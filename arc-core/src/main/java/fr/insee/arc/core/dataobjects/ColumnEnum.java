@@ -5,13 +5,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import fr.insee.arc.utils.dao.SQL;
+import fr.insee.arc.utils.database.Delimiters;
 import fr.insee.arc.utils.dataobjects.PgColumnEnum;
 import fr.insee.arc.utils.dataobjects.PgSchemaEnum;
 import fr.insee.arc.utils.dataobjects.TypeEnum;
 
 public enum ColumnEnum {
 
-	  BLOCKING_THRESHOLD("blocking_threshold", TypeEnum.TEXT, "") // ihm_controle_regle
+	BLOCKING_THRESHOLD("blocking_threshold", TypeEnum.TEXT, "") // ihm_controle_regle
 	, BORNE_INF("borne_inf", TypeEnum.TEXT, "") // ihm_controle_regle
 	, BORNE_SUP("borne_sup", TypeEnum.TEXT, "") // ihm_controle_regle
 	, CALL_ID("call_id", TypeEnum.INTEGER, "") // ihm_ws_context,ihm_ws_query
@@ -19,7 +20,7 @@ public enum ColumnEnum {
 	, CONDITION("condition", TypeEnum.TEXT, "") // ihm_controle_regle
 	, DATE_INACTIF("date_inactif", TypeEnum.DATE, "") // ihm_jeuderegle
 	, DATE_PRODUCTION("date_production", TypeEnum.DATE, "") // ihm_jeuderegle
-	, DATE_INTEGRATION("date_integration", TypeEnum.TEXT, "")
+	, DATE_INTEGRATION("date_integration", TypeEnum.TEXT, "") // phase
 	, DEF_NORME("def_norme", TypeEnum.TEXT, "") // ihm_norme
 	, DEF_VALIDITE("def_validite", TypeEnum.TEXT, "") // ihm_norme
 	, DELIMITER("delimiter", TypeEnum.TEXT, "") // ihm_chargement_regle
@@ -36,8 +37,8 @@ public enum ColumnEnum {
 	, EXPR_NOM("expr_nom", TypeEnum.TEXT, "") // ihm_expression
 	, EXPR_REGLE_COL("expr_regle_col", TypeEnum.TEXT, "") // ihm_mapping_regle
 	, EXPR_VALEUR("expr_valeur", TypeEnum.TEXT, "") // ihm_expression
-	, EXPORT_PARQUET_OPTION("export_parquet_option", TypeEnum.TEXT, "")
-	, EXPORT_COORDINATOR_OPTION("export_coordinator_option", TypeEnum.TEXT, "")
+	, EXPORT_PARQUET_OPTION("export_parquet_option", TypeEnum.TEXT, "") // export_option
+	, EXPORT_COORDINATOR_OPTION("export_coordinator_option", TypeEnum.TEXT, "") // export_option
 	, FORMAT("format", TypeEnum.TEXT, "") // ihm_chargement_regle
 	, HOST_ALLOWED("host_allowed", TypeEnum.TEXT, "") // ihm_webservice_whitelist,security_webservice_log
 	, ID("id", TypeEnum.TEXT, "") // ext_webservice_type,ext_mod_periodicite,ext_webservice_queryview,ext_export_format,ext_etat,ext_type_normage,ext_type_fichier_chargement,ext_type_controle,ext_etat_jeuderegle
@@ -104,61 +105,60 @@ public enum ColumnEnum {
 	, HEADERS("headers", TypeEnum.TEXT, "") // export
 	, ORDER_TABLE("order_table", TypeEnum.TEXT, "") // export
 	, ZIP("zip", TypeEnum.TEXT, "") // export
-	
+
 	, ID_SOURCE("id_source", TypeEnum.TEXT, "the entry filename contatenated with entry repository") //
 
-	, MODULE_ORDER("module_order", TypeEnum.INTEGER, "index of rules module")
-	, MODULE_NAME("module_name", TypeEnum.TEXT, "name of rules module")
-	
-	, PHASE_TRAITEMENT("phase_traitement", TypeEnum.TEXT, "phase of the process of file in pilotage")
-	, ETAT_TRAITEMENT("etat_traitement", TypeEnum.TEXT_ARRAY, "state of the process of file in pilotage")
-	, DATE_TRAITEMENT("date_traitement", TypeEnum.TIMESTAMP, "timestamp of the beginning of the process of file in pilotage")
-	, RAPPORT("rapport", TypeEnum.INTEGER, "report of the process of file in pilotage")
-	, TAUX_KO("taux_ko", TypeEnum.NUMERIC, "deprecated")
-	, NB_ENR("nb_enr", TypeEnum.INTEGER, "number records of the process of file in pilotage")
-	, NB_ESSAIS("nb_essais", TypeEnum.INTEGER, "deprecated")
-	, ETAPE("etape", TypeEnum.INTEGER, "status of the process of file in pilotage")
-	, DATE_ENTREE("date_entree", TypeEnum.TEXT, "entry date of the file")
-	, CONTAINER("container", TypeEnum.TEXT, "name of the file container reworked by arc")
-	, V_CONTAINER("v_container", TypeEnum.TEXT, "version of the container")
-	, O_CONTAINER("o_container", TypeEnum.TEXT, "genuine name of the file container")
-	, TO_DELETE("to_delete", TypeEnum.TEXT, "flag to mark a user maintenance operation for a file")
-	, CLIENT("client", TypeEnum.TEXT_ARRAY, "clients who have already retrieved the file")
-	, DATE_CLIENT("date_client", TypeEnum.TIMESTAMP_ARRAY, "dates when the clients retrieved the file")
-	, JOINTURE("jointure", TypeEnum.TEXT, "data structure query of the processing file")
-	, GENERATION_COMPOSITE("generation_composite", TypeEnum.TEXT, "timestamp of the end of the process of the file in pilotage")
+	, MODULE_ORDER("module_order", TypeEnum.INTEGER, "index of rules module") // ihm_module_view
+	, MODULE_NAME("module_name", TypeEnum.TEXT, "name of rules module") // ihm_module_view
 
-	, ENTREPOT("entrepot", TypeEnum.TEXT, "name of the datastore that recieve archive file")
-	, NOM_ARCHIVE("nom_archive", TypeEnum.TEXT, "name of archive file")
-	
+	, PHASE_TRAITEMENT("phase_traitement", TypeEnum.TEXT, "phase of the process of file in pilotage") // pilotage
+	, ETAT_TRAITEMENT("etat_traitement", TypeEnum.TEXT_ARRAY, "state of the process of file in pilotage") // pilotage
+	, DATE_TRAITEMENT("date_traitement", TypeEnum.TIMESTAMP, "timestamp of the beginning of the process of file in pilotage") // pilotage
+	, RAPPORT("rapport", TypeEnum.INTEGER, "report of the process of file in pilotage") // pilotage
+	, TAUX_KO("taux_ko", TypeEnum.NUMERIC, "deprecated") // pilotage
+	, NB_ENR("nb_enr", TypeEnum.INTEGER, "number records of the process of file in pilotage") // pilotage
+	, NB_ESSAIS("nb_essais", TypeEnum.INTEGER, "deprecated") // pilotage
+	, ETAPE("etape", TypeEnum.INTEGER, "status of the process of file in pilotage") // pilotage
+	, DATE_ENTREE("date_entree", TypeEnum.TEXT, "entry date of the file") // pilotage
+	, CONTAINER("container", TypeEnum.TEXT, "name of the file container reworked by arc") // pilotage
+	, V_CONTAINER("v_container", TypeEnum.TEXT, "version of the container") // pilotage
+	, O_CONTAINER("o_container", TypeEnum.TEXT, "genuine name of the file container") // pilotage
+	, TO_DELETE("to_delete", TypeEnum.TEXT, "flag to mark a user maintenance operation for a file") // pilotage
+	, CLIENT("client", TypeEnum.TEXT_ARRAY, "clients who have already retrieved the file") // pilotage
+	, DATE_CLIENT("date_client", TypeEnum.TIMESTAMP_ARRAY, "dates when the clients retrieved the file") // pilotage
+	, JOINTURE("jointure", TypeEnum.TEXT, "data structure query of the processing file") // pilotage
+	, GENERATION_COMPOSITE("generation_composite", TypeEnum.TEXT, "timestamp of the end of the process of the file in pilotage") // pilotage
+
+	, ENTREPOT("entrepot", TypeEnum.TEXT, "name of the datastore that recieve archive file") // ihm_entrepot
+	, NOM_ARCHIVE("nom_archive", TypeEnum.TEXT, "name of archive file") // ihm_entrepot
+
 	// aliases
 	, VARBDD("varbdd", TypeEnum.TEXT, "variable in BDD") // export
 	, POS("pos", TypeEnum.BIGINT, "ordinal position") // export
 	, MAXP("maxp", TypeEnum.BIGINT, "highest position") // export
 	, I("i", TypeEnum.BIGINT, "row number index") // maintenanceparametre
 	, NB("nb", TypeEnum.BIGINT, "count") // pilotage
-	
-	, TEST1(PgColumnEnum.TEST1)
-	, TEST2(PgColumnEnum.TEST2)
-		
-	, COLUMN_NAME(PgColumnEnum.COLUMN_NAME)
-	, TABLE_NAME(PgColumnEnum.TABLE_NAME)
-	, TABLE_SCHEMA(PgColumnEnum.TABLE_SCHEMA)
-	
-	, TABLENAME(PgColumnEnum.TABLENAME)
-	, SCHEMANAME(PgColumnEnum.SCHEMANAME)
 
-	, M0("m0", TypeEnum.TEXT, "short column m0 in xml parser")
-	, M1("m1", TypeEnum.INTEGER, "short column m1 in xml parser")
-	, M2("m2", TypeEnum.TEXT, "short column m2 in xml parser")
-	, M3("m3", TypeEnum.TEXT, "short column m3 in xml parser")
-	, M4("m4", TypeEnum.TEXT, "short column m4 in xml parser")
-	, M5("m5", TypeEnum.TEXT, "short column m5 in xml parser")
-	
-	, ARCHIVE_NAME("archive_name", TypeEnum.TEXT, "name of the archive file")
-	, ARCHIVE_SIZE("archive_size", TypeEnum.TEXT, "size of the archive file")
-	, ARCHIVE_DATE("archive_date", TypeEnum.TEXT, "date of the archive file")
-	
+	, TEST1(PgColumnEnum.TEST1) // test
+	, TEST2(PgColumnEnum.TEST2) // test
+
+	, COLUMN_NAME(PgColumnEnum.COLUMN_NAME) // pg_tables
+	, TABLE_NAME(PgColumnEnum.TABLE_NAME) // pg_tables
+	, TABLE_SCHEMA(PgColumnEnum.TABLE_SCHEMA) // pg_tables
+
+	, TABLENAME(PgColumnEnum.TABLENAME), SCHEMANAME(PgColumnEnum.SCHEMANAME)
+
+	, M0("m0", TypeEnum.TEXT, "short column m0 in xml parser") // xml_handler
+	, M1("m1", TypeEnum.INTEGER, "short column m1 in xml parser") // xml_handler
+	, M2("m2", TypeEnum.TEXT, "short column m2 in xml parser") // xml_handler
+	, M3("m3", TypeEnum.TEXT, "short column m3 in xml parser") // xml_handler
+	, M4("m4", TypeEnum.TEXT, "short column m4 in xml parser") // xml_handler
+	, M5("m5", TypeEnum.TEXT, "short column m5 in xml parser") // xml_handler
+
+	, ARCHIVE_NAME("archive_name", TypeEnum.TEXT, "name of the archive file") // reception
+	, ARCHIVE_SIZE("archive_size", TypeEnum.TEXT, "size of the archive file") // reception
+	, ARCHIVE_DATE("archive_date", TypeEnum.TEXT, "date of the archive file") // reception
+
 	, ARCHIVE_FILENAME("archive_filename", TypeEnum.TEXT, "name of the archive file")
 	, ARCHIVE_TIMESTAMP("archive_timestamp", TypeEnum.TEXT, "timestamp of the reception of the archive file")
 
@@ -173,14 +173,13 @@ public enum ColumnEnum {
 		this.columnType = columnType;
 		this.columnExplanation = columnExplanation;
 	}
-	
+
 	/** contructor from PgColumnEnum */
 	private ColumnEnum(PgColumnEnum c) {
 		this.columnName = c.getColumnName();
 		this.columnType = c.getColumnType();
 		this.columnExplanation = c.getColumnExplanation();
 	}
-	
 
 	public String getColumnName() {
 		return columnName;
@@ -211,28 +210,30 @@ public enum ColumnEnum {
 	 * @return
 	 */
 	public static List<String> listColumnEnumDDL(Collection<ColumnEnum> listOfColumnEnum) {
-		return listOfColumnEnum.stream().map(column -> { return column.getColumnName() + " " + column.getColumnType().getTypeName();}).collect(Collectors.toList());
+		return listOfColumnEnum.stream().map(column -> {
+			return column.getColumnName() + " " + column.getColumnType().getTypeName();
+		}).collect(Collectors.toList());
 	}
-	
+
 	@Override
 	public String toString() {
 		return this.getColumnName();
 	}
 
-
-	public static SchemaEnum convert(PgSchemaEnum pgSchema)
-	{
+	public static SchemaEnum convert(PgSchemaEnum pgSchema) {
 		return SchemaEnum.valueOf(pgSchema.toString());
 	}
-	
-	public String alias(ViewEnum v)
-	{
-		return v.getTableName()+SQL.DOT.getSqlCode()+this.columnName;
+
+	public String alias(ViewEnum v) {
+		return v.getTableName() + Delimiters.SQL_SCHEMA_DELIMITER + this.columnName;
 	}
-	
-	public String alias(String v)
-	{
-		return v+SQL.DOT.getSqlCode()+this.columnName;
+
+	public String alias(String v) {
+		return v + Delimiters.SQL_SCHEMA_DELIMITER + this.columnName;
 	}
-	
+
+	public String alias(SQL v) {
+		return v.getSqlCode() + Delimiters.SQL_SCHEMA_DELIMITER + this.columnName;
+	}
+
 }

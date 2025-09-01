@@ -12,48 +12,52 @@ import fr.insee.arc.utils.utils.FormatSQL;
 
 public class CopyObjectsToDatabase {
 
-	private static final String CONNECTION_ALIAS = "con"; 
-
 	private static final int CHUNK_SIZE = 10000;
-	
+
 	private CopyObjectsToDatabase() {
 		throw new IllegalStateException("Utility class");
 	}
 
 	/**
 	 * execute copy by chunk. It is mandatory for large GenericBean objects
+	 * 
 	 * @param connection
 	 * @param targetTableName
 	 * @param genericBeanContainingData
 	 * @throws ArcException
 	 */
-	public static void execCopyFromGenericBean(Connection connection, String targetTableName, GenericBean genericBeanContainingData)
-			throws ArcException {
+	public static void execCopyFromGenericBean(Connection connection, String targetTableName,
+			GenericBean genericBeanContainingData) throws ArcException {
 		execCopyFromGenericBean(connection, targetTableName, genericBeanContainingData, CHUNK_SIZE, true);
 	}
 
-	public static void execCopyFromGenericBeanWithoutDroppingTargetTable(Connection targetConnection, String targetTableName, GenericBean genericBeanContainingData)
-			throws ArcException {
+	public static void execCopyFromGenericBeanWithoutDroppingTargetTable(Connection targetConnection,
+			String targetTableName, GenericBean genericBeanContainingData) throws ArcException {
 		execCopyFromGenericBean(targetConnection, targetTableName, genericBeanContainingData, CHUNK_SIZE, false);
 	}
-	
-	
+
 	/**
- 	 * Drop and replace the target table
- 	 * Copy the data of the input table located on the input connexion to the target table located on the target Connection 
+	 * Drop and replace the target table Copy the data of the input table located on
+	 * the input connexion to the target table located on the target Connection
+	 * 
 	 * @param inputConnection
 	 * @param targetConnection
 	 * @param inputTable
 	 * @param targetTable
 	 * @throws ArcException
 	 */
-	public static void execCopyFromTable(Connection inputConnection, Connection targetConnection, String inputTable, String targetTable) throws ArcException
-	{
-		execCopyFromTableCore(inputConnection, targetConnection, inputTable, targetTable, true);
+	public static void execCopyFromTable(Connection inputConnection, Connection targetConnection, String inputTable,
+			String targetTable) throws ArcException {
+		createExtensionDblink(targetConnection);
+		try {
+			execCopyFromTableCore(inputConnection, targetConnection, inputTable, targetTable, true);
+		} finally {
+			dropExtensionDblink(targetConnection);
+		}
 	}
-	
-	public static void execCopyFromTableWithoutDroppingTargetTable(Connection inputConnection, Connection targetConnection, String inputTable, String targetTable) throws ArcException
-	{
+
+	public static void execCopyFromTableWithoutDroppingTargetTableNorDblinkExtension(Connection inputConnection,
+			Connection targetConnection, String inputTable, String targetTable) throws ArcException {
 		execCopyFromTableCore(inputConnection, targetConnection, inputTable, targetTable, false);
 	}
 
@@ -66,39 +70,40 @@ public class CopyObjectsToDatabase {
 	 * @param chunkSize
 	 * @throws ArcException
 	 */
-	private static void execCopyFromGenericBean(Connection targetConnection, String targetTableName, GenericBean genericBeanContainingData, int chunkSize, boolean replaceTargetTable)
-			throws ArcException {
+	private static void execCopyFromGenericBean(Connection targetConnection, String targetTableName,
+			GenericBean genericBeanContainingData, int chunkSize, boolean replaceTargetTable) throws ArcException {
 		GenericPreparedStatementBuilder query = new GenericPreparedStatementBuilder();
 
 		query.append(query.createWithGenericBean(targetTableName, genericBeanContainingData, replaceTargetTable));
 
 		int cursor = 0;
 		boolean stillToDo = true;
-		
+
 		do {
 			int startChunk = cursor;
 			int endChunk = cursor + chunkSize;
 			cursor = endChunk;
-			stillToDo=(cursor < genericBeanContainingData.getContent().size());
-			
+			stillToDo = (cursor < genericBeanContainingData.getContent().size());
+
 			query.insertWithGenericBeanByChunk(targetTableName, genericBeanContainingData, startChunk, endChunk);
-			
+
 			// analyze on the table at the end
-			if (!stillToDo)
-			{
+			if (!stillToDo) {
 				query.append(SQL.COMMIT).append(SQL.END_QUERY);
 				query.append(FormatSQL.analyzeSecured(targetTableName));
 			}
-			
+
 			UtilitaireDao.get(0).executeRequest(targetConnection, query);
 			query = new GenericPreparedStatementBuilder();
-			
+
 		} while (stillToDo);
-		
+
 	}
-	
+
 	/**
-	 * execute the copy from a table located on a given input connexion to a target table located on a target Connection 
+	 * execute the copy from a table located on a given input connexion to a target
+	 * table located on a target Connection
+	 * 
 	 * @param inputConnexion
 	 * @param targetConnection
 	 * @param inputTable
@@ -106,107 +111,100 @@ public class CopyObjectsToDatabase {
 	 * @param create
 	 * @throws ArcException
 	 */
-	private static void execCopyFromTableCore(Connection inputConnection, Connection targetConnection, String inputTable, String targetTable, boolean replaceTargetTable) throws ArcException
-	{
-	
-		// normalize table name
+	private static void execCopyFromTableCore(Connection inputConnection, Connection targetConnection,
+			String inputTable, String targetTable, boolean replaceTargetTable) throws ArcException {
 
-		createExtensionDblink(targetConnection);
-		
+		// normalize table name
 		connectDblink(inputConnection, targetConnection);
-		
-		ColumnAttributes inputTableColumnAttributes = retrieveColumnAttributesOfInpuTable (targetConnection, inputTable);
+
+		ColumnAttributes inputTableColumnAttributes = retrieveColumnAttributesOfInpuTable(inputConnection,
+				targetConnection, inputTable);
 
 		createOutputTableIfRequired(targetConnection, targetTable, inputTableColumnAttributes, replaceTargetTable);
 
-		insertDataInputTableOutputTable(targetConnection, targetTable, inputTable, inputTableColumnAttributes);
+		insertDataInputTableOutputTable(inputConnection, targetConnection, targetTable, inputTable,
+				inputTableColumnAttributes);
 
-		disconnectDblink(targetConnection);
+		disconnectDblink(inputConnection, targetConnection);
 
-		dropExtensionDblink(targetConnection);
-		
 	}
 
 	/**
-	 * Create the dblink extension. It will be dropped at the end for security concern
+	 * Create the dblink extension. It will be dropped at the end for security
+	 * concern
+	 * 
 	 * @param targetConnection
 	 * @throws ArcException
 	 */
-	private static void createExtensionDblink(Connection targetConnection) throws ArcException {
+	public static void createExtensionDblink(Connection targetConnection) throws ArcException {
 		GenericPreparedStatementBuilder query = new GenericPreparedStatementBuilder();
-		query.build(SQL.CREATE, SQL.EXTENSION, SQL.IF_NOT_EXISTS, SQL.DBLINK);
+		query.build(SQL.CREATE, SQL.EXTENSION, SQL.IF_NOT_EXISTS, SQL.DBLINK, SQL.WITH, SQL.SCHEMA, SQL.PUBLIC);
 		UtilitaireDao.get(0).executeRequest(targetConnection, query);
 	}
 
 	/**
 	 * Create a dblink connection from the target connection to the input connection
-	 * The target connection where the target table is created
-	 * read data from the input connection through the dblink
+	 * The target connection where the target table is created read data from the
+	 * input connection through the dblink
+	 * 
 	 * @param inputConnexion
 	 * @param targetConnection
 	 * @throws ArcException
 	 */
-	private static void connectDblink(Connection inputConnexion, Connection targetConnection) throws ArcException {
+	private static void connectDblink(Connection inputConnection, Connection targetConnection) throws ArcException {
 		// get connection information to build the connection chain
 		PropertiesHandler p = PropertiesHandler.getInstance();
-		ConnectionAttribute connexionInAttributes = p.retrieveConnectionAttribute(inputConnexion);
-		
-		
+		ConnectionAttribute connexionInAttributes = p.retrieveConnectionAttribute(inputConnection);
+
 		// connect to connexionIn from connexionOut
 		GenericPreparedStatementBuilder query = new GenericPreparedStatementBuilder();
-		query.append("SELECT dblink_connect(")
-			.appendText(CONNECTION_ALIAS)
-			.append(",")
-			.appendText(connexionInAttributes.getConnectionChainInLibpqFormat())
-			.append(")");
-		UtilitaireDao.get(0).executeRequest(targetConnection, query);    
+		query.append("SELECT dblink_connect(").appendText(inputConnection.toString()).append(",")
+				.appendText(connexionInAttributes.getConnectionChainInLibpqFormat()).append(")");
+		UtilitaireDao.get(0).executeRequest(targetConnection, query);
 	}
-	
 
 	/**
 	 * Use the database link to retrieve the columns definition of the input table
+	 * 
 	 * @param targetConnection
 	 * @param inputTable
 	 * @return
 	 * @throws ArcException
 	 */
-	private static ColumnAttributes retrieveColumnAttributesOfInpuTable(Connection targetConnection,
-			String inputTable) throws ArcException {
+	private static ColumnAttributes retrieveColumnAttributesOfInpuTable(Connection inputConnection,
+			Connection targetConnection, String inputTable) throws ArcException {
 		// retrieve the meta data of table to copy
-		String queryColumnMetadata =
-				String.format("""
-				SELECT STRING_AGG(column_name, ',' ORDER BY ordinal_position) as cols 
+		String queryColumnMetadata = String.format("""
+				SELECT STRING_AGG(column_name, ',' ORDER BY ordinal_position) as cols
 				, STRING_AGG(column_name || ' ' || udt_name, ',' ORDER BY ordinal_position) as cols_with_type
 				from information_schema.columns where table_schema||'.'||table_name=lower('%s')
 				""", inputTable);
-		
+
 		GenericPreparedStatementBuilder query = new GenericPreparedStatementBuilder();
-		query.append("SELECT cols, cols_with_type FROM dblink(")
-			.appendText(CONNECTION_ALIAS)
-			.append(",")
-			.appendText(queryColumnMetadata)
-			.append(") as metadata (cols text, cols_with_type text)");
-		
-		GenericBean gb = new GenericBean(UtilitaireDao.get(0).executeRequest(targetConnection, query));   
+		query.append("SELECT cols, cols_with_type FROM dblink(").appendText(inputConnection.toString()).append(",")
+				.appendText(queryColumnMetadata).append(") as metadata (cols text, cols_with_type text)");
+
+		GenericBean gb = new GenericBean(UtilitaireDao.get(0).executeRequest(targetConnection, query));
 		return new ColumnAttributes(gb.getColumnValues("cols").get(0), gb.getColumnValues("cols_with_type").get(0));
 
 	}
-	
+
 	/**
-	 * Drop the output table container if required
-	 * Create the output table container if not exists
+	 * Drop the output table container if required Create the output table container
+	 * if not exists
+	 * 
 	 * @param targetConnection
 	 * @param targetTable
 	 * @param inputTableColumnAttributes
 	 * @param replaceTargetTable
 	 * @throws ArcException
 	 */
-	private static void createOutputTableIfRequired(Connection targetConnection, String targetTable, ColumnAttributes inputTableColumnAttributes, boolean replaceTargetTable) throws ArcException {
+	private static void createOutputTableIfRequired(Connection targetConnection, String targetTable,
+			ColumnAttributes inputTableColumnAttributes, boolean replaceTargetTable) throws ArcException {
 		GenericPreparedStatementBuilder query = new GenericPreparedStatementBuilder();
-		
+
 		// drop target table if it must be replaced
-		if (replaceTargetTable)
-		{
+		if (replaceTargetTable) {
 			query.append(SQL.DROP).append(SQL.TABLE).append(SQL.IF_EXISTS).append(targetTable).append(SQL.END_QUERY);
 		}
 
@@ -215,61 +213,60 @@ public class CopyObjectsToDatabase {
 			query.append(SQL.TEMPORARY);
 		}
 		query.build(SQL.TABLE, SQL.IF_NOT_EXISTS);
-		query.append(targetTable).append(" (").append(inputTableColumnAttributes.getColsWithType()).append(" )").append(FormatSQL.WITH_NO_VACUUM);
+		query.append(targetTable).append(" (").append(inputTableColumnAttributes.getColsWithType()).append(" )")
+				.append(FormatSQL.WITH_NO_VACUUM);
 		UtilitaireDao.get(0).executeRequest(targetConnection, query);
-		
+
 	}
-	
 
 	/**
-	 * read the data from input table through dblink and insert data into the  output table container
+	 * read the data from input table through dblink and insert data into the output
+	 * table container
+	 * 
 	 * @param targetConnection
 	 * @param targetTable
 	 * @param inputTable
 	 * @param inputTableColumnAttributes
-	 * @throws ArcException 
+	 * @throws ArcException
 	 */
-	private static void insertDataInputTableOutputTable(Connection targetConnection, String targetTable, String inputTable,
-			ColumnAttributes inputTableColumnAttributes) throws ArcException {
-		
+	private static void insertDataInputTableOutputTable(Connection inputConnection, Connection targetConnection,
+			String targetTable, String inputTable, ColumnAttributes inputTableColumnAttributes) throws ArcException {
+
 		// query data and insert into container
-		String queryData =
-				String.format("SELECT %s FROM %s", inputTableColumnAttributes.getCols(), inputTable);
-		
-		GenericPreparedStatementBuilder query =  new GenericPreparedStatementBuilder();
+		String queryData = String.format("SELECT %s FROM %s", inputTableColumnAttributes.getCols(), inputTable);
+
+		GenericPreparedStatementBuilder query = new GenericPreparedStatementBuilder();
 		query.build(SQL.INSERT_INTO, targetTable, "(", inputTableColumnAttributes.getCols(), ")");
 		query.build(SQL.SELECT, inputTableColumnAttributes.getCols(), SQL.FROM);
-		query.build(SQL.DBLINK, "(", query.quoteText(CONNECTION_ALIAS), ",", query.quoteText(queryData), ")");
-		query.build(SQL.AS, PgViewEnum.ALIAS_A.getTableName(), "(", inputTableColumnAttributes.getColsWithType() , ")");
+		query.build(SQL.DBLINK, "(", query.quoteText(inputConnection.toString()), ",", query.quoteText(queryData), ")");
+		query.build(SQL.AS, PgViewEnum.ALIAS_A.getTableName(), "(", inputTableColumnAttributes.getColsWithType(), ")");
 		UtilitaireDao.get(0).executeRequest(targetConnection, query);
 	}
-	
+
 	/**
 	 * Disconnect the dblink
-	 * @param targetConnection
-	 * @throws ArcException 
-	 */
-	private static void disconnectDblink(Connection targetConnection) throws ArcException {
-		// disconnect connexionIn from connexionOut
-		GenericPreparedStatementBuilder query = new GenericPreparedStatementBuilder();
-		query.append("SELECT dblink_disconnect(")
-			.appendText(CONNECTION_ALIAS)
-			.append(")");
-		UtilitaireDao.get(0).executeRequest(targetConnection, query);
-		
-	}
-	
-
-	
-	/**
-	 * Drop the dblink extension
+	 * 
 	 * @param targetConnection
 	 * @throws ArcException
 	 */
-	private static void dropExtensionDblink(Connection targetConnection) throws ArcException {
+	private static void disconnectDblink(Connection inputConnection, Connection targetConnection) throws ArcException {
+		// disconnect connexionIn from connexionOut
+		GenericPreparedStatementBuilder query = new GenericPreparedStatementBuilder();
+		query.append("SELECT dblink_disconnect(").appendText(inputConnection.toString()).append(")");
+		UtilitaireDao.get(0).executeRequest(targetConnection, query);
+
+	}
+
+	/**
+	 * Drop the dblink extension
+	 * 
+	 * @param targetConnection
+	 * @throws ArcException
+	 */
+	public static void dropExtensionDblink(Connection targetConnection) throws ArcException {
 		GenericPreparedStatementBuilder query = new GenericPreparedStatementBuilder();
 		query.build(SQL.DROP, SQL.EXTENSION, SQL.IF_EXISTS, SQL.DBLINK);
 		UtilitaireDao.get(0).executeRequest(targetConnection, query);
 	}
-	
+
 }

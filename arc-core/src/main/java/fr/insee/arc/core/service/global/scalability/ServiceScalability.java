@@ -27,7 +27,7 @@ public class ServiceScalability {
 	public static int dispatchOnNods(Connection coordinatorConnexion, ThrowingConsumer<Connection> actionOnCoordinator, ThrowingConsumer<Connection> actionOnExecutor) throws ArcException
 	{
 		
-		List<Thread> threadPool = new ArrayList<Thread>();	
+		List<ThreadDispatchOn> threadPool = new ArrayList<ThreadDispatchOn>();	
 		threadPool.add(new ThreadDispatchOnCoordinator(actionOnCoordinator, coordinatorConnexion));
 
 		// dispatch when scaled
@@ -42,17 +42,18 @@ public class ServiceScalability {
 		}
 		
 		// start threads
-		for (Thread t : threadPool)
+		for (ThreadDispatchOn t : threadPool)
 		{
 			t.start();
 		}
 		
 		// join threads
 		boolean errorInThread = false;
-		for (Thread t : threadPool)
+		for (ThreadDispatchOn t : threadPool)
 		{
 			try {
 				t.join();
+				errorInThread = errorInThread || t.isErrorInThread();
 			} catch (InterruptedException e) {
 				t.interrupt();
 				errorInThread = true;

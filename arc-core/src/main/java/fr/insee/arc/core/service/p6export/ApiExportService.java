@@ -22,7 +22,13 @@ public class ApiExportService  extends ApiService {
 	@Override
 	public void executer() throws ArcException {
 
+		exportOperation.initializeExport();
+		
 		exportOperation.exportParquet();
+		
+		exportOperation.exportToMasterNod();
+		
+		exportOperation.markExport();
 		
 	}
 

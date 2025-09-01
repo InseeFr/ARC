@@ -371,6 +371,7 @@ public class BddPatcher {
 
 		query.build(query.quoteText(ViewEnum.MOD_TABLE_METIER.getTableName()), ",");
 		query.build(query.quoteText(ViewEnum.MOD_VARIABLE_METIER.getTableName()), ",");
+		query.build(query.quoteText(ViewEnum.EXPORT_OPTION.getTableName()), ",");
 
 		// must return the table of rules for phase
 		for (TraitementPhase p : TraitementPhase.RECEPTION.nextPhases()) {

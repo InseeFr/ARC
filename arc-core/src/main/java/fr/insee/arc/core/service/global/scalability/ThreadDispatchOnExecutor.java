@@ -8,7 +8,7 @@ import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
 
-public class ThreadDispatchOnExecutor extends Thread {
+public class ThreadDispatchOnExecutor extends ThreadDispatchOn {
 			
 	private ThrowingConsumer<Connection> actionOnExecutor;
 	private int executorConnectionIndex;
@@ -20,13 +20,15 @@ public class ThreadDispatchOnExecutor extends Thread {
 		this.executorConnectionIndex = executorConnectionIndex;
 	}
 
-	public void actionOnExecutor() throws ArcException, SQLException
+	public void actionOnExecutor() throws ArcException
 	{
 		// instanciate connexion
 		try (Connection executorConnection = UtilitaireDao.get(executorConnectionIndex).getDriverConnexion())
 		{
 			actionOnExecutor.accept(executorConnection);
 
+		} catch (SQLException e) {
+			throw new ArcException(e, ArcExceptionMessage.DATABASE_CONNECTION_COORDINATOR_FAILED);
 		}
 	}
 
@@ -35,14 +37,9 @@ public class ThreadDispatchOnExecutor extends Thread {
 		try {
 			actionOnExecutor();
 		}
-		 catch (SQLException e) {
-			 ArcException customException = new ArcException(e, ArcExceptionMessage.DATABASE_CONNECTION_COORDINATOR_FAILED);
-			 customException.logFullException();
-			this.interrupt();
-		}
 		 catch (ArcException e) {
 			e.logFullException();
-			this.interrupt();
+			this.setErrorInThread(true);
 		}
 	}
 	
