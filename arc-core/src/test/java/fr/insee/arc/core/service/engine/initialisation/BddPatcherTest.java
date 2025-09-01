@@ -210,6 +210,7 @@ public class BddPatcherTest extends InitializeQueryTest {
 		u.executeRequest(c, "CREATE TABLE "+testSandbox3+".mapping_regle (id_norme text, regle text, commentaire text);");
 		u.executeRequest(c, "CREATE TABLE "+testSandbox3+".mod_variable_metier (a text);");
 		u.executeRequest(c, "CREATE TABLE "+testSandbox3+".mod_table_metier (a text);");
+		u.executeRequest(c, "CREATE TABLE "+testSandbox3+".export_option (a text);");
 		
 		u.executeRequest(c, "CREATE TABLE "+testSandbox3+".mapping_dsn_employeur_ok (id_source text);");
 		
@@ -242,7 +243,8 @@ public class BddPatcherTest extends InitializeQueryTest {
 		assertTrue(result.contains(testSandbox3+".mapping_regle"));
 		assertTrue(result.contains(testSandbox3+".mod_variable_metier"));
 		assertTrue(result.contains(testSandbox3+".mod_table_metier"));
-		assertEquals(4, result.size());
+		assertTrue(result.contains(testSandbox3+".export_option"));
+		assertEquals(5, result.size());
 
 		result = BddPatcher.retrieveExternalTablesUsedInRules(c, testSandbox3);
 		

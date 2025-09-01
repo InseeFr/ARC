@@ -222,7 +222,7 @@ class BatchARC implements IReturnCode {
 		method.run();
 	}
 
-	private void executeIfParquetActive(ThrowingRunnable method) throws ArcException {
+	private void executeIfExportActive(ThrowingRunnable method) throws ArcException {
 		if (!this.exportOn) {
 			return;
 		}
@@ -410,7 +410,7 @@ class BatchARC implements IReturnCode {
 		// Delete entry files if no interruption or no problems
 		effacerRepertoireChargement(repertoire, envExecution);
 
-		executeIfParquetActive(this::exportToParquet);
+		executeIfExportActive(this::export);
 
 		message("Traitement Fin");
 
@@ -420,14 +420,14 @@ class BatchARC implements IReturnCode {
 	 * Export business mapping tables to parquet Only in volatile mode
 	 * @throws ArcException 
 	 */
-	private void exportToParquet() throws ArcException {
-		PhaseThreadFactory exportToParquet = new PhaseThreadFactory(mapParam, TraitementPhase.EXPORT);
-		exportToParquet.execute();
+	private void export() throws ArcException {
+		PhaseThreadFactory export = new PhaseThreadFactory(mapParam, TraitementPhase.EXPORT);
+		export.execute();
 		
-		if (exportToParquet.getReport().getException() != null)
+		if (export.getReport().getException() != null)
 		{
-			message("Erreur export parquet");
-			throw exportToParquet.getReport().getException();
+			message("Erreur export");
+			throw export.getReport().getException();
 		}
 		
 		message("Fin export parquet");

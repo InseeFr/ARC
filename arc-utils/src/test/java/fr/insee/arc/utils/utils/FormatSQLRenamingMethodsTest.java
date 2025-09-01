@@ -31,6 +31,11 @@ public class FormatSQLRenamingMethodsTest {
 		assertEquals(61,tableName61Bytes.length());
 		assertEquals("34567890123456789012345678901234567890123456789012345678901_img",
 				FormatSQL.imageObjectName(tableName61Bytes));
+
+		System.out.println(FormatSQL.imageObjectName(tableName61Bytes, "000"));
+		assertEquals("7890123456789012345678901234567890123456789012345678901_img000",
+				FormatSQL.imageObjectName(tableName61Bytes, "000"));
+		assertEquals(63,FormatSQL.imageObjectName(tableName61Bytes, "000").length());
 		
 	}
 

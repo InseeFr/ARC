@@ -241,7 +241,7 @@ public enum ViewEnum {
 	 * @return
 	 */
 	public static String getFullTableNameInSchema(SchemaEnum schema, String tablename, String...suffix) {
-		return (schema.equals(SchemaEnum.TEMPORARY) ? tablename : schema.getSchemaName() + SQL.DOT.getSqlCode() + tablename).toLowerCase();
+		return (schema.equals(SchemaEnum.TEMPORARY) ? tablename : schema.getSchemaName() + Delimiters.SQL_SCHEMA_DELIMITER + tablename).toLowerCase();
 	}
 	
 	
@@ -260,11 +260,11 @@ public enum ViewEnum {
 	 * @return
 	 */
 	public String getFullName(String schema) {
-		return normalizeTableName(schema + SQL.DOT.getSqlCode() + this.tableName);
+		return normalizeTableName(schema + Delimiters.SQL_SCHEMA_DELIMITER + this.tableName);
 	}
 
 	public static String getFullNameNotNormalized(String schema, String providedTableName) {
-		return providedTableName.contains(SQL.DOT.getSqlCode())? providedTableName : schema + SQL.DOT.getSqlCode() + providedTableName;
+		return providedTableName.contains(Delimiters.SQL_SCHEMA_DELIMITER)? providedTableName : schema + Delimiters.SQL_SCHEMA_DELIMITER + providedTableName;
 	}
 	
 	public static String getFullName(String schema, String providedTableName) {

@@ -1,5 +1,7 @@
 package fr.insee.arc.utils.dao;
 
+import fr.insee.arc.utils.utils.FormatSQL;
+
 public enum SQL {
 	SELECT("SELECT"), FROM("FROM"), WHERE("WHERE"), ORDER_BY("ORDER BY"), DISTINCT("DISTINCT"),
 
@@ -47,16 +49,22 @@ public enum SQL {
 	
 	WITH("WITH"), RETURNING("RETURNING"),
 	
+	NO_VACUUM(FormatSQL.NO_VACUUM),
+	
 	ANALYZE("ANALYZE"),
 	
 	SPACE(" "), NEW_LINE("\n"),
 	
-	DBLINK("dblink"),
+	DBLINK("dblink"), SCHEMA ("schema"), PUBLIC("public"),
 	
 	UNLOGGED("UNLOGGED"),
 	
+	JOIN("JOIN"), LEFT_JOIN("LEFT JOIN"), RIGHT_JOIN("RIGHT JOIN"), FULL_JOIN("FULL JOIN"), ON("ON"),
+	
+	ALIAS_A("a"), ALIAS_B("b"), ALIAS_C("C"),
+	
 	// symbol
-	END_QUERY(";", false), BR(System.lineSeparator(), false), CAST_OPERATOR("::", false), COMMA(",", false), DOT(".",false)
+	END_QUERY(";", false), BR(System.lineSeparator(), false), CAST_OPERATOR("::", false), COMMA(",", false)
 	
 	;
 

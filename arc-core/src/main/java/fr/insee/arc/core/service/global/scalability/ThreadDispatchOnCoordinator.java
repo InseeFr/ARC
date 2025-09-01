@@ -9,7 +9,7 @@ import fr.insee.arc.utils.database.ArcDatabase;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
 
-public class ThreadDispatchOnCoordinator extends Thread {
+public class ThreadDispatchOnCoordinator extends ThreadDispatchOn {
 
 	private ThrowingConsumer<Connection> actionOnCoordinator;
 	
@@ -21,7 +21,7 @@ public class ThreadDispatchOnCoordinator extends Thread {
 		this.coordinatorConnexion = coordinatorConnexion;
 	}
 
-	public void actionOnCoordinator() throws ArcException, SQLException
+	public void actionOnCoordinator() throws ArcException
 	{
 		if (coordinatorConnexion==null)
 		{
@@ -29,6 +29,8 @@ public class ThreadDispatchOnCoordinator extends Thread {
 			{
 				actionOnCoordinator.accept(newCoordinatorConnexion);
 				
+			} catch (SQLException e) {
+				throw new ArcException(e, ArcExceptionMessage.DATABASE_CONNECTION_COORDINATOR_FAILED);
 			}
 		}
 		else
@@ -43,15 +45,11 @@ public class ThreadDispatchOnCoordinator extends Thread {
 		try {
 			actionOnCoordinator();
 		}
-		 catch (SQLException e) {
-			 ArcException customException = new ArcException(e, ArcExceptionMessage.DATABASE_CONNECTION_COORDINATOR_FAILED);
-			 customException.logFullException();
-			this.interrupt();
-		}
 		 catch (ArcException e) {
 			e.logFullException();
-			this.interrupt();
+			this.setErrorInThread(true);
 		}
 	}
+
 
 }

@@ -1,25 +1,16 @@
 package fr.insee.arc.core.service.p6export.dao;
 
-import java.io.File;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.TraitementPhase.ConditionExecution;
 import fr.insee.arc.core.service.global.bo.Sandbox;
-import fr.insee.arc.core.service.p6export.parquet.ParquetDao;
-import fr.insee.arc.core.service.p6export.parquet.ParquetEncryptionKey;
-import fr.insee.arc.core.service.p6export.parquet.ParquetEncryptionKey.EncryptionType;
-import fr.insee.arc.core.service.p6export.provider.DirectoryPathExport;
-import fr.insee.arc.core.service.s3.ArcS3;
 import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
-import fr.insee.arc.utils.database.ArcDatabase;
-import fr.insee.arc.utils.database.TableToRetrieve;
 import fr.insee.arc.utils.exception.ArcException;
-import fr.insee.arc.utils.files.FileUtilsArc;
-import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.utils.structure.GenericBean;
 
 public class ExportDao {
@@ -27,13 +18,8 @@ public class ExportDao {
 	private Sandbox coordinatorSandbox;
 	private String exportTimeStamp;
 
-	private static final String EXPORT_CLIENT_NAME = "EXPORT";
-
-	private String directoryExport;
-	private String directoryOut;
-	private String s3Out;
-	private String s3OutTemp;
-
+	public static final String EXPORT_CLIENT_NAME = "EXPORT";
+	
 	public ExportDao(Sandbox coordinatorSandbox) {
 		this.coordinatorSandbox = coordinatorSandbox;
 	}
@@ -59,88 +45,6 @@ public class ExportDao {
 	}
 
 	/**
-	 * select mapping tables found on the executor by listing table in
-	 * IHM_MOD_TABLE_METIER
-	 * 
-	 * @return
-	 * @throws ArcException
-	 */
-	public Set<String> selectBusinessTableToExport() throws ArcException {
-		Set<String> mappingTablesName = new HashSet<>();
-
-		int numberOfNods = ArcDatabase.numberOfNods();
-
-		// if executor nods, get tables to retrieve from them else get from coordinator
-		if (ArcDatabase.isScaled()) {
-			queryBusinessTablesFromNods(mappingTablesName, ArcDatabase.EXECUTOR.getIndex(), numberOfNods);
-		} else {
-			queryBusinessTablesFromNods(mappingTablesName, ArcDatabase.COORDINATOR.getIndex(), numberOfNods);
-		}
-
-		return mappingTablesName;
-	}
-
-	/**
-	 * Query table name to export from mod_table_metier add them to set of tables to
-	 * export We use hashset as we want unique table name
-	 * 
-	 * @param mappingTablesName
-	 * @param startNodConnectionIndex
-	 * @param endNodConnectionIndex
-	 * @throws ArcException
-	 */
-	protected void queryBusinessTablesFromNods(Set<String> mappingTablesName, int startNodConnectionIndex,
-			int endNodConnectionIndex) throws ArcException {
-
-		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
-		query.build(SQL.SELECT, ColumnEnum.NOM_TABLE_METIER, SQL.FROM,
-				ViewEnum.MOD_TABLE_METIER.getFullName(coordinatorSandbox.getSchema()));
-
-		for (int connectionIndex = startNodConnectionIndex; connectionIndex < endNodConnectionIndex; connectionIndex++) {
-			mappingTablesName.addAll(new GenericBean(UtilitaireDao.get(connectionIndex).executeRequest(null, query))
-					.getColumnValues(ColumnEnum.NOM_TABLE_METIER.getColumnName()));
-		}
-	}
-
-	public List<TableToRetrieve> fetchBusinessTableToNod(Set<String> mappingTablesName) {
-		List<TableToRetrieve> tablesToExport = new ArrayList<>();
-		// business mapping table tagged to executor nod if connection is scaled
-		mappingTablesName.stream()
-				.forEach(t -> tablesToExport.add(
-						new TableToRetrieve(ArcDatabase.isScaled() ? ArcDatabase.EXECUTOR : ArcDatabase.COORDINATOR, //
-								ViewEnum.getFullName(this.coordinatorSandbox.getSchema(), t) //
-						)));
-		return tablesToExport;
-	}
-
-	/**
-	 * export the list of business table to parquet in the directory
-	 * /bas/export/timestamp
-	 * 
-	 * @param dateExport
-	 * @param tablesToExport
-	 * @throws ArcException
-	 */
-	public void exportTablesToParquet(String dateExport, List<TableToRetrieve> tablesToExport) throws ArcException {
-		PropertiesHandler properties = PropertiesHandler.getInstance();
-		
-		this.directoryExport = DirectoryPathExport.directoryExport(properties.getBatchParametersDirectory(),
-				this.coordinatorSandbox.getSchema());
-		
-		this.directoryOut = DirectoryPathExport.directoryExport(properties.getBatchParametersDirectory(),
-				this.coordinatorSandbox.getSchema(), EXPORT_CLIENT_NAME, dateExport);
-		
-		this.s3Out = DirectoryPathExport.s3Export(this.coordinatorSandbox.getSchema(), EXPORT_CLIENT_NAME, dateExport);
-
-		this.s3OutTemp = DirectoryPathExport.s3ExportTemp(this.coordinatorSandbox.getSchema(), EXPORT_CLIENT_NAME, dateExport);
-
-		ParquetEncryptionKey parquetEncryptionKey = properties.getS3OutputParquetKey().isEmpty() ? null
-				: new ParquetEncryptionKey(EncryptionType.KEY256, properties.getS3OutputParquetKey());
-
-		new ParquetDao().exportToParquet(tablesToExport, directoryOut, parquetEncryptionKey);
-	}
-
-	/**
 	 * mark exported data
 	 * 
 	 * @throws ArcException
@@ -156,24 +60,6 @@ public class ExportDao {
 		query.build(SQL.WHERE, ConditionExecution.PIPELINE_TERMINE_DONNEES_NON_EXPORTEES.getSqlFilter());
 
 		UtilitaireDao.get(0).executeRequest(this.coordinatorSandbox.getConnection(), query);
-	}
-
-	public void copyToS3Out() throws ArcException {
-		// copy first to a temporary folder
-		ArcS3.OUTPUT_BUCKET.createDirectory(this.s3OutTemp);
-
-		for (File f : Objects.requireNonNull(new File(this.directoryOut).listFiles())) {
-			ArcS3.OUTPUT_BUCKET.upload(f, this.s3OutTemp + File.separator + f.getName());
-		}
-
-		// once upload to S3 complete, move to the permanent directory
-		ArcS3.OUTPUT_BUCKET.createDirectory(this.s3Out);
-		ArcS3.OUTPUT_BUCKET.moveDirectory(this.s3OutTemp, this.s3Out);
-		
-		// delete export directory if S3 output bucket is declared in order to not duplicate data
-		if (ArcS3.OUTPUT_BUCKET.isS3Off()) return;
-		FileUtilsArc.deleteDirectory(this.directoryExport);
-		FileUtilsArc.createDirIfNotexist(this.directoryExport);
 	}
 
 }

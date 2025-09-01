@@ -3,6 +3,7 @@ package fr.insee.arc.core.dataobjects;
 import org.springframework.stereotype.Component;
 
 import fr.insee.arc.utils.dao.SQL;
+import fr.insee.arc.utils.database.Delimiters;
 
 @Component
 public class DataObjectService {
@@ -29,7 +30,7 @@ public class DataObjectService {
 
 		if ((e.getTableLocation().equals(SchemaEnum.SANDBOX)
 				|| e.getTableLocation().equals(SchemaEnum.SANDBOX_GENERATED)) && this.sandboxSchema != null) {
-			return this.sandboxSchema + SQL.DOT.getSqlCode() + e.getTableName();
+			return this.sandboxSchema + Delimiters.SQL_SCHEMA_DELIMITER + e.getTableName();
 		}
 
 		return ViewEnum.getFullTableNameInSchema(e.getTableLocation(), e.getTableName());

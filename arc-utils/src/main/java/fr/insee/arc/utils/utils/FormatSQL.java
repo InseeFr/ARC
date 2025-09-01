@@ -1,8 +1,12 @@
 package fr.insee.arc.utils.utils;
 
+import java.lang.reflect.Array;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -30,7 +34,7 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique {
 	public static final String TMP = "$tmp$";
 	public static final String REGEX_TMP = "\\$tmp\\$";
 
-	public static final String IMG = "img";
+	public static final String IMG = "_img";
 	
 	public static final boolean DROP_FIRST_FALSE = false;
 	public static final boolean DROP_FIRST_TRUE = true;
@@ -85,13 +89,13 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique {
 	}
 
 	public static String extractSchemaNameToken(String fullTableName) {
-		return fullTableName.contains(SQL.DOT.getSqlCode())
-				? ManipString.substringBeforeFirst(fullTableName, SQL.DOT.getSqlCode())
+		return fullTableName.contains(Delimiters.SQL_SCHEMA_DELIMITER)
+				? ManipString.substringBeforeFirst(fullTableName, Delimiters.SQL_SCHEMA_DELIMITER)
 				: null;
 	}
 
 	public static String extractTableNameToken(String fullTableName) {
-		return ManipString.substringAfterFirst(fullTableName, SQL.DOT.getSqlCode());
+		return ManipString.substringAfterFirst(fullTableName, Delimiters.SQL_SCHEMA_DELIMITER);
 	}
 
 	/**
@@ -256,7 +260,7 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique {
 	 * @return
 	 */
 	public static boolean isTemporary(String tablename) {
-		return !tablename.contains(SQL.DOT.getSqlCode());
+		return !tablename.contains(Delimiters.SQL_SCHEMA_DELIMITER);
 	}
 
 	/**
@@ -288,9 +292,24 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique {
 	 * @param databaseObject
 	 * @return
 	 */
-	public static final String imageObjectName(String databaseObject) {
+	public static final String imageObjectName(String databaseObject, String...extraTokens) {
+		List<String> tokens = new ArrayList<String>();
+		tokens.add(IMG);
+		tokens.addAll(Arrays.asList(extraTokens));
+		return objectName(databaseObject, tokens.toArray(new String[0]));
+	}
+	
+	/**
+	 * Ajoute des tokens suffixes à un nom d'objet de base de données
+	 * Gère la longeur maximale des identifiers dans la base (63 dans postgres)
+	 * Tronque par le début si jamais la longueur du nom de l'identifier est trop grande
+	 * @param databaseObject
+	 * @return
+	 */
+	public static final String objectName(String databaseObject, String...extraTokens) {
 		
-		String imgSuffix = Delimiters.SQL_TOKEN_DELIMITER + IMG;
+		StringBuilder imgSuffix = new StringBuilder();
+		Stream.of(extraTokens).forEach(t-> imgSuffix.append(t));
 		
 		String databaseObjectIdentifier = extractTableNameToken(databaseObject);
 		String databaseObjectSchema = extractSchemaNameToken(databaseObject);
@@ -303,6 +322,7 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique {
 				
 		return ((databaseObjectSchema!=null) ? databaseObjectSchema + Delimiters.SQL_SCHEMA_DELIMITER : "") + databaseObjectIdentifier.substring(overlength) + imgSuffix;
 	}
+	
 	
 	/**
 	 * Ne garde que les séparateurs
