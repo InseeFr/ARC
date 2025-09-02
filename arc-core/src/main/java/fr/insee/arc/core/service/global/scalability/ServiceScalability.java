@@ -28,7 +28,7 @@ public class ServiceScalability {
 	{
 		
 		List<ThreadDispatchOn> threadPool = new ArrayList<ThreadDispatchOn>();	
-		threadPool.add(new ThreadDispatchOnCoordinator(actionOnCoordinator, coordinatorConnexion));
+		threadPool.add(new ThreadDispatchOnCoordinator(coordinatorConnexion, actionOnCoordinator));
 
 		// dispatch when scaled
 		int numberOfExecutorNods = ArcDatabase.numberOfExecutorNods();
@@ -37,7 +37,7 @@ public class ServiceScalability {
 		{
 			for (int executorConnectionIndex=ArcDatabase.EXECUTOR.getIndex(); executorConnectionIndex<ArcDatabase.EXECUTOR.getIndex()+numberOfExecutorNods; executorConnectionIndex++ )
 			{
-				threadPool.add(new ThreadDispatchOnExecutor(actionOnExecutor, executorConnectionIndex));
+				threadPool.add(new ThreadDispatchOnExecutor(executorConnectionIndex, actionOnExecutor));
 			}
 		}
 		
