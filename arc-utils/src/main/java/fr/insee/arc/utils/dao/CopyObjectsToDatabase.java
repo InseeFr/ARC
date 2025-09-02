@@ -136,10 +136,14 @@ public class CopyObjectsToDatabase {
 	 * @param targetConnection
 	 * @throws ArcException
 	 */
-	public static void createExtensionDblink(Connection targetConnection) throws ArcException {
+	public static void createExtensionDblink(Connection targetConnection) {
 		GenericPreparedStatementBuilder query = new GenericPreparedStatementBuilder();
 		query.build(SQL.CREATE, SQL.EXTENSION, SQL.IF_NOT_EXISTS, SQL.DBLINK, SQL.WITH, SQL.SCHEMA, SQL.PUBLIC);
-		UtilitaireDao.get(0).executeRequest(targetConnection, query);
+		try {
+			UtilitaireDao.get(0).executeRequest(targetConnection, query);
+		} catch (ArcException e) {
+			// silent fail : since postgres 13 only trusted extension can be created by non super user
+		}
 	}
 
 	/**
@@ -263,10 +267,14 @@ public class CopyObjectsToDatabase {
 	 * @param targetConnection
 	 * @throws ArcException
 	 */
-	public static void dropExtensionDblink(Connection targetConnection) throws ArcException {
+	public static void dropExtensionDblink(Connection targetConnection) {
 		GenericPreparedStatementBuilder query = new GenericPreparedStatementBuilder();
 		query.build(SQL.DROP, SQL.EXTENSION, SQL.IF_EXISTS, SQL.DBLINK);
-		UtilitaireDao.get(0).executeRequest(targetConnection, query);
+		try {
+			UtilitaireDao.get(0).executeRequest(targetConnection, query);
+		} catch (ArcException e) {
+			// silent fail : since postgres 13 only trusted extension can be created by non super user
+		}
 	}
 
 }
