@@ -15,7 +15,7 @@ public class ThreadDispatchOnCoordinator extends ThreadDispatchOn {
 	
 	private Connection coordinatorConnexion;
 	
-	public ThreadDispatchOnCoordinator(ThrowingConsumer<Connection> actionOnCoordinator, Connection coordinatorConnexion) {
+	public ThreadDispatchOnCoordinator(Connection coordinatorConnexion, ThrowingConsumer<Connection> actionOnCoordinator) {
 		super();
 		this.actionOnCoordinator = actionOnCoordinator;
 		this.coordinatorConnexion = coordinatorConnexion;

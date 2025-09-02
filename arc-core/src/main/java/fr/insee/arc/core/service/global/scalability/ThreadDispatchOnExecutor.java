@@ -14,7 +14,7 @@ public class ThreadDispatchOnExecutor extends ThreadDispatchOn {
 	private int executorConnectionIndex;
 	
 	
-	public ThreadDispatchOnExecutor(ThrowingConsumer<Connection> actionOnExecutor, int executorConnectionIndex) {
+	public ThreadDispatchOnExecutor(int executorConnectionIndex, ThrowingConsumer<Connection> actionOnExecutor) {
 		super();
 		this.actionOnExecutor = actionOnExecutor;
 		this.executorConnectionIndex = executorConnectionIndex;
@@ -32,6 +32,7 @@ public class ThreadDispatchOnExecutor extends ThreadDispatchOn {
 		}
 	}
 
+	@Override
 	public void run()
 	{
 		try {
