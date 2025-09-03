@@ -412,4 +412,16 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique {
 		return Arrays.asList(colonnes).toString().replaceFirst("^\\[", "{").replaceFirst("\\]$", "}");
 	}
 
+	
+	public static GenericPreparedStatementBuilder getTableMetadata(String tablename)
+	{
+	GenericPreparedStatementBuilder query = new GenericPreparedStatementBuilder();
+	query.build("""
+			SELECT STRING_AGG(column_name, ',' ORDER BY ordinal_position) as cols
+			, STRING_AGG(column_name || ' ' || udt_name, ',' ORDER BY ordinal_position) as cols_with_type
+			from information_schema.columns where table_schema||'.'||table_name=lower(
+			""", query.quoteText(tablename), ")");
+	return query;
+	}
+	
 }

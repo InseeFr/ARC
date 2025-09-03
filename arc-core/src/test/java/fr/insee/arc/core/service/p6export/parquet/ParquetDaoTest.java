@@ -30,13 +30,13 @@ public class ParquetDaoTest extends ParquetDao {
 
 	@Test
 	public void attachmentNameTest() {
-		assertEquals("pg_0", attachmentName(0));
-		assertEquals("pg_1", attachmentName(1));
+		assertEquals("pg_0", this.duckdbDao.attachmentName(0));
+		assertEquals("pg_1", this.duckdbDao.attachmentName(1));
 	}
 
 	@Test
 	public void attachmentTableNameTest() {
-		assertEquals("pg_0.arc_bas1.ma_table", attachedTableName(0, "arc_bas1.ma_table"));
+		assertEquals("pg_0.arc_bas1.ma_table", this.duckdbDao.attachedTableName(0, "arc_bas1.ma_table"));
 	}
 
 
@@ -73,7 +73,7 @@ public class ParquetDaoTest extends ParquetDao {
 	}
 	
 	@Test
-	public void checkNotEmptyTest() throws SQLException {
+	public void checkNotEmptyTest() throws ArcException {
 		assertTrue(checkNotEmpty(InitializeQueryTest.c, new GenericPreparedStatementBuilder("SELECT * FROM (VALUES (1),(2),(3)) t (col)")));
 		assertFalse(checkNotEmpty(InitializeQueryTest.c, new GenericPreparedStatementBuilder("SELECT 1 WHERE 1=0")));
 	}

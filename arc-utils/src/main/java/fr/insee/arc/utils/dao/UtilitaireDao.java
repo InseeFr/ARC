@@ -32,6 +32,7 @@ import org.apache.logging.log4j.Logger;
 import org.postgresql.copy.CopyManager;
 import org.postgresql.core.BaseConnection;
 
+import fr.insee.arc.utils.dataobjects.ColumnAttributes;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.files.CompressedUtils;
@@ -1049,6 +1050,21 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		executeRequest(connexion,FormatSQL.analyzeSecured(table));
 	}
 
+	
+	/**
+	 * retrieve the columns definition of the input table
+	 * 
+	 * @param targetConnection
+	 * @param inputTable
+	 * @return
+	 * @throws ArcException
+	 */
+	public ColumnAttributes retrieveColumnAttributesOfTable(Connection targetConnection, String inputTable) throws ArcException {
+		GenericBean gb = new GenericBean(executeRequest(targetConnection, FormatSQL.getTableMetadata(inputTable)));
+		return new ColumnAttributes(gb.getColumnValues("cols").get(0), gb.getColumnValues("cols_with_type").get(0));
+
+	}
+	
 	
 	public PropertiesHandler getProperties() {
 		return properties;

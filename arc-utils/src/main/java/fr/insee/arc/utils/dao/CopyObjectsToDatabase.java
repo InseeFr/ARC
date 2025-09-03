@@ -48,17 +48,15 @@ public class CopyObjectsToDatabase {
 	 */
 	public static void execCopyFromTable(Connection inputConnection, Connection targetConnection, String inputTable,
 			String targetTable) throws ArcException {
+
 		createExtensionDblink(targetConnection);
+
 		try {
 			execCopyFromTableCore(inputConnection, targetConnection, inputTable, targetTable, true);
 		} finally {
 			dropExtensionDblink(targetConnection);
 		}
-	}
 
-	public static void execCopyFromTableWithoutDroppingTargetTableNorDblinkExtension(Connection inputConnection,
-			Connection targetConnection, String inputTable, String targetTable) throws ArcException {
-		execCopyFromTableCore(inputConnection, targetConnection, inputTable, targetTable, false);
 	}
 
 	/**
@@ -117,7 +115,7 @@ public class CopyObjectsToDatabase {
 		// normalize table name
 		connectDblink(inputConnection, targetConnection);
 
-		ColumnAttributes inputTableColumnAttributes = retrieveColumnAttributesOfInpuTable(inputConnection,
+		ColumnAttributes inputTableColumnAttributes = retrieveColumnAttributesOfDistantInputTable(inputConnection,
 				targetConnection, inputTable);
 
 		createOutputTableIfRequired(targetConnection, targetTable, inputTableColumnAttributes, replaceTargetTable);
@@ -136,13 +134,14 @@ public class CopyObjectsToDatabase {
 	 * @param targetConnection
 	 * @throws ArcException
 	 */
-	public static void createExtensionDblink(Connection targetConnection) {
+	private static void createExtensionDblink(Connection targetConnection) {
 		GenericPreparedStatementBuilder query = new GenericPreparedStatementBuilder();
 		query.build(SQL.CREATE, SQL.EXTENSION, SQL.IF_NOT_EXISTS, SQL.DBLINK, SQL.WITH, SQL.SCHEMA, SQL.PUBLIC);
 		try {
 			UtilitaireDao.get(0).executeRequest(targetConnection, query);
 		} catch (ArcException e) {
-			// silent fail : since postgres 13 only trusted extension can be created by non super user
+			// silent fail : since postgres 13 only trusted extension can be created by non superuser
+			// so this query might fail
 		}
 	}
 
@@ -175,18 +174,13 @@ public class CopyObjectsToDatabase {
 	 * @return
 	 * @throws ArcException
 	 */
-	private static ColumnAttributes retrieveColumnAttributesOfInpuTable(Connection inputConnection,
+	private static ColumnAttributes retrieveColumnAttributesOfDistantInputTable(Connection inputConnection,
 			Connection targetConnection, String inputTable) throws ArcException {
-		// retrieve the meta data of table to copy
-		String queryColumnMetadata = String.format("""
-				SELECT STRING_AGG(column_name, ',' ORDER BY ordinal_position) as cols
-				, STRING_AGG(column_name || ' ' || udt_name, ',' ORDER BY ordinal_position) as cols_with_type
-				from information_schema.columns where table_schema||'.'||table_name=lower('%s')
-				""", inputTable);
 
+		// retrieve the meta data of table to copy
 		GenericPreparedStatementBuilder query = new GenericPreparedStatementBuilder();
 		query.append("SELECT cols, cols_with_type FROM dblink(").appendText(inputConnection.toString()).append(",")
-				.appendText(queryColumnMetadata).append(") as metadata (cols text, cols_with_type text)");
+				.appendText(FormatSQL.getTableMetadata(inputTable).getQueryWithParameters()).append(") as metadata (cols text, cols_with_type text)");
 
 		GenericBean gb = new GenericBean(UtilitaireDao.get(0).executeRequest(targetConnection, query));
 		return new ColumnAttributes(gb.getColumnValues("cols").get(0), gb.getColumnValues("cols_with_type").get(0));
@@ -267,13 +261,14 @@ public class CopyObjectsToDatabase {
 	 * @param targetConnection
 	 * @throws ArcException
 	 */
-	public static void dropExtensionDblink(Connection targetConnection) {
+	private static void dropExtensionDblink(Connection targetConnection) {
 		GenericPreparedStatementBuilder query = new GenericPreparedStatementBuilder();
 		query.build(SQL.DROP, SQL.EXTENSION, SQL.IF_EXISTS, SQL.DBLINK);
 		try {
 			UtilitaireDao.get(0).executeRequest(targetConnection, query);
 		} catch (ArcException e) {
-			// silent fail : since postgres 13 only trusted extension can be created by non super user
+			// silent fail : since postgres 13 only trusted extension can be created by non superuser
+			// so this query might fail
 		}
 	}
 
