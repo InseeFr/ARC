@@ -46,10 +46,6 @@ accept-charset="UTF-8"
 <c:param name="ligneFilter" value ="true" />
 <c:param name="checkbox" value ="true" />
 <c:param name="checkboxVisible" value ="true" />
-<c:param name="extraScopeAdd" value ="viewListNomenclatures;viewSchemaNmcl;viewNomenclature;" />
-<c:param name="extraScopeDelete" value ="viewListNomenclatures;viewSchemaNmcl;viewNomenclature;" />
-<c:param name="extraScopeUpdate" value ="viewListNomenclatures;viewSchemaNmcl;viewNomenclature;" />
-<c:param name="extraScopeSee" value ="viewListNomenclatures;viewSchemaNmcl;viewNomenclature;" />
 <c:param name="multiSelection" value ="true" />
 <c:param name="otherButton">
 <input 
@@ -83,10 +79,6 @@ value="<spring:message code="gui.button.exportStart"/>"></input>
 <c:param name="ligneFilter" value ="true" />
 <c:param name="checkbox" value ="true" />
 <c:param name="checkboxVisible" value ="true" />
-<c:param name="extraScopeAdd" value ="viewSchemaNmcl;" />
-<c:param name="extraScopeDelete" value ="viewSchemaNmcl;" />
-<c:param name="extraScopeUpdate" value ="viewSchemaNmcl;" />
-<c:param name="extraScopeSee" value ="viewSchemaNmcl;" />
 <c:param name="multiSelection" value ="true" />
 <c:param name="otherButton">
 <button
@@ -119,10 +111,6 @@ ajax="false"
 <c:param name="checkbox" value ="true" />
 <c:param name="checkboxVisible" value ="true" />
 <c:param name="multiSelection" value ="true" />
-<c:param name="extraScopeAdd" value ="viewModules;" />
-<c:param name="extraScopeDelete" value ="viewModules;" />
-<c:param name="extraScopeUpdate" value ="viewModules;" />
-<c:param name="extraScopeSee" value ="viewModules;" />
 <c:param name="allowResize" value ="true" />
 <c:param name="otherButton">
 <input 

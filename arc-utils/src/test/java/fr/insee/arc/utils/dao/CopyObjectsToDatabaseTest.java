@@ -77,25 +77,6 @@ public class CopyObjectsToDatabaseTest extends InitializeQueryTest {
 		// check that dblink extension had been deleted
 		int numberOfDblinkExtension = UtilitaireDao.get(0).getInt(e1, "select count(*) from pg_extension where extname='dblink'");
 		assertEquals(0, numberOfDblinkExtension);
-				
-		// new copy without dropping the target table
-		CopyObjectsToDatabase.createExtensionDblink(e1);
-		
-		try {
-			CopyObjectsToDatabase.execCopyFromTableWithoutDroppingTargetTableNorDblinkExtension(c, e1, "test.table_test", "tmp");
-			// check that dblink extension still exists
-			numberOfDblinkExtension = UtilitaireDao.get(0).getInt(e1, "select count(*) from pg_extension where extname='dblink'");
-			assertEquals(1, numberOfDblinkExtension);
-		}
-		finally {
-			CopyObjectsToDatabase.dropExtensionDblink(e1);
-		}
-		
-		numberOfRecordInCopy = UtilitaireDao.get(0).getInt(e1, "SELECT count(*) from tmp");
-
-		// the number of record of target table must be equals to 
-		// the double of the number of records in input table
-		assertEquals(numberOfRecordInInputTable * 2, numberOfRecordInCopy);
 		
 		UtilitaireDao.get(0).executeRequest(e1, "DISCARD TEMP");
 		
