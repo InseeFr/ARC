@@ -13,13 +13,11 @@ import org.apache.logging.log4j.Logger;
 import fr.insee.arc.utils.consumer.ThrowingConsumer;
 import fr.insee.arc.utils.dao.DuckdbDao;
 import fr.insee.arc.utils.dao.GenericPreparedStatementBuilder;
-import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.database.ArcDatabase;
 import fr.insee.arc.utils.database.TableToRetrieve;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.files.FileUtilsArc;
-import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.LoggerHelper;
 
@@ -220,12 +218,13 @@ public class ParquetDao {
 			throws ArcException {
 		GenericPreparedStatementBuilder query = new GenericPreparedStatementBuilder();
 		query.append("COPY (").append(selectQuery).append(") TO " + query.quoteText(output));
+		query.append(" (FORMAT PARQUET ");
 		
 		if (encryptionKey != null) {
-			query.append("(ENCRYPTION_CONFIG {footer_key: "+query.quoteText(encryptionKey.getType().getAlias())+"})");
+			query.append(", ENCRYPTION_CONFIG {footer_key: "+query.quoteText(encryptionKey.getType().getAlias())+"}");
 		}
 		
-		query.append(";");
+		query.append(");");
 		duckdbDao.executeQuery(connection, query);
 	}
 
@@ -238,7 +237,12 @@ public class ParquetDao {
 	 */
 	public static String exportTablePath(TableToRetrieve table, String outputDirectory)
 	{
-		return outputDirectory + File.separator + FormatSQL.extractTableNameToken(table.getTableName())
+		return exportTablePath(table.getTableName(), outputDirectory);
+	}
+	
+	public static String exportTablePath(String table, String outputDirectory)
+	{
+		return outputDirectory + File.separator + FormatSQL.extractTableNameToken(table)
 		+ PARQUET_FILE_EXTENSION;
 	}
 

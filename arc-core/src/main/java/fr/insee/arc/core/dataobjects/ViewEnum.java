@@ -144,6 +144,10 @@ public enum ViewEnum {
 	, T1(PgViewEnum.T1), T2(PgViewEnum.T2), T3(PgViewEnum.T3)
 	
 	
+	// table des id_source pour la synchro dans l'initialisation
+	, ID_SOURCE_SYNCHRO("id_source_synchro", SchemaEnum.SANDBOX_GENERATED)
+
+	
 	, TABLE_PILOTAGE_THREAD("p", SchemaEnum.TEMPORARY)
 	
 	, TMP_CHARGEMENT_ARC(PgViewEnum.ALIAS_A), TMP_CHARGEMENT_BRUT(PgViewEnum.ALIAS_B)
@@ -243,17 +247,6 @@ public enum ViewEnum {
 	public static String getFullTableNameInSchema(SchemaEnum schema, String tablename, String...suffix) {
 		return (schema.equals(SchemaEnum.TEMPORARY) ? tablename : schema.getSchemaName() + Delimiters.SQL_SCHEMA_DELIMITER + tablename).toLowerCase();
 	}
-	
-	
-	
-	/**
-	 * return tablename with schema (normalize lower case)
-	 * @return
-	 */
-	public String getFullNameWithSuffix(String schema, String...suffix) {
-		return normalizeTableName(getFullName(schema) + (suffix.length==0?"":Delimiters.SQL_TOKEN_DELIMITER)+ Stream.of(suffix).collect(Collectors.joining(Delimiters.SQL_TOKEN_DELIMITER))); 
-	}
-
 	
 	/**
 	 * return tablename with schema (normalize lower case)

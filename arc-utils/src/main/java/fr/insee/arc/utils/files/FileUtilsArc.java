@@ -52,8 +52,19 @@ public class FileUtilsArc {
 		createDirIfNotexist(new File(fPath));
 	}
 
+	/**
+	 * delete directory
+	 * @param directoryToBeDeleted
+	 * @throws ArcException
+	 */
 	public static void deleteDirectory(String directoryToBeDeleted) throws ArcException {
-		deleteDirectory(new File(directoryToBeDeleted));
+		
+		File f = new File(directoryToBeDeleted);
+		
+		if (f.exists() && f.isDirectory())
+		{
+			deleteDirectory(new File(directoryToBeDeleted));
+		}
 	}
 	
 	

@@ -1,5 +1,6 @@
 package fr.insee.arc.ws.services.importServlet;
 
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,6 +8,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.dataobjects.SchemaEnum;
+import fr.insee.arc.core.service.global.scalability.ServiceScalability;
+import fr.insee.arc.utils.consumer.ThrowingConsumer;
 import fr.insee.arc.utils.database.ArcDatabase;
 import fr.insee.arc.utils.database.TableToRetrieve;
 import fr.insee.arc.utils.exception.ArcException;
@@ -195,27 +198,33 @@ public class ImportStep1InitializeClientTablesService {
 	 * @throws ArcException
 	 */
 	private List<TableToRetrieve> createImages(List<String> tablesMetierNames) throws ArcException {
+		
 		int numberOfExecutorNods = ArcDatabase.numberOfExecutorNods();
 		
 		List<TableToRetrieve> tablesToRetrieve = new ArrayList<>();
 
 		if (numberOfExecutorNods == 0) {
-			clientDao.createImages(tablesMetierNames, ArcDatabase.COORDINATOR.getIndex())
-			.forEach(t -> tablesToRetrieve.add(new TableToRetrieve(ArcDatabase.COORDINATOR, t)));
-			
-			
+
+			// create images on the coordinator
+			clientDao.createImages(tablesMetierNames, null).forEach(t -> tablesToRetrieve.add(new TableToRetrieve(ArcDatabase.COORDINATOR, t)));
+
 		} else {
-			for (int executorConnectionId = ArcDatabase.EXECUTOR.getIndex(); executorConnectionId < ArcDatabase.EXECUTOR
-					.getIndex() + numberOfExecutorNods; executorConnectionId++) {
-				
-				// copy the table containing id_source to be retrieved on executor nods
-				clientDao.copyTableOfIdSourceToExecutorNod(executorConnectionId);
-				
-				// create the business table containing data of id_source found in table tableOfIdSource
-				clientDao.createImages(tablesMetierNames, executorConnectionId)
-				.forEach(t -> tablesToRetrieve.add(new TableToRetrieve(ArcDatabase.EXECUTOR, t)))
-				;
-			}
+
+			// copy the id_source table into executor
+			clientDao.copyTableOfIdSourceToExecutorNod();
+			
+			ThrowingConsumer<Connection> functionCoordinator = nodConnection -> 			
+			{
+				// do nothing on coordinator
+			};
+			
+			ThrowingConsumer<Connection> functionExecutor = nodConnection ->			
+			{
+				clientDao.createImages(tablesMetierNames, nodConnection)
+				.forEach(t -> tablesToRetrieve.add(new TableToRetrieve(ArcDatabase.EXECUTOR, t)));
+			};
+
+			ServiceScalability.dispatchOnNods(null, functionCoordinator, functionExecutor);
 		}
 
 		return tablesToRetrieve;

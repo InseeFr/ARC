@@ -1,5 +1,6 @@
 package fr.insee.arc.core.service.p6export.dao;
 
+import java.sql.Connection;
 import java.util.List;
 import java.util.Map;
 
@@ -8,6 +9,8 @@ import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.TraitementPhase.ConditionExecution;
 import fr.insee.arc.core.service.global.bo.Sandbox;
+import fr.insee.arc.core.service.global.scalability.ServiceScalability;
+import fr.insee.arc.utils.consumer.ThrowingConsumer;
 import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;

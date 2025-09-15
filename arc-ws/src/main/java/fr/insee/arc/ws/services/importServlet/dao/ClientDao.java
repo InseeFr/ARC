@@ -2,7 +2,6 @@ package fr.insee.arc.ws.services.importServlet.dao;
 
 import java.io.File;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -17,8 +16,8 @@ import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.dao.TableNaming;
+import fr.insee.arc.core.service.global.scalability.CopyFromCoordinatorToExecutors;
 import fr.insee.arc.core.service.p6export.parquet.ParquetDao;
-import fr.insee.arc.utils.dao.CopyObjectsToDatabase;
 import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.database.ArcDatabase;
@@ -145,7 +144,7 @@ public class ClientDao {
 	 * @throws ArcException
 	 */
 	@SqlInjectionChecked
-	private String addImage(String tableMetier, int executorConnectionId) throws ArcException {
+	private String addImage(String tableMetier, Connection nodConnection) throws ArcException {
 		ArcPreparedStatementBuilder request = new ArcPreparedStatementBuilder();
 
 		String nomTableImage = TableNaming.buildTableNameWithTokens(environnement, tableMetier, client, timestamp);
@@ -157,7 +156,7 @@ public class ClientDao {
 		request.append("AND exists (SELECT 1 FROM " + tableOfIdSource + " T2 where T2."
 				+ ColumnEnum.ID_SOURCE.getColumnName() + "=T1." + ColumnEnum.ID_SOURCE.getColumnName() + "); ");
 		
-		UtilitaireDao.get(executorConnectionId).executeBlock(connection, request);
+		UtilitaireDao.get(0).executeBlock(nodConnection, request);
 
 		registerTableToBeRetrieved(ExportTrackingType.DATA, ArcDatabase.EXECUTOR, nomTableImage);
 		
@@ -276,12 +275,12 @@ public class ClientDao {
 	 * @return liste des noms de tables images crées
 	 * @throws ArcException
 	 */
-	public List<String> createImages(List<String> tablesMetierNames, int executorConnectionId) throws ArcException {
+	public List<String> createImages(List<String> tablesMetierNames, Connection executorConnection) throws ArcException {
 		LoggerHelper.debugAsComment(LOGGER, timestamp, "ClientDaoImpl.createImage()");
 		List<String> dataTableImages = new ArrayList<>(); 
 		
 		for (String tableMetier : tablesMetierNames) {
-			dataTableImages.add(addImage(tableMetier, executorConnectionId));
+			dataTableImages.add(addImage(tableMetier, executorConnection));
 		}
 		return dataTableImages;
 	}
@@ -605,25 +604,9 @@ public class ClientDao {
 	 * @param connectionId
 	 * @throws ArcException
 	 */
-	public void copyTableOfIdSourceToExecutorNod(int connectionId) throws ArcException {
-		
-		try (Connection coordinatorConnection = UtilitaireDao.get(0).getDriverConnexion()) {
-			
-			try (Connection executorConnection = UtilitaireDao.get(connectionId).getDriverConnexion()) {
-			
-				CopyObjectsToDatabase.execCopyFromTable(coordinatorConnection, executorConnection, tableOfIdSource, tableOfIdSource);
-
-			} catch (SQLException e) {
-				ArcException customException = new ArcException(e, ArcExceptionMessage.DATABASE_CONNECTION_EXECUTOR_FAILED);
-				customException.logFullException();
-				throw customException;
-			}
-			
-		} catch (SQLException e) {
-			ArcException customException = new ArcException(e, ArcExceptionMessage.DATABASE_CONNECTION_EXECUTOR_FAILED);
-			customException.logFullException();
-			throw customException;
-		}
+	public void copyTableOfIdSourceToExecutorNod() throws ArcException {
+		CopyFromCoordinatorToExecutors copy = new CopyFromCoordinatorToExecutors();
+		copy.copyWithTee(this.tableOfIdSource);
 	}
 
 	public void deleteFromTrackTable(String tableName) throws ArcException {

@@ -1,6 +1,7 @@
 package fr.insee.arc.core.service.p0initialisation.pilotage.dao;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -15,6 +16,7 @@ import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.dataobjects.TypeEnum;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.security.SqlInjectionChecked;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.FormatSQL;
@@ -118,58 +120,16 @@ public class SynchronizeDataByPilotageDao {
 	 * @throws ArcException
 	 */
 	public static void execQueryMaterializeOnExecutorIdSource(Connection executorConnection,
-			List<String> idSourceToDelete) throws ArcException {
+			String tableOfIdSource, List<String> idSourceToDelete) throws ArcException {
 		
 		GenericBean gb = new GenericBean(ColumnEnum.ID_SOURCE.getColumnName(), TypeEnum.TEXT.getTypeName(),
 				idSourceToDelete);
-		execQueryMaterializeOnExecutorIdSource(executorConnection, gb);
+		
+		// materialize
+		CopyObjectsToDatabase.execCopyFromGenericBean(executorConnection, tableOfIdSource, gb);
+
 		}
-	
-	/**
-	 * materialize on executor nod a table containing the GenericBean of idSource provided
-	 * @param executorConnection
-	 * @param idSourceToDelete
-	 * @throws ArcException
-	 */
-	private static void execQueryMaterializeOnExecutorIdSource(Connection executorConnection,
-			GenericBean idSourceInPilotageToKeep) throws ArcException {
 
-		CopyObjectsToDatabase.execCopyFromGenericBean(executorConnection, ViewEnum.T1.getFullName(), idSourceInPilotageToKeep);
-		
-		// analyze table
-		analyzeT1(executorConnection);
-	}
-
-	/**
-	 * materialize on executor nod the input table of coordinator nod
-	 * @param executorConnection
-	 * @param idSourceToDelete
-	 * @throws ArcException
-	 */
-	public static void execQueryMaterializeOnExecutorIdSource(Connection coordinatorConnection, Connection executorConnection,
-			String tableOfIdSourceToCopy) throws ArcException {
-
-		
-		CopyObjectsToDatabase.execCopyFromTable(coordinatorConnection, executorConnection, tableOfIdSourceToCopy, ViewEnum.T1.getFullName());
-
-		analyzeT1(executorConnection);
-		
-	}
-	
-	/**
-	 * Analyze the
-	 * @param executorConnection
-	 * @throws ArcException
-	 */
-	private static void analyzeT1(Connection executorConnection) throws ArcException
-	{
-		
-		// analyze table
-		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
-		query.build(FormatSQL.analyzeSecured(ViewEnum.T1.getFullName()));
-		UtilitaireDao.get(0).executeRequest(executorConnection, query);
-	}
-	
 	
 	/**
 	 * Delete the records from a target data table according to a given list of id_source
@@ -179,12 +139,12 @@ public class SynchronizeDataByPilotageDao {
 	 * @param targetDataTable
 	 * @throws ArcException
 	 */
-	public static void deleteDataRecordsFoundInIdSource(Connection executorConnection, String targetDataTable) throws ArcException {
+	public static void deleteDataRecordsFoundInIdSource(Connection executorConnection, String tableOfIdSource, String targetDataTable) throws ArcException {
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		query.build(SQL.DELETE, targetDataTable, SQL.AS, ViewEnum.ALIAS_A);
 		query.build(SQL.WHERE, SQL.EXISTS);
 		query.build("(");
-		query.build(SQL.SELECT, SQL.FROM, ViewEnum.T1.getFullName(), SQL.AS, ViewEnum.ALIAS_B);
+		query.build(SQL.SELECT, SQL.FROM, tableOfIdSource, SQL.AS, ViewEnum.ALIAS_B);
 		query.build(SQL.WHERE, ColumnEnum.ID_SOURCE.alias(ViewEnum.ALIAS_A), "=", ColumnEnum.ID_SOURCE.alias(ViewEnum.ALIAS_B));
 		query.build(")");
 		query.build(SQL.END_QUERY);
@@ -200,7 +160,7 @@ public class SynchronizeDataByPilotageDao {
 	 * @param targetDataTable
 	 * @throws ArcException
 	 */
-	public static void keepDataRecordsFoundInIdSourceOnly(Connection executorConnection, String targetDataTable) throws ArcException {
+	public static void keepDataRecordsFoundInIdSourceOnly(Connection executorConnection, String tableOfIdsource, String targetDataTable) throws ArcException {
 		
 		String targetDataTableImg = FormatSQL.imageObjectName(targetDataTable);
 		String targetDataTableIdentifier = FormatSQL.extractTableNameToken(targetDataTable);
@@ -209,13 +169,16 @@ public class SynchronizeDataByPilotageDao {
 		// this operation occurs once a week
 		
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
+
+		query.build(FormatSQL.analyzeSecured(tableOfIdsource));
+		
 		query.build(SQL.DROP, SQL.TABLE, SQL.IF_EXISTS, targetDataTableImg, SQL.END_QUERY);
 		
 		query.build(SQL.CREATE, SQL.TABLE, targetDataTableImg, FormatSQL.WITH_NO_VACUUM, SQL.AS);
 		query.build(SQL.SELECT, "*", SQL.FROM, targetDataTable, SQL.AS, ViewEnum.ALIAS_A);
 		query.build(SQL.WHERE, SQL.EXISTS);
 		query.build("(");
-		query.build(SQL.SELECT, SQL.FROM, ViewEnum.T1.getFullName(), SQL.AS, ViewEnum.ALIAS_B);
+		query.build(SQL.SELECT, SQL.FROM, tableOfIdsource, SQL.AS, ViewEnum.ALIAS_B);
 		query.build(SQL.WHERE, ColumnEnum.ID_SOURCE.alias(ViewEnum.ALIAS_A), "=", ColumnEnum.ID_SOURCE.alias(ViewEnum.ALIAS_B));
 		query.build(")");
 		query.build(SQL.END_QUERY);
@@ -228,7 +191,10 @@ public class SynchronizeDataByPilotageDao {
 		UtilitaireDao.get(0).executeRequest(executorConnection, query);
 	}
 
-	
+
+	public static void dropTable(Connection executorConnection, String table) {
+		UtilitaireDao.get(0).dropTable(executorConnection, table);
+	}
 
 	public static void dropDataTables(Connection executorConnection, List<String> dataTablesToDrop) {
 		UtilitaireDao.get(0).dropTable(executorConnection, dataTablesToDrop);

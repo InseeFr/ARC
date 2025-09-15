@@ -1059,10 +1059,11 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * @return
 	 * @throws ArcException
 	 */
-	public ColumnAttributes retrieveColumnAttributesOfTable(Connection targetConnection, String inputTable) throws ArcException {
-		GenericBean gb = new GenericBean(executeRequest(targetConnection, FormatSQL.getTableMetadata(inputTable)));
-		return new ColumnAttributes(gb.getColumnValues("cols").get(0), gb.getColumnValues("cols_with_type").get(0));
-
+	public ColumnAttributes retrieveColumnAttributes(Connection connection, String tablename) throws ArcException {
+		GenericPreparedStatementBuilder query =new GenericPreparedStatementBuilder();
+		query.build(SQL.SELECT, "*", SQL.FROM, tablename, SQL.WHERE, SQL.FALSE);
+		GenericBean gb = new GenericBean(UtilitaireDao.get(0).executeRequest(connection, query));
+		return new ColumnAttributes(gb);
 	}
 	
 	

@@ -1,6 +1,7 @@
 package fr.insee.arc.core.service.p0initialisation.metadata;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -13,12 +14,16 @@ import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.service.global.bo.JeuDeRegle;
 import fr.insee.arc.core.service.global.bo.JeuDeRegleDao;
 import fr.insee.arc.core.service.global.bo.Sandbox;
+import fr.insee.arc.core.service.global.scalability.CopyFromCoordinatorToExecutors;
 import fr.insee.arc.core.service.global.scalability.ServiceScalability;
 import fr.insee.arc.core.service.p0initialisation.dbmaintenance.BddPatcher;
 import fr.insee.arc.core.service.p0initialisation.metadata.dao.SynchronizeRulesAndMetadataDao;
 import fr.insee.arc.utils.consumer.ThrowingConsumer;
 import fr.insee.arc.utils.dao.CopyObjectsToDatabase;
+import fr.insee.arc.utils.dao.UtilitaireDao;
+import fr.insee.arc.utils.database.ArcDatabase;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.LoggerHelper;
@@ -69,8 +74,13 @@ public class SynchronizeRulesAndMetadataOperation {
 		// on coordinator nod - copy the metadata user rules from metadata schema to sandbox schema
 		copyMetadataToSandbox();
 
+		// patch the executor nods with database script
+		patchDatabaseToExecutorsAllNods();
+		
 		// copy the rules in sandbox schema of the coordinator nod to the sandbox schema of the executor nods
 		copyMetadataToExecutorsAllNods();
+		
+		
 	}
 
 	/**
@@ -87,12 +97,13 @@ public class SynchronizeRulesAndMetadataOperation {
 		applyExpressions();
 	}
 
+	
 	/**
-	 * Instanciate the metadata required into all executors pod
+	 * Patch the database with required table and function into all executors pod
 	 * @return number of executor pod
 	 * @throws ArcException
 	 */
-	protected int copyMetadataToExecutorsAllNods() throws ArcException {
+	protected void patchDatabaseToExecutorsAllNods() throws ArcException {
 
 		Connection coordinatorConnexion = sandbox.getConnection();
 		String envExecution = sandbox.getSchema();
@@ -101,10 +112,34 @@ public class SynchronizeRulesAndMetadataOperation {
 		};
 
 		ThrowingConsumer<Connection> onExecutor = executorConnection -> {
-			copyMetaDataToExecutors(coordinatorConnexion, executorConnection, envExecution);
+			patchDatabaseToExecutors(coordinatorConnexion, executorConnection, envExecution);
 		};
 
-		return ServiceScalability.dispatchOnNods(coordinatorConnexion, onCoordinator, onExecutor);
+		ServiceScalability.dispatchOnNods(coordinatorConnexion, onCoordinator, onExecutor);
+
+	}
+	
+	
+	/**
+	 * Instanciate the metadata required into all executors pod
+	 * @return number of executor pod
+	 * @throws ArcException
+	 */
+	protected void copyMetadataToExecutorsAllNods() throws ArcException {
+		
+		Connection coordinatorConnexion = sandbox.getConnection();
+		String envExecution = sandbox.getSchema();
+		
+		// retrieve table to copy
+		List<String> tablesToCopyIntoExecutor = BddPatcher.retrieveRulesTablesFromSchema(coordinatorConnexion,
+				envExecution);
+		tablesToCopyIntoExecutor
+				.addAll(BddPatcher.retrieveExternalTablesUsedInRules(coordinatorConnexion, envExecution));
+		tablesToCopyIntoExecutor.addAll(BddPatcher.retrieveModelTablesFromSchema(coordinatorConnexion, envExecution));
+
+		for (String table : new HashSet<String>(tablesToCopyIntoExecutor)) {
+			new CopyFromCoordinatorToExecutors().copyWithTee(table);
+		}
 
 	}
 
@@ -116,7 +151,7 @@ public class SynchronizeRulesAndMetadataOperation {
 	 * @param envExecution
 	 * @throws ArcException
 	 */
-	private static void copyMetaDataToExecutors(Connection coordinatorConnexion, Connection executorConnection,
+	private static void patchDatabaseToExecutors(Connection coordinatorConnexion, Connection executorConnection,
 			String envExecution) throws ArcException {
 		PropertiesHandler properties = PropertiesHandler.getInstance();
 
@@ -127,28 +162,11 @@ public class SynchronizeRulesAndMetadataOperation {
 		// add tables for phases if required
 		BddPatcher.bddScriptEnvironment(executorConnection, properties.getDatabaseRestrictedUsername(),
 				new String[] { envExecution });
-
-		// copy tables
-
-		List<String> tablesToCopyIntoExecutor = BddPatcher.retrieveRulesTablesFromSchema(coordinatorConnexion,
-				envExecution);
-		tablesToCopyIntoExecutor
-				.addAll(BddPatcher.retrieveExternalTablesUsedInRules(coordinatorConnexion, envExecution));
-		tablesToCopyIntoExecutor.addAll(BddPatcher.retrieveModelTablesFromSchema(coordinatorConnexion, envExecution));
-
-		for (String table : new HashSet<String>(tablesToCopyIntoExecutor)) {
-			
-			CopyObjectsToDatabase.execCopyFromTable(coordinatorConnexion, executorConnection, table, table);
-
-		}
 		
-		// copy an empty image of  
-		tablesToCopyIntoExecutor = new ArrayList<>(BddPatcher.retrieveMappingTablesFromSchema(coordinatorConnexion, envExecution));
-
+		// set an empty image of mapping tables
+		List<String> tablesToCopyIntoExecutor = new ArrayList<>(BddPatcher.retrieveMappingTablesFromSchema(coordinatorConnexion, envExecution));
 		for (String table : new HashSet<String>(tablesToCopyIntoExecutor)) {
-			
 			GenericBean gb = SynchronizeRulesAndMetadataDao.execQuerySelectMetaDataOnlyFrom(coordinatorConnexion, table);
-
 			CopyObjectsToDatabase.execCopyFromGenericBeanWithoutDroppingTargetTable(executorConnection, table, gb);
 		}
 		
