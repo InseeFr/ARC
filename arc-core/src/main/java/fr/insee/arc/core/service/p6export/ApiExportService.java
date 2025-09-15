@@ -22,6 +22,7 @@ public class ApiExportService  extends ApiService {
 	@Override
 	public void executer() throws ArcException {
 
+		try {
 		exportOperation.initializeExport();
 		
 		exportOperation.exportParquet();
@@ -29,6 +30,12 @@ public class ApiExportService  extends ApiService {
 		exportOperation.exportToMasterNod();
 		
 		exportOperation.markExport();
+		
+		} catch (ArcException e)
+		{
+			exportOperation.rollBack();
+		}
+		
 		
 	}
 

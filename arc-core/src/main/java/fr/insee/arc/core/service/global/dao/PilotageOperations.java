@@ -179,23 +179,14 @@ public class PilotageOperations {
 	 * @param etat
 	 * @return
 	 */
-	public static ArcPreparedStatementBuilder queryCreateIdSourceFromPilotage(String envExecution, TraitementPhase phase, TraitementEtat etat)
+	public static ArcPreparedStatementBuilder queryCreateIdSourceFromPilotage(String tableOfIdSource, String envExecution, TraitementPhase phase, TraitementEtat etat)
 	{
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder(); 
-		
-		String tableOfIdSource = tableOfIdSourceForPhaseAndEtat(envExecution, phase, etat);
 		
 		query.build(SQL.DROP, SQL.TABLE, SQL.IF_EXISTS, tableOfIdSource, SQL.END_QUERY);
 		query.build(SQL.CREATE, SQL.UNLOGGED, SQL.TABLE, tableOfIdSource, SQL.AS);
 		query.build(querySelectIdSourceFromPilotage(envExecution, phase, etat));
 		return query;
-	}
-	
-	
-	
-	public static String tableOfIdSourceForPhaseAndEtat(String envExecution, TraitementPhase phase, TraitementEtat etat)
-	{
-		return ViewEnum.ID_SOURCE.getFullNameWithSuffix(envExecution, phase.toString(), etat.toString());
 	}
 	
 	

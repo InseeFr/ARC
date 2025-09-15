@@ -7,7 +7,6 @@ import java.util.List;
 import fr.insee.arc.utils.consumer.ThrowingConsumer;
 import fr.insee.arc.utils.database.ArcDatabase;
 import fr.insee.arc.utils.exception.ArcException;
-import fr.insee.arc.utils.exception.ArcExceptionMessage;
 
 public class ServiceScalability {
 	
@@ -40,31 +39,11 @@ public class ServiceScalability {
 				threadPool.add(new ThreadDispatchOnExecutor(executorConnectionIndex, actionOnExecutor));
 			}
 		}
-		
-		// start threads
-		for (ThreadDispatchOn t : threadPool)
-		{
-			t.start();
-		}
-		
-		// join threads
-		boolean errorInThread = false;
-		for (ThreadDispatchOn t : threadPool)
-		{
-			try {
-				t.join();
-				errorInThread = errorInThread || t.isErrorInThread();
-			} catch (InterruptedException e) {
-				t.interrupt();
-				errorInThread = true;
-			}
-		}
-		
-		if (errorInThread)
-		{
-			throw new ArcException(ArcExceptionMessage.MULTITHREADING_DISPATCH_FAILED);
-		}
-		
+
+		// execute threads and report problems
+		ThreadDispatchOn.execute(threadPool);
+
+		// return number of nods
 		return numberOfExecutorNods;
 		
 	}

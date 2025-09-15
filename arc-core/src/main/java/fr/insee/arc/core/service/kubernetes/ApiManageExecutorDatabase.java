@@ -18,8 +18,8 @@ public class ApiManageExecutorDatabase {
 		throw new IllegalStateException("Utility class");
 	}
 	
-	private static PropertiesHandler properties = PropertiesHandler.getInstance();
-
+	private static final int MAX_NUMBER_OF_EXECUTORS = 16; 
+	
 	public static List<KubernetesApiResult> create() throws ArcException
 	{
 		List<KubernetesApiResult> results = new ArrayList<>();
@@ -58,7 +58,10 @@ public class ApiManageExecutorDatabase {
 
 		RestQuery restQuery;
 
-		for (int i=0; i< properties.getKubernetesExecutorNumber(); i++)
+		
+		// try to delete more executors than declared because the number of executor could had been lowered 
+		// and it is important to clear old created databases
+		for (int i=0; i< MAX_NUMBER_OF_EXECUTORS; i++)
 		{
 			
 			restQuery = BuildRestQuery.deleteStateful(i);

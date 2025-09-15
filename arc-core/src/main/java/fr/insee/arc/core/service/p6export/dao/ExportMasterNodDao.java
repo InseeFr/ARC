@@ -86,7 +86,7 @@ public class ExportMasterNodDao {
 	 */
 	public void copyMappingTablesToMasterNod(Set<String> mappingTablesName) throws ArcException {
 
-		createImagesOfMappingTable(mappingTablesName);
+		dropImagesOfMappingTable(mappingTablesName);
 
 		transfertDataFromExecutorNodsToMasterNodImageTables(mappingTablesName);
 			
@@ -99,7 +99,7 @@ public class ExportMasterNodDao {
 	 * @param mappingTablesName
 	 * @throws ArcException
 	 */
-	private void createImagesOfMappingTable(Set<String> mappingTablesName) throws ArcException {
+	private void dropImagesOfMappingTable(Set<String> mappingTablesName) throws ArcException {
 		GenericPreparedStatementBuilder query = new GenericPreparedStatementBuilder();
 		
 		// create the image table of mapping tables
@@ -119,7 +119,7 @@ public class ExportMasterNodDao {
 	 * @param mappingTablesName
 	 * @throws ArcException
 	 */
-	private void transfertDataFromExecutorNodsToMasterNodImageTables(Set<String> mappingTablesName) throws ArcException {
+	public void transfertDataFromExecutorNodsToMasterNodImageTables(Set<String> mappingTablesName) throws ArcException {
 		
 		ThrowingConsumer<Connection> transfert = duckdbConnection ->
 			{
@@ -130,7 +130,7 @@ public class ExportMasterNodDao {
 					
 					ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 					query.build(SQL.CREATE, SQL.TABLE, duckdbDao.attachedTableName(0, tableNameImage), SQL.AS);
-					query.append(duckdbDao.selectTableFromAllExecutorNods(tableName));
+					query.build(duckdbDao.selectTableFromAllExecutorNods(tableName));
 					duckdbDao.executeQuery(duckdbConnection, query);
 				}
 			}
@@ -158,7 +158,7 @@ public class ExportMasterNodDao {
 			String tableName = ViewEnum.getFullName(coordinatorSandbox.getSchema(), mappingTableName);
 			String tableNameImage = FormatSQL.imageObjectName(tableName);
 			
-			ColumnAttributes columnsOfImageTable = UtilitaireDao.get(0).retrieveColumnAttributesOfTable(coordinatorSandbox.getConnection(), tableNameImage);
+			ColumnAttributes columnsOfImageTable = UtilitaireDao.get(0).retrieveColumnAttributes(coordinatorSandbox.getConnection(), tableNameImage);
 			
 			query.build(SQL.INSERT_INTO, tableName, "(", columnsOfImageTable.getCols(), ")" 
 					, SQL.SELECT, columnsOfImageTable.getCols(), SQL.FROM, tableNameImage, SQL.END_QUERY);
