@@ -29,7 +29,9 @@ public class ApiExportService  extends ApiService {
 		
 		exportOperation.exportToMasterNod();
 		
-		exportOperation.markExport();
+		exportOperation.markExportedInPilotage();
+		
+		exportOperation.commitExport();
 		
 		} catch (ArcException e)
 		{

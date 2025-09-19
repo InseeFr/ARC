@@ -144,13 +144,13 @@ public class ExportMasterNodDao {
 
 	/**
 	 * Transactional query to finish the copy to the real table
+	 * No commit
 	 * @param mappingTablesName
 	 * @throws ArcException
 	 */
 	private void copyImageTablesToParentMappingTables(Set<String> mappingTablesName) throws ArcException {
 		GenericPreparedStatementBuilder query = new GenericPreparedStatementBuilder();
 		
-		query.build(SQL.BEGIN);
 		
 		// create the image table of mapping tables
 		for (String mappingTableName : mappingTablesName)
@@ -165,11 +165,9 @@ public class ExportMasterNodDao {
 			query.build(SQL.DROP, SQL.TABLE, SQL.IF_EXISTS, tableNameImage, SQL.END_QUERY);
 			
 		}
-		query.build(SQL.COMMIT, SQL.END_QUERY);
 		
-		UtilitaireDao.get(0).executeRequest(coordinatorSandbox.getConnection(), query);				
+		UtilitaireDao.get(0).executeRequestNoCommit(coordinatorSandbox.getConnection(), query);				
 	}
-	
-	
+
 
 }

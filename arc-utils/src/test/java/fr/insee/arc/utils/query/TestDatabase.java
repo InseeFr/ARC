@@ -7,21 +7,22 @@ import java.sql.SQLException;
 import io.zonky.test.db.postgres.embedded.EmbeddedPostgres;
 
 public class TestDatabase {
+	
+	public Connection testConnection;
+	public Connection testConnectionExtra;
 
-	public Connection testConnection = instanciateTestDatabase();
-
-	private static Connection instanciateTestDatabase()
+	public TestDatabase()
 	{
 	    EmbeddedPostgres pg;
-	    Connection connection=null;
 	    try {
 			pg = EmbeddedPostgres.start();
-			connection = pg.getPostgresDatabase().getConnection();
+			testConnection = pg.getPostgresDatabase().getConnection();
+			testConnectionExtra = pg.getPostgresDatabase().getConnection();
 
 		} catch (IOException | SQLException e) {
-			connection = null;
+			testConnectionExtra = null;
+			testConnectionExtra = null;
 		}
-	  return connection;
 	}
 
 	

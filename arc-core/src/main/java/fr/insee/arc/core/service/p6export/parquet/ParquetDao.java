@@ -13,6 +13,7 @@ import org.apache.logging.log4j.Logger;
 import fr.insee.arc.utils.consumer.ThrowingConsumer;
 import fr.insee.arc.utils.dao.DuckdbDao;
 import fr.insee.arc.utils.dao.GenericPreparedStatementBuilder;
+import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.database.ArcDatabase;
 import fr.insee.arc.utils.database.TableToRetrieve;
 import fr.insee.arc.utils.exception.ArcException;
@@ -77,9 +78,7 @@ public class ParquetDao {
 			// export tables one by one to parquet
 			for (TableToRetrieve table : tables) {
 				// export table to parquet
-				LoggerHelper.custom(LOGGER, "Parquet export start : " + table.getTableName());
 				exportTableToParquet(connection, table, outputDirectory);
-				LoggerHelper.custom(LOGGER, "Parquet export end");
 			}
 		};
 		
@@ -135,9 +134,7 @@ public class ParquetDao {
 		
 		GenericPreparedStatementBuilder query = duckdbDao.selectTableFromAllExecutorNods(table.getTableName());
 
-		if (checkExportCondition(connection, query)) {
-			executeCopy(connection, query, outputFileName);
-		}
+		exportWhenNotEmpty(connection, query, outputFileName);
 		
 	}
 
@@ -158,8 +155,16 @@ public class ParquetDao {
 		GenericPreparedStatementBuilder query = new GenericPreparedStatementBuilder();
 		query.append("SELECT * FROM " + duckdbDao.attachedTableName(ArcDatabase.COORDINATOR.getIndex(), table.getTableName()));
 		
+		exportWhenNotEmpty(connection, query, outputFileName);
+	}
+
+
+	private void exportWhenNotEmpty(Connection connection, GenericPreparedStatementBuilder query, String outputFileName)
+			throws ArcException {
 		if (checkExportCondition(connection, query)) {
+			LoggerHelper.custom(LOGGER, "Parquet export start : " + outputFileName);
 			executeCopy(connection, query, outputFileName);
+			LoggerHelper.custom(LOGGER, "Parquet export end");
 		}
 	}
 
@@ -188,23 +193,7 @@ public class ParquetDao {
 			throws ArcException {
 		GenericPreparedStatementBuilder query = new GenericPreparedStatementBuilder();
 		query.append("SELECT count(*) FROM (").append(selectQuery).append(" LIMIT 1) a;\n");
-		
-		int countLine;
-		try (PreparedStatement stmt = connection.prepareStatement(query.toString())) {
-			stmt.execute();
-			
-			try (ResultSet rs = stmt.getResultSet())
-			{
-				rs.next();
-				countLine = rs.getInt(1);
-			}
-		}
-		catch (SQLException e)
-		{
-			throw new ArcException(ArcExceptionMessage.SQL_EXECUTE_FAILED, e.getMessage());
-		}
-		
-		return (countLine == 1);
+		return UtilitaireDao.get(0).getInt(connection, query)==1;
 	}
 
 	/**

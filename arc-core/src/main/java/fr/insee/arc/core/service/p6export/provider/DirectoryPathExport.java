@@ -13,6 +13,8 @@ public class DirectoryPathExport {
 
 	private static final String S3_EXPORT_ROOT_TEMP = "TEMP_ARC";
 
+	private static final String DIR_TEMP = "TEMP";
+
 	/**
 	 * Methods to provide directories paths
 	 * 
@@ -27,6 +29,11 @@ public class DirectoryPathExport {
 	public static String directoryExport(String rootDirectory, String env, String clientExport, String dateExport) {
 		return FileSystemManagement.directoryPhaseRootSubdirectories(rootDirectory, env, TraitementPhase.EXPORT, clientExport,
 				dateExport);
+	}
+	
+	public static String directoryExportTemp(String rootDirectory, String env, String clientExport, String dateExport) {
+		return FileSystemManagement.directoryPhaseRootSubdirectories(rootDirectory, env, TraitementPhase.EXPORT, clientExport,
+				dateExport, DIR_TEMP);
 	}
 	
 	public static String s3Export(String env, String clientExport, String dateExport) {
