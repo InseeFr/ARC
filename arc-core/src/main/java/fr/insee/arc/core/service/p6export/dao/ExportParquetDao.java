@@ -36,6 +36,8 @@ public class ExportParquetDao {
 	private static final Logger LOGGER = LogManager.getLogger(ExportParquetDao.class);
 
 	private String directoryOut;
+	private String directoryOutTemp;
+
 	private String s3Out;
 	private String s3OutTemp;
 
@@ -89,9 +91,11 @@ public class ExportParquetDao {
 				, "COALESCE(", ColumnEnum.EXPORT_PARQUET_OPTION.alias(SQL.ALIAS_B), ",'1')='1'"
 				);
 
+
 		for (int connectionIndex = startNodConnectionIndex; connectionIndex < endNodConnectionIndex; connectionIndex++) {
-			mappingTablesName.addAll(new GenericBean(UtilitaireDao.get(connectionIndex).executeRequest(null, query))
-					.getColumnValues(ColumnEnum.NOM_TABLE_METIER.getColumnName()));
+			
+			GenericBean gb = new GenericBean(UtilitaireDao.get(connectionIndex).executeRequest(null, query));
+			mappingTablesName.addAll(gb.getColumnValues(ColumnEnum.NOM_TABLE_METIER.getColumnName()));
 		}
 	}
 
@@ -119,6 +123,9 @@ public class ExportParquetDao {
 		
 		this.directoryOut = DirectoryPathExport.directoryExport(properties.getBatchParametersDirectory(),
 				this.coordinatorSandbox.getSchema(), ExportDao.EXPORT_CLIENT_NAME, dateExport);
+
+		this.directoryOutTemp = DirectoryPathExport.directoryExportTemp(properties.getBatchParametersDirectory(),
+				this.coordinatorSandbox.getSchema(), ExportDao.EXPORT_CLIENT_NAME, dateExport);
 		
 		this.s3Out = DirectoryPathExport.s3Export(this.coordinatorSandbox.getSchema(), ExportDao.EXPORT_CLIENT_NAME, dateExport);
 
@@ -127,7 +134,7 @@ public class ExportParquetDao {
 		ParquetEncryptionKey parquetEncryptionKey = properties.getS3OutputParquetKey().isEmpty() ? null
 				: new ParquetEncryptionKey(EncryptionType.KEY256, properties.getS3OutputParquetKey());
 
-		new ParquetDao().exportToParquet(tablesToExport, directoryOut, parquetEncryptionKey);
+		new ParquetDao().exportToParquet(tablesToExport, directoryOutTemp, parquetEncryptionKey);
 	}
 
 
@@ -142,17 +149,41 @@ public class ExportParquetDao {
 		// copy first to a temporary folder
 		ArcS3.OUTPUT_BUCKET.createDirectory(this.s3OutTemp);
 
-		for (File f : Objects.requireNonNull(new File(this.directoryOut).listFiles())) {
+		for (File f : Objects.requireNonNull(new File(this.directoryOutTemp).listFiles())) {
 			ArcS3.OUTPUT_BUCKET.upload(f, this.s3OutTemp + File.separator + f.getName());
 		}
-
-		// once upload to S3 complete, move to the permanent bucket
-		ArcS3.OUTPUT_BUCKET.createDirectory(this.s3Out);
-		ArcS3.OUTPUT_BUCKET.moveDirectory(this.s3OutTemp, this.s3Out);
 		
 		// delete the temporary export directory
-		FileUtilsArc.deleteDirectory(this.directoryOut);
+		FileUtilsArc.deleteDirectory(this.directoryOutTemp);
 
+	}
+	
+	// commit
+	// move files in temporary folder to final folders
+	public void commitExportParquet() throws ArcException
+	{
+		if (ArcS3.OUTPUT_BUCKET.isS3Off())
+		{
+			// move files from directoryOutTemp to directoryOut if s3 is off
+			
+			File dirOutTemp = new File(this.directoryOutTemp);
+			
+			FileUtilsArc.createDirIfNotexist(new File(this.directoryOut));
+			
+			for (File f:dirOutTemp.listFiles())
+			{
+				FileUtilsArc.deplacerFichier(directoryOutTemp, this.directoryOut, f.getName(), f.getName());
+			}
+			
+			FileUtilsArc.deleteDirectory(dirOutTemp);
+			
+			
+			return;
+		}
+		
+		// once upload to S3 complete, move the file in temporary bucket to the permanent bucket
+		ArcS3.OUTPUT_BUCKET.createDirectory(this.s3Out);
+		ArcS3.OUTPUT_BUCKET.moveDirectory(this.s3OutTemp, this.s3Out);
 	}
 	
 	/**

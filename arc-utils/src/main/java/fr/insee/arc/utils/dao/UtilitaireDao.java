@@ -390,7 +390,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 */
 	public List<List<String>> executeRequest(Connection connexion, GenericPreparedStatementBuilder requete,
 			ModeRequete[] modes) throws ArcException {
-		return executeRequest(connexion, requete, EntityProvider.getArrayOfArrayProvider(), modes);
+		return executeRequest(connexion, requete, EntityProvider.getArrayOfArrayProvider(), modes, true);
 
 	}
 
@@ -406,9 +406,43 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	
 	public List<List<String>> executeRequest(Connection connexion, GenericPreparedStatementBuilder requete)
 			throws ArcException {
-		return executeRequest(connexion, requete, EntityProvider.getArrayOfArrayProvider(), new ModeRequete[] {});
+		return executeRequest(connexion, requete, EntityProvider.getArrayOfArrayProvider(), new ModeRequete[] {}, true);
 	}
 
+	public List<List<String>> executeRequestNoCommit(Connection connexion, GenericPreparedStatementBuilder requete)
+			throws ArcException {
+		return executeRequest(connexion, requete, EntityProvider.getArrayOfArrayProvider(), new ModeRequete[] {}, false);
+	}
+	
+	
+	public void executeRequestCommit(Connection connexion)
+			throws ArcException {
+		try {
+			connexion.commit();
+		} catch (SQLException sqlException) {
+			try {
+				connexion.rollback();
+			} catch (SQLException e) {
+				LoggerHelper.error(LOGGER, "Rollback failed");
+			}
+			LoggerHelper.error(LOGGER, "Commit failed");
+			throw new ArcException(sqlException, ArcExceptionMessage.SQL_EXECUTE_FAILED, sqlException.getMessage()).logFullException();
+		}
+
+	}
+	
+
+	public void executeRequestRollback(Connection connexion)
+			throws ArcException {
+		try {
+			connexion.rollback();
+		} catch (SQLException sqlException) {
+			LoggerHelper.error(LOGGER, "Lors du commit");
+			throw new ArcException(sqlException, ArcExceptionMessage.SQL_EXECUTE_FAILED, sqlException.getMessage()).logFullException();
+		}
+
+	}
+	
 	/**
 	 * Register in the targetPreparedStatement the bind variable of a request with
 	 * correct type
@@ -449,7 +483,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 *
 	 */
 	public <T> T executeRequest(Connection connexion, GenericPreparedStatementBuilder requete,
-			EntityProvider<T> entityProvider, ModeRequete[] modes) throws ArcException {
+			EntityProvider<T> entityProvider, ModeRequete[] modes, boolean autocommit) throws ArcException {
 
 		if (LOGGER.isEnabled(Level.TRACE)) {
 			LoggerHelper.trace(LOGGER, "/* Start executeRequest */");
@@ -496,7 +530,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 				LoggerHelper.error(LOGGER, "ROLLBACK !!", e);
 				throw e;
 			} finally {
-				if (!rollback)
+				if (!rollback && autocommit)
 				{
 					connexionWrapper.getConnexion().commit();
 				}

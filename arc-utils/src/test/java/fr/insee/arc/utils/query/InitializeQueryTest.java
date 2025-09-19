@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNotNull;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -18,11 +19,16 @@ import fr.insee.arc.utils.structure.GenericBean;
 
 public class InitializeQueryTest {
 
+	
+	public static TestDatabase testDatabase = new TestDatabase();
+	
 
 	public static UtilitaireDao u = UtilitaireDao.get(0);
     
-    public static Connection c = new TestDatabase().testConnection;
+    public static Connection c = testDatabase.testConnection;
 
+    public static Connection ce = testDatabase.testConnectionExtra;
+    
     public static Connection e1;
 
     public static Connection e2;
@@ -150,13 +156,28 @@ public class InitializeQueryTest {
      * @return
      * @throws ArcException
      */
-	public static String createSimpleTableTest(Connection c) throws ArcException
+	public static List<String> createSimpleTableTest(Connection c, String...tableNames) throws ArcException
 	{
 		UtilitaireDao.get(0).executeRequest(c, "DROP SCHEMA IF EXISTS test CASCADE;");
 		UtilitaireDao.get(0).executeRequest(c, "CREATE SCHEMA test;");
-		// create a test table with 26 lines
-		UtilitaireDao.get(0).executeRequest(c, "CREATE TABLE test.table_test as select i as id, chr(i+64)::text as val, array[i,i+1] as arr, current_date as dd from generate_series(1,26) i;");
-		return "test.table_test";
+		
+		List<String> tablesCreated = new ArrayList<String>();
+		
+		// create the test tables with 26 lines
+		
+		if (tableNames.length==0)
+		{
+			UtilitaireDao.get(0).executeRequest(c, "CREATE TABLE test.table_test as select i as id, chr(i+64)::text as val, array[i,i+1] as arr, current_date as dd from generate_series(1,26) i;");
+			tablesCreated.add("test.table_test");
+		} else
+		{
+			for (String tableName : tableNames)
+			{
+				UtilitaireDao.get(0).executeRequest(c, "CREATE TABLE test."+tableName+" as select i as id, chr(i+64)::text as val, array[i,i+1] as arr, current_date as dd from generate_series(1,26) i;");
+				tablesCreated.add("test."+tableName);
+			}
+		}
+		return tablesCreated;
 		
 	}
 	
@@ -165,5 +186,8 @@ public class InitializeQueryTest {
 		UtilitaireDao.get(0).executeRequest(c, "DROP SCHEMA IF EXISTS test CASCADE;");
 	}
     
-    
+	public static int countNumberOfRows(Connection c, String table) throws ArcException
+	{
+		return UtilitaireDao.get(0).getInt(c, "SELECT count(*) from "+table);
+	}
 }
