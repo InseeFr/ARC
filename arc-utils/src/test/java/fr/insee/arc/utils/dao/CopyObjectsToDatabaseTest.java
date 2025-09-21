@@ -29,7 +29,7 @@ public class CopyObjectsToDatabaseTest extends InitializeQueryTest {
 		GenericBean gb = new GenericBean(UtilitaireDao.get(0).executeRequest(c, "SELECT * FROM test.table_test"));
 		CopyObjectsToDatabase.execCopyFromGenericBean(e1, "tmp", gb);
 
-		int numberOfRecordInInputTable = UtilitaireDao.get(0).getInt(c, "SELECT count(*) from test.table_test");
+		int numberOfRecordInInputTable = countNumberOfRows(c, "test.table_test");
 		int numberOfRecordInCopy = UtilitaireDao.get(0).getInt(e1, "SELECT count(*) from tmp");
 
 		// check that there is at least a record not to be a useless test
