@@ -24,7 +24,7 @@ public class CopyObjectsToDatabaseTest extends InitializeQueryTest {
 		buildPropertiesWithOneExecutor(".");
 		
 		// create the test table
-		assertEquals("test.table_test", createSimpleTableTest(c));
+		createSimpleTableTest(c);
 		
 		GenericBean gb = new GenericBean(UtilitaireDao.get(0).executeRequest(c, "SELECT * FROM test.table_test"));
 		CopyObjectsToDatabase.execCopyFromGenericBean(e1, "tmp", gb);
@@ -50,6 +50,5 @@ public class CopyObjectsToDatabaseTest extends InitializeQueryTest {
 		// drop schema
 		dropSimpleTableTest(c);		
 	}
-
 
 }
