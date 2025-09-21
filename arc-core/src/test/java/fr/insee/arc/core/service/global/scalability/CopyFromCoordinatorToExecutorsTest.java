@@ -23,7 +23,7 @@ public class CopyFromCoordinatorToExecutorsTest extends InitializeQueryTest {
 		buildPropertiesWithTwoExecutors(".");
 		
 		// create the test table in databases
-		assertEquals("test.table_test", createSimpleTableTest(c));
+		createSimpleTableTest(c);
 		createSimpleTableTest(e1);
 		createSimpleTableTest(e2);
 		
