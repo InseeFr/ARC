@@ -14,7 +14,7 @@ public class GenericPreparedStatementBuilderTest extends InitializeQueryTest {
 	public void copyFromGenericBean() throws ArcException {
 
 		// create the test table
-		assertEquals("test.table_test", createSimpleTableTest(c));
+		createSimpleTableTest(c);
 		
 		// the content will grab the first 10 lines of test table
 		GenericBean gb=	new GenericBean(UtilitaireDao.get(0).executeRequest(c, new GenericPreparedStatementBuilder("SELECT * FROM test.table_test where id<=10")));

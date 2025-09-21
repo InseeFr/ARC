@@ -23,23 +23,29 @@ public class CopyObjectsToDatabaseTest extends InitializeQueryTest {
 		
 		buildPropertiesWithOneExecutor(".");
 		
-		// create the test table
-		createSimpleTableTest(c);
+		// create the test table that will be copied
+		String testTable = createSimpleTableTest(c).get(0);
 		
-		GenericBean gb = new GenericBean(UtilitaireDao.get(0).executeRequest(c, "SELECT * FROM test.table_test"));
-		CopyObjectsToDatabase.execCopyFromGenericBean(e1, "tmp", gb);
+		// create the container of the copy
+		String copyContainerTable = "tmp";
+		
+		
+		// retrive data into a genericbean object
+		// and copy the content of the genericbean into the table container
+		GenericBean gb = new GenericBean(UtilitaireDao.get(0).executeRequest(c, "SELECT * FROM "+testTable));
+		CopyObjectsToDatabase.execCopyFromGenericBean(e1, copyContainerTable, gb);
 
-		int numberOfRecordInInputTable = countNumberOfRows(c, "test.table_test");
-		int numberOfRecordInCopy = UtilitaireDao.get(0).getInt(e1, "SELECT count(*) from tmp");
+		int numberOfRecordInInputTable = countNumberOfRows(c, testTable);
+		int numberOfRecordInCopy = countNumberOfRows(e1, copyContainerTable);
 
 		// check that there is at least a record not to be a useless test
 		assertTrue(numberOfRecordInInputTable>0);
 		// the number of record of target table must be equals to the number of record in input table
 		assertEquals(numberOfRecordInInputTable, numberOfRecordInCopy);
 				
-		// new copy without dropping the target table
-		CopyObjectsToDatabase.execCopyFromGenericBeanWithoutDroppingTargetTable(e1, "tmp", gb);
-		numberOfRecordInCopy = UtilitaireDao.get(0).getInt(e1, "SELECT count(*) from tmp");
+		// new copy without dropping the target copy container table
+		CopyObjectsToDatabase.execCopyFromGenericBeanWithoutDroppingTargetTable(e1, copyContainerTable, gb);
+		numberOfRecordInCopy = countNumberOfRows(e1, copyContainerTable);
 		
 		// the number of record of target table must be equals to 
 		// the double of the number of records in input table

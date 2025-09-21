@@ -123,8 +123,6 @@ public class UtilitaireDaoTest extends InitializeQueryTest {
 		String testTable1 = testTables.get(0);
 		String testTable2 = testTables.get(1);
 		
-		System.out.println(testTable1);
-		
 		// extra connection is used to count and check in order not to mess with 
 		// the main connection that will do the real process (add lines, commit, rollback, ...)
 		int initalNumberOfRows =  countNumberOfRows(ce, testTable1);
