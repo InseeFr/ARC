@@ -3,6 +3,22 @@
 ## TODO List
 - All notable changes to this project will be documented in this file.
 
+## version-94.2.20b
+- spring security 6.5.4
+
+## version-94.2.19b
+- export phase update
+- when the export phase is activated, users may now set the target of mapping tables in the export data menu
+  - default export targets of mapping tables are parquet files
+  - user can also set target the the master nod
+    - mapping table data are copied from executors nod to master nod during the export phase
+
+## version-94.2.15b
+- changed postgres docker image from bitnami to standart postgres
+
+## version-94.2.10
+- fix the non-copying of type_consolidation when importing family rules
+
 ## version-94.2.9
 - minio client version
 - security fix
