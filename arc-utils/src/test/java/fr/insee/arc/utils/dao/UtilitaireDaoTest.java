@@ -8,6 +8,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.BrokenBarrierException;
+import java.util.concurrent.CyclicBarrier;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -17,11 +19,40 @@ import org.junit.Test;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.query.InitializeQueryTest;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
-import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.LogAppenderResource;
 
 public class UtilitaireDaoTest extends InitializeQueryTest {
 
+	
+	final CyclicBarrier gate = new CyclicBarrier(5);
+	
+	private class UtilitaireDaoInstance extends Thread {
+		UtilitaireDao instance;
+		int poolIndex;
+		
+		public UtilitaireDaoInstance(int poolIndex)
+		{
+			this.poolIndex=poolIndex;
+		}
+		
+		public void run()
+		{
+			try {
+				// wait to start threads exactly at the same time
+				gate.await();
+			} catch (InterruptedException | BrokenBarrierException e) {
+				// used for test
+			}
+			
+			this.instance = UtilitaireDao.get(poolIndex);
+		}
+		public UtilitaireDao getInstance()
+		{
+			return instance;
+		}
+	};
+	
+	
 	@Rule
 	public LogAppenderResource appender = new LogAppenderResource(LogManager.getLogger(UtilitaireDao.class));
 	
@@ -194,6 +225,48 @@ public class UtilitaireDaoTest extends InitializeQueryTest {
 		
 		System.out.println(query.getQueryWithParameters());
 		return query;
+	}
+	
+	
+	/**
+	 * This test check that concurrent accesses of UtilitaireDao don't bring any problem
+	 * especially for the first call when a new instance of UtilitaireDao is created
+	 * for a given pool
+	 * @throws ArcException
+	 */
+	@Test
+	public void concurrentConnectionTest() throws ArcException
+	{
+		UtilitaireDaoInstance t1 = new UtilitaireDaoInstance(0);
+		UtilitaireDaoInstance t2 = new UtilitaireDaoInstance(0);
+		UtilitaireDaoInstance t3 = new UtilitaireDaoInstance(1);
+		UtilitaireDaoInstance t4 = new UtilitaireDaoInstance(1);
+		
+		t1.start();
+		t2.start();
+		t3.start();
+		t4.start();
+		
+		try {
+			gate.await();
+		} catch (InterruptedException | BrokenBarrierException e) {
+			// free the gate
+		}
+		
+		try {
+			t1.join();
+			t2.join();
+			t3.join();
+			t4.join();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		// check that the instance of utilitaireDao is the same
+		assertEquals (t1.getInstance(), t2.getInstance());
+		assertEquals (t3.getInstance(), t4.getInstance());
+
 	}
 	
 }

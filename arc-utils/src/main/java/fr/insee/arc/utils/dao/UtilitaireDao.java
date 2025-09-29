@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
@@ -66,7 +67,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * default pool name used in properties
 	 */
 	private Integer pool;
-	public static Map<Integer, UtilitaireDao> map = new HashMap<>();
+	public static Map<Integer, UtilitaireDao> map = new ConcurrentHashMap<>();
 
 	PropertiesHandler properties;
 
@@ -76,7 +77,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	}
 
 	public static final UtilitaireDao get(Integer aPool) {
-		map.computeIfAbsent(aPool, UtilitaireDao::new);
+		map.putIfAbsent(aPool, new UtilitaireDao(aPool));
 		return map.get(aPool);
 	}
 
