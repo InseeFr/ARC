@@ -1,6 +1,8 @@
 # Change Log
 
 ## TODO List
+- enable tar compression for bigger files
+
 - All notable changes to this project will be documented in this file.
 
 ## version-94.2.20b
