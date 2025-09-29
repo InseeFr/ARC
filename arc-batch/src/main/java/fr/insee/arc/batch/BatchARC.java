@@ -363,7 +363,7 @@ class BatchARC implements IReturnCode {
 		message("Préparation de l'environnement");
 
 		// create volatile database
-		executeIfVolatile(this::executorsDatabaseCreate);
+		executeIfVolatile(this::executorsDatabaseDropAndCreate);
 		
 		// recover process if last batch didn't finish well
 		resetPendingFilesFromPilotage();
@@ -400,7 +400,7 @@ class BatchARC implements IReturnCode {
 	 * @throws ArcException
 	 */
 	private void executorsDatabaseDrop() throws ArcException {
-		message(ApiManageExecutorDatabase.create().toString());
+		message(ApiManageExecutorDatabase.delete().toString());
 		Sleep.sleep(waitExecutorTimerInMS);
 	}
 	
@@ -409,7 +409,7 @@ class BatchARC implements IReturnCode {
 	 * drop and create volatile databases
 	 * @throws ArcException
 	 */
-	private void executorsDatabaseCreate() throws ArcException {
+	private void executorsDatabaseDropAndCreate() throws ArcException {
 		executorsDatabaseDrop();
 		message(ApiManageExecutorDatabase.create().toString());
 		Sleep.sleep(waitExecutorTimerInMS);
