@@ -1,7 +1,6 @@
 package fr.insee.arc.core.service.p0initialisation.metadata;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -20,10 +19,7 @@ import fr.insee.arc.core.service.p0initialisation.dbmaintenance.BddPatcher;
 import fr.insee.arc.core.service.p0initialisation.metadata.dao.SynchronizeRulesAndMetadataDao;
 import fr.insee.arc.utils.consumer.ThrowingConsumer;
 import fr.insee.arc.utils.dao.CopyObjectsToDatabase;
-import fr.insee.arc.utils.dao.UtilitaireDao;
-import fr.insee.arc.utils.database.ArcDatabase;
 import fr.insee.arc.utils.exception.ArcException;
-import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.LoggerHelper;
