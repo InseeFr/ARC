@@ -394,8 +394,23 @@ class BatchARC implements IReturnCode {
 		executeIfVolatile(() -> dao.execQueryResetPendingFilesInPilotageTableVolatile(envExecution));
 	}
 
+	
+	/**
+	 * drop volatile databases
+	 * @throws ArcException
+	 */
+	private void executorsDatabaseDrop() throws ArcException {
+		message(ApiManageExecutorDatabase.create().toString());
+		Sleep.sleep(waitExecutorTimerInMS);
+	}
+	
+	
+	/**
+	 * drop and create volatile databases
+	 * @throws ArcException
+	 */
 	private void executorsDatabaseCreate() throws ArcException {
-		message(ApiManageExecutorDatabase.delete().toString());
+		executorsDatabaseDrop();
 		message(ApiManageExecutorDatabase.create().toString());
 		Sleep.sleep(waitExecutorTimerInMS);
 	}
@@ -411,6 +426,9 @@ class BatchARC implements IReturnCode {
 		effacerRepertoireChargement(repertoire, envExecution);
 
 		executeIfExportActive(this::export);
+		
+		// drop volatile databases
+		executeIfVolatile(this::executorsDatabaseDrop);
 
 		message("Traitement Fin");
 
