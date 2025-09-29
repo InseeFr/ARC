@@ -401,6 +401,15 @@ class BatchARC implements IReturnCode {
 	 */
 	private void executorsDatabaseDrop() throws ArcException {
 		message(ApiManageExecutorDatabase.delete().toString());
+	}
+	
+	/**
+	 * create volatile databases
+	 * wait for kubernetes to build them up
+	 * @throws ArcException
+	 */
+	private void executorsDatabaseCreate() throws ArcException {
+		message(ApiManageExecutorDatabase.create().toString());
 		Sleep.sleep(waitExecutorTimerInMS);
 	}
 	
@@ -411,8 +420,7 @@ class BatchARC implements IReturnCode {
 	 */
 	private void executorsDatabaseDropAndCreate() throws ArcException {
 		executorsDatabaseDrop();
-		message(ApiManageExecutorDatabase.create().toString());
-		Sleep.sleep(waitExecutorTimerInMS);
+		executorsDatabaseCreate();
 	}
 	
 	/***
