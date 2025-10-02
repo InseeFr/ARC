@@ -930,9 +930,6 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 			} else {
 				copyManager.copyOut("COPY " + table + " TO STDOUT WITH (FORMAT BINARY)", os);
 			}
-			
-			os.flush();
-			
 		} catch (SQLException sqlException) {
 			throw new ArcException(sqlException, ArcExceptionMessage.SQL_EXECUTE_FAILED, sqlException.getMessage()).logFullException();
 		} catch (IOException e) {

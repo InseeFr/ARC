@@ -72,8 +72,6 @@ public class ServiceDao {
 				UtilitaireDao.get(0).exporting(null, table.getTableName(), goz, true);
 			}
 			
-			goz.flush();
-			
 		} catch (IOException e) {
 			throw new ArcException(ArcExceptionMessage.STREAM_WRITE_FAILED);
 		}		
@@ -90,7 +88,6 @@ public class ServiceDao {
 		try (FileInputStream fis = new FileInputStream(fileToTransfer);)
 		{
 			IOUtils.copy(fis, os, CompressedUtils.READ_BUFFER_SIZE);
-			os.flush();
 		} catch (FileNotFoundException e) {
 			throw new ArcException(e, ArcExceptionMessage.FILE_READ_FAILED, fileToTransfer);
 		} catch (IOException e) {
