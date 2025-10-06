@@ -15,7 +15,8 @@
 		<project.spring.version>6.2.11</project.spring.version>
 		<project.jackson.version>2.16.1</project.jackson.version>
 		<project.postgres.version>42.7.3</project.postgres.version>
-		<project.duckdb.version>1.1.1</project.duckdb.version>
+		<project.duckdb.version>1.4.0.0</project.duckdb.version>
+		<project.duckdb.extension.version>1.4.0</project.duckdb.extension.version>
 		<project.java.version>17</project.java.version>
 		<project.jakarta.version>6.1.0-M1</project.jakarta.version>
 		<project.maven.compiler.version>3.14.0</project.maven.compiler.version>
