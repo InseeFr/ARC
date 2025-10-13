@@ -26,6 +26,10 @@ public class DirectoryPathExport {
 		return FileSystemManagement.directoryPhaseRootSubdirectories(rootDirectory, env, TraitementPhase.EXPORT);
 	}
 
+	public static String directoryExport(String rootDirectory, String env, String clientExport) {
+		return FileSystemManagement.directoryPhaseRootSubdirectories(rootDirectory, env, TraitementPhase.EXPORT, clientExport);
+	}
+	
 	public static String directoryExport(String rootDirectory, String env, String clientExport, String dateExport) {
 		return FileSystemManagement.directoryPhaseRootSubdirectories(rootDirectory, env, TraitementPhase.EXPORT, clientExport,
 				dateExport);
