@@ -92,8 +92,11 @@ public class InitializeQueryTest {
 		testProperties.setDatabaseDriverClassName(driver.toString());
 		
 		testProperties.setBatchParametersDirectory(repertoire);
+
 		// disable s3 endpoint for internal test
 		testProperties.setS3InputApiUri("");
+		testProperties.setS3OutputApiUri("");
+		testProperties.setS3OutputParquetKey("");
 		
 		u.setProperties(testProperties);		
 	}
