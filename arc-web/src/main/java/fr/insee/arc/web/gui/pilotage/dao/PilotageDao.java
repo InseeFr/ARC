@@ -422,7 +422,9 @@ public class PilotageDao extends VObjectHelperDao {
 	}
 
 	public String execQueryState() throws ArcException {
-		return UtilitaireDao.get(0).getString(null, new ArcPreparedStatementBuilder("SELECT case when operation='"+BatchEtat.ON+"' then 'active' else 'inactive' end FROM "+dataObjectService.getView(ViewEnum.PILOTAGE_BATCH)));
+		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
+		query.build(SQL.SELECT, "case when ", BatchEtat.ON.isCodeInOperation(), " then 'active' else 'inactive' end ", SQL.FROM, dataObjectService.getView(ViewEnum.PILOTAGE_BATCH));
+		return UtilitaireDao.get(0).getString(null, query);
 	}
 	
 	public void execQueryDelayBatchTime() throws ArcException {
@@ -436,11 +438,15 @@ public class PilotageDao extends VObjectHelperDao {
 	}
 	
 	public void execQueryToggleOn() throws ArcException {
-		UtilitaireDao.get(0).executeRequest(null, new ArcPreparedStatementBuilder("UPDATE "+dataObjectService.getView(ViewEnum.PILOTAGE_BATCH)+" set operation='"+BatchEtat.ON+"'; "));
+		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
+		query.build(SQL.UPDATE, dataObjectService.getView(ViewEnum.PILOTAGE_BATCH), SQL.SET, BatchEtat.ON.updateCodeInOperation(), SQL.END_QUERY);
+		UtilitaireDao.get(0).executeRequest(null, query);
 	}
 	
 	public void execQueryToggleOff() throws ArcException {
-		UtilitaireDao.get(0).executeRequest(null, new ArcPreparedStatementBuilder("UPDATE "+dataObjectService.getView(ViewEnum.PILOTAGE_BATCH)+" set operation='"+BatchEtat.OFF+"'; "));
+		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
+		query.build(SQL.UPDATE, dataObjectService.getView(ViewEnum.PILOTAGE_BATCH), SQL.SET, BatchEtat.OFF.updateCodeInOperation(), SQL.END_QUERY);
+		UtilitaireDao.get(0).executeRequest(null, query);
 	}
 	
 	

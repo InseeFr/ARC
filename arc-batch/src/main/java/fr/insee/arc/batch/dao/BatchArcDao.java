@@ -202,13 +202,32 @@ public class BatchArcDao {
 		return UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).getInt(batchConnection, query);
 	}
 
-	public Boolean execQueryIsProductionOn(String envExecution) throws ArcException {
+	/**
+	 * Test if production is on as set by user
+	 * If stopOnBackup is set, test also if database doesn't backup to declare production as on
+	 */
+	public Boolean execQueryIsProductionOn(String envExecution, Boolean stopOnBackup) throws ArcException {
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
-		query.build(SQL.SELECT, "1", SQL.FROM, ViewEnum.PILOTAGE_BATCH.getFullName(envExecution));
-		query.build(SQL.WHERE, ColumnEnum.OPERATION, "=", query.quoteText(BatchEtat.ON));
+		query.build(SQL.SELECT, "1", SQL.WHERE);
+		query.build("(", SQL.SELECT, "true", SQL.FROM, ViewEnum.PILOTAGE_BATCH.getFullName(envExecution), SQL.WHERE, BatchEtat.ON.isCodeInOperation(), SQL.LIMIT, "1", ")");
+		if (stopOnBackup)
+		{
+			query.build(SQL.AND);
+			query.build("(", SQL.SELECT, "true", SQL.FROM, "pg_settings", SQL.WHERE, "name='archive_command'", SQL.AND, "setting IN ('/bin/true','(disabled)')", SQL.LIMIT, "1", ")");
+		}
 		return UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).hasResults(batchConnection, query);
 	}
-
+	
+	
+	/**
+	 * Test if sandbox musty be reset
+	 */
+	public Boolean execQueryIsResetRequired(String envExecution) throws ArcException {
+		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
+		query.build(SQL.SELECT, "1", SQL.FROM, ViewEnum.PILOTAGE_BATCH.getFullName(envExecution));
+		query.build(SQL.WHERE, BatchEtat.RESET.isCodeInOperation());
+		return UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).hasResults(batchConnection, query);
+	}
 	
 	
 	/**

@@ -14,7 +14,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import fr.insee.arc.core.dataobjects.ViewEnum;
-import fr.insee.arc.core.model.BatchEtat;
 import fr.insee.arc.core.service.global.bo.ArcDateFormat;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.query.InitializeQueryTest;
@@ -34,7 +33,7 @@ public class BatchArcDaoTest extends InitializeQueryTest {
 		
 		u.executeRequest(c, "DROP TABLE IF EXISTS " + tablePilotageBatch);
 		u.executeRequest(c, "CREATE TABLE " + tablePilotageBatch + " (last_init text, operation text)");
-		u.executeRequest(c, "INSERT INTO " + tablePilotageBatch + " select '2024-01-01:22','"+BatchEtat.ON+"'");
+		u.executeRequest(c, "INSERT INTO " + tablePilotageBatch + " select '2024-01-01:22','O'");
 		
 	}
 
@@ -49,7 +48,41 @@ public class BatchArcDaoTest extends InitializeQueryTest {
 	
 	
 	@Test
-	public void initialisationTest() throws ArcException, ParseException {
+	/**
+	 * Test the time of the next initialisation phase in batch
+	 * @throws ArcException
+	 * @throws ParseException
+	 */
+	public void BatchActiveTest() throws ArcException, ParseException {
+		BatchArcDao dao = new BatchArcDao(c);
+		assertTrue(dao.execQueryIsProductionOn(sandbox, true));
+
+		u.executeRequest(c, "UPDATE "+ tablePilotageBatch + " set operation = 'N'");
+		assertFalse(dao.execQueryIsProductionOn(sandbox, true));
+		assertFalse(dao.execQueryIsResetRequired(sandbox));
+
+		u.executeRequest(c, "UPDATE "+ tablePilotageBatch + " set operation = 'OR'");
+		assertTrue(dao.execQueryIsProductionOn(sandbox, true));
+		assertTrue(dao.execQueryIsResetRequired(sandbox));
+
+		u.executeRequest(c, "UPDATE "+ tablePilotageBatch + " set operation = 'O-'");
+		assertTrue(dao.execQueryIsProductionOn(sandbox, true));
+		assertFalse(dao.execQueryIsResetRequired(sandbox));
+		
+		u.executeRequest(c, "UPDATE "+ tablePilotageBatch + " set operation = 'NR'");
+		assertFalse(dao.execQueryIsProductionOn(sandbox, true));
+		assertTrue(dao.execQueryIsResetRequired(sandbox));
+
+	}
+	
+	
+	@Test
+	/**
+	 * Test the time of the next initialisation phase in batch
+	 * @throws ArcException
+	 * @throws ParseException
+	 */
+	public void initialisationTimerTest() throws ArcException, ParseException {
 		
 		
 		BatchArcDao dao = new BatchArcDao(c);
@@ -72,7 +105,7 @@ public class BatchArcDaoTest extends InitializeQueryTest {
 		assertFalse(dao.isInitializationMustTrigger(sandbox));
 		
 		// test if batch if on
-		assertTrue(dao.execQueryIsProductionOn(sandbox));
+		assertTrue(dao.execQueryIsProductionOn(sandbox,true));
 		
 	}
 

@@ -110,6 +110,8 @@ class BatchARC implements IReturnCode {
 
 	// is production on ?
 	private boolean productionOn;
+	// must production stop on backup ?
+	private boolean stopOnBackup;
 
 	// data from executors must be automatically exported ?
 	private boolean exportOn;
@@ -324,6 +326,10 @@ class BatchARC implements IReturnCode {
 		// wait executor pods
 		waitExecutorTimerInMS = bdParameters.getInt(dao.getBatchConnection(), "LanceurARC.DATABASE_WAIT_FOR_EXECUTORS_IN_MS",
 				30000);
+		
+		stopOnBackup = Boolean.parseBoolean(bdParameters.getString(dao.getBatchConnection(), "LanceurARC.STOP_ON_BACKUP",
+				"false"));
+		
 		
 		
 		repertoire = properties.getBatchParametersDirectory();
@@ -848,7 +854,7 @@ class BatchARC implements IReturnCode {
 	 * @throws ArcException
 	 */
 	private boolean isProductionOn() throws ArcException {
-		this.productionOn = dao.execQueryIsProductionOn(this.envExecution);
+		this.productionOn = dao.execQueryIsProductionOn(this.envExecution, this.stopOnBackup);
 		return productionOn;
 	}
 
