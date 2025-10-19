@@ -46,11 +46,10 @@ public class TableObject implements Cloneable, Iterable<LineObject> {
         return this.t.get(index);
     }
 
-    @Override
-	public TableObject clone() {
+	public TableObject duplicate() {
         List<LineObject> clonedContent = new ArrayList<>();
         for (int i = 0; i < this.t.size(); i++) {
-            clonedContent.add(this.t.get(i).clone());
+            clonedContent.add(this.t.get(i).duplicate());
         }
         return new TableObject(clonedContent);
     }

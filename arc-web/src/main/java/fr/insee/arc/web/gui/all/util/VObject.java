@@ -405,7 +405,7 @@ public class VObject {
 		v0.setTable(this.getTable());
 		v0.setMessage(this.getMessage());
 		if (this.getContent() != null) {
-			v0.setContent(this.getContent().clone());
+			v0.setContent(this.getContent().duplicate());
 		} else {
 			v0.setContent(null);
 		}

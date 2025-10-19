@@ -32,8 +32,7 @@ public class LineObject implements Cloneable, Iterable<String> {
         this.d = aData;
     }
 
-    @Override
-    public LineObject clone() {
+    public LineObject duplicate() {
     	return new LineObject(new ArrayList<>(this.d));
     }
 
