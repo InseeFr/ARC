@@ -2,8 +2,15 @@
 
 ## TODO List
 - enable tar compression for bigger files
-
 - All notable changes to this project will be documented in this file.
+
+## version-94.2.25b
+- duckdb upgrade version 1.4
+- minio upgrade version 1.6.0
+- new parameter stop_on_backup to stop batch when an hot database backup has started. It checks the archive command to see if archive are disabled or redirected to bin. Production is stopped when archive mode is enabled ans not redirected to bin.
+
+## version-94.2.20b
+- spring security 6.5.4
 
 ## version-94.2.20b
 - spring security 6.5.4
