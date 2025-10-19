@@ -58,13 +58,14 @@ public class CopyFromCoordinatorToExecutors {
 	 * Connect the ouput stream that recieve data to the multiple inputstreams that
 	 * will read data ans write them to the distant database
 	 * 
+	 * SuppressWarning ressource because ressources cannot be closed as used in different threads
 	 * @param tableOut
 	 * @return
 	 * @throws ArcException
 	 */
+	@SuppressWarnings("resource")
 	private void initializeStreamPipes(String tableIn, String tableOut) throws ArcException {
 		
-		@SuppressWarnings("resource")
 		ArcTeeOutputStream tos = new ArcTeeOutputStream();
 		this.tcs = new ArrayList<ThreadConsumer>();
 

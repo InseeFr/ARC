@@ -89,6 +89,9 @@ UPDATE arc.parameter set description='parameter.ihm.sandbox.sandboxListAsBatchKe
 INSERT INTO arc.parameter VALUES ('LanceurARC.DATABASE_WAIT_FOR_EXECUTORS_IN_MS','30000');
 UPDATE arc.parameter set description='parameter.batch.execution.executor.wait.time' where key='LanceurARC.DATABASE_WAIT_FOR_EXECUTORS_IN_MS';
 
+-- patch 19/10/2025
+INSERT INTO arc.parameter VALUES ('LanceurARC.STOP_ON_BACKUP','false');
+UPDATE arc.parameter set description='parameter.batch.execution.stopOnBackup' where key='LanceurARC.STOP_ON_BACKUP';
 
 -- parallelism parameters
 -- patch api multiphase 18/05/2025

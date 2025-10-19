@@ -405,6 +405,7 @@ when key= 'ApiReceptionService.batch.maxNumberOfFiles' then public.check_integer
 when key= 'ApiReceptionService.ihm.maxNumberOfFiles' then public.check_integer(val)
 when key= 'LanceurARC.DATABASE_CHECKTODO_ROUTINE_INTERVAL' then public.check_integer(val)
 when key= 'LanceurARC.DATABASE_WAIT_FOR_EXECUTORS_IN_MS' then public.check_integer(val)
+when key= 'LanceurARC.STOP_ON_BACKUP' then val::boolean in (true,false)
 when key= 'LanceurARC.tailleMaxReceptionEnMb' then public.check_integer(val)
 when key= 'LanceurARC.DATABASE_MAINTENANCE_ROUTINE_INTERVAL' then public.check_integer(val)
 when key= 'ArcAction.productionEnvironments' then public.check_sandboxes(val)
