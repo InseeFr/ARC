@@ -235,7 +235,7 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique {
 	 */
 	public static String executeIf(String queryToTest, String queryToExecute) {
 		StringBuilder query = new StringBuilder();
-		query.append("do $$ declare b boolean; begin execute ").append(escapeLiteralForPgFunction(queryToTest)).append(" into b; ")
+		query.append("commit;do $$ declare b boolean; begin execute ").append(escapeLiteralForPgFunction(queryToTest)).append(" into b; ")
 				.append("if (b) then execute ").append(escapeLiteralForPgFunction(queryToExecute)).append("; end if; end; $$;");
 		return query.toString();
 	}

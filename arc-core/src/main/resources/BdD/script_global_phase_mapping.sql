@@ -15,7 +15,7 @@ REFERENCES arc.ihm_jeuderegle (id_norme, periodicite, validite_inf, validite_sup
 ON UPDATE CASCADE ON DELETE CASCADE 
 ); 
         
-do $$ begin CREATE TRIGGER tg_insert_mapping BEFORE INSERT ON arc.ihm_mapping_regle FOR EACH ROW EXECUTE PROCEDURE arc.insert_controle(); exception when others then end; $$;
+commit;do $$ begin CREATE TRIGGER tg_insert_mapping BEFORE INSERT ON arc.ihm_mapping_regle FOR EACH ROW EXECUTE PROCEDURE arc.insert_controle(); exception when others then end; $$;
 
 CREATE TABLE IF NOT EXISTS arc.ihm_expression
 (
@@ -34,4 +34,4 @@ REFERENCES arc.ihm_jeuderegle (id_norme, periodicite, validite_inf, validite_sup
 ON UPDATE CASCADE ON DELETE CASCADE
 );
 
-do $$ begin CREATE TRIGGER tg_insert_expression BEFORE INSERT ON arc.ihm_expression FOR EACH ROW EXECUTE PROCEDURE arc.insert_controle(); exception when others then end; $$;
+commit;do $$ begin CREATE TRIGGER tg_insert_expression BEFORE INSERT ON arc.ihm_expression FOR EACH ROW EXECUTE PROCEDURE arc.insert_controle(); exception when others then end; $$;

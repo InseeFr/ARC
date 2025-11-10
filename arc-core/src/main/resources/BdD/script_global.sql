@@ -140,7 +140,7 @@ ALTER TABLE arc.ext_etat_jeuderegle add column IF NOT exists env_description tex
 
 
 -- enregistrement des bacs à sable
-do $$
+commit;do $$
 BEGIN
 for i in 1..{{nbSandboxes}} loop
 INSERT INTO arc.ext_etat_jeuderegle values ('arc.bas'||i,'BAC A SABLE '||i,'TRUE','TRUE') ON CONFLICT DO NOTHING;
@@ -153,7 +153,7 @@ INSERT INTO arc.ext_etat_jeuderegle values ('inactif','INACTIF','FALSE','FALSE')
 
 
 -- patch to delete historical double records
-do $$ 
+commit;do $$ 
 declare doublon int;
 begin
 SELECT count(*) into doublon FROM (SELECT id from arc.ext_mod_periodicite group by id having count(*)>1) u;
@@ -221,7 +221,7 @@ host_allowed text, id_famille text, id_application text, is_secured text
 ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-do $$ begin ALTER TABLE arc.ihm_webservice_whitelist DROP CONSTRAINT ihm_webservice_whitelist_pkey; alter table arc.ihm_webservice_whitelist ADD PRIMARY KEY (id_famille, id_application, host_allowed); EXCEPTION WHEN OTHERS then end; $$;
+commit;do $$ begin ALTER TABLE arc.ihm_webservice_whitelist DROP CONSTRAINT ihm_webservice_whitelist_pkey; alter table arc.ihm_webservice_whitelist ADD PRIMARY KEY (id_famille, id_application, host_allowed); EXCEPTION WHEN OTHERS then end; $$;
 
 
 -- data retrieval webservice logs 
@@ -234,7 +234,7 @@ ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 -- patch : drop old logging table if no longer used
-do $$
+commit;do $$
 declare b boolean;
 BEGIN
 select true into b from arc.security_webservice_log limit 1;
@@ -263,8 +263,8 @@ CREATE TABLE IF NOT EXISTS arc.ihm_norme
 alter table arc.ihm_norme alter column etat set not null;
 alter table arc.ihm_norme alter column id_famille set not null;
 
-do $$ begin alter table arc.ihm_norme add CONSTRAINT ihm_norme_periodicite_fkey FOREIGN KEY (periodicite) REFERENCES arc.ext_mod_periodicite(id) ON DELETE CASCADE ON UPDATE cascade ; EXCEPTION WHEN OTHERS then end; $$;
-do $$ begin alter table arc.ihm_norme add CONSTRAINT ihm_norme_etat_fkey FOREIGN KEY (etat) REFERENCES arc.ext_etat(id) ON DELETE CASCADE ON UPDATE cascade ; EXCEPTION WHEN OTHERS then end; $$;
+commit;do $$ begin alter table arc.ihm_norme add CONSTRAINT ihm_norme_periodicite_fkey FOREIGN KEY (periodicite) REFERENCES arc.ext_mod_periodicite(id) ON DELETE CASCADE ON UPDATE cascade ; EXCEPTION WHEN OTHERS then end; $$;
+commit;do $$ begin alter table arc.ihm_norme add CONSTRAINT ihm_norme_etat_fkey FOREIGN KEY (etat) REFERENCES arc.ext_etat(id) ON DELETE CASCADE ON UPDATE cascade ; EXCEPTION WHEN OTHERS then end; $$;
 
 
 CREATE TABLE IF NOT EXISTS arc.ihm_calendrier 
@@ -282,7 +282,7 @@ CREATE TABLE IF NOT EXISTS arc.ihm_calendrier
 );
 alter table arc.ihm_calendrier alter column etat set not null;
 
-do $$ begin alter table arc.ihm_calendrier add CONSTRAINT ihm_calendrier_etat_fkey FOREIGN KEY (etat) REFERENCES arc.ext_etat(id) ON DELETE CASCADE ON UPDATE cascade ; EXCEPTION WHEN OTHERS then end; $$;
+commit;do $$ begin alter table arc.ihm_calendrier add CONSTRAINT ihm_calendrier_etat_fkey FOREIGN KEY (etat) REFERENCES arc.ext_etat(id) ON DELETE CASCADE ON UPDATE cascade ; EXCEPTION WHEN OTHERS then end; $$;
 
 CREATE TABLE IF NOT EXISTS arc.ihm_jeuderegle 
 ( 
@@ -299,9 +299,9 @@ CREATE TABLE IF NOT EXISTS arc.ihm_jeuderegle
       REFERENCES arc.ihm_calendrier (id_norme, periodicite, validite_inf, validite_sup) MATCH SIMPLE 
       ON UPDATE CASCADE ON DELETE CASCADE
 );
-do $$ begin ALTER TABLE arc.ihm_jeuderegle rename sandbox to etat; EXCEPTION WHEN OTHERS then end; $$;
+commit;do $$ begin ALTER TABLE arc.ihm_jeuderegle rename sandbox to etat; EXCEPTION WHEN OTHERS then end; $$;
 alter table arc.ihm_jeuderegle alter column etat set not null;
-do $$ begin alter table arc.ihm_jeuderegle add CONSTRAINT ihm_jeuderegle_etat_fkey FOREIGN KEY (etat) REFERENCES arc.ext_etat_jeuderegle(id) ON DELETE CASCADE ON UPDATE cascade ; EXCEPTION WHEN OTHERS then end; $$;
+commit;do $$ begin alter table arc.ihm_jeuderegle add CONSTRAINT ihm_jeuderegle_etat_fkey FOREIGN KEY (etat) REFERENCES arc.ext_etat_jeuderegle(id) ON DELETE CASCADE ON UPDATE cascade ; EXCEPTION WHEN OTHERS then end; $$;
 
 CREATE TABLE IF NOT EXISTS arc.ihm_mod_table_metier 
 ( 
@@ -313,7 +313,7 @@ CONSTRAINT pk_ihm_mod_table_metier PRIMARY KEY (id_famille, nom_table_metier)
 
 ALTER TABLE arc.ihm_mod_table_metier DROP CONSTRAINT IF EXISTS fk_ihm_table_metier_famille;
 
-do $$ begin ALTER TABLE arc.ihm_mod_table_metier ADD CONSTRAINT fk2_ihm_table_metier_famille FOREIGN KEY (id_famille) REFERENCES arc.ihm_famille (id_famille) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE; EXCEPTION WHEN OTHERS then end; $$;
+commit;do $$ begin ALTER TABLE arc.ihm_mod_table_metier ADD CONSTRAINT fk2_ihm_table_metier_famille FOREIGN KEY (id_famille) REFERENCES arc.ihm_famille (id_famille) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE; EXCEPTION WHEN OTHERS then end; $$;
 
 CREATE TABLE IF NOT EXISTS arc.ihm_mod_variable_metier 
 ( 
@@ -328,8 +328,8 @@ CONSTRAINT pk_ihm_mod_variable_metier PRIMARY KEY (id_famille, nom_table_metier,
 
 ALTER TABLE arc.ihm_mod_variable_metier DROP CONSTRAINT IF EXISTS fk_ihm_mod_variable_table_metier;
 
-do $$ begin ALTER TABLE arc.ihm_mod_variable_metier ADD CONSTRAINT fk2_ihm_mod_variable_table_metier FOREIGN KEY (id_famille,nom_table_metier) REFERENCES arc.ihm_mod_table_metier(id_famille,nom_table_metier) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE; EXCEPTION WHEN OTHERS then end; $$;
-do $$ begin CREATE TRIGGER tg_check_variable_famille AFTER insert or update or delete ON arc.ihm_mod_variable_metier EXECUTE PROCEDURE arc.fn_check_variable_famille(); EXCEPTION WHEN OTHERS then end; $$;
+commit;do $$ begin ALTER TABLE arc.ihm_mod_variable_metier ADD CONSTRAINT fk2_ihm_mod_variable_table_metier FOREIGN KEY (id_famille,nom_table_metier) REFERENCES arc.ihm_mod_table_metier(id_famille,nom_table_metier) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE; EXCEPTION WHEN OTHERS then end; $$;
+commit;do $$ begin CREATE TRIGGER tg_check_variable_famille AFTER insert or update or delete ON arc.ihm_mod_variable_metier EXECUTE PROCEDURE arc.fn_check_variable_famille(); EXCEPTION WHEN OTHERS then end; $$;
 
 CREATE TABLE IF NOT EXISTS arc.ihm_nmcl 
 ( 
@@ -373,7 +373,7 @@ periodicite text,
 CONSTRAINT ws_engine_context_pkey PRIMARY KEY (service_name, call_id) 
 ); 
 
-do $$ begin alter table arc.ihm_ws_context add CONSTRAINT ihm_norme_periodicite_fkey FOREIGN KEY (periodicite) REFERENCES arc.ext_mod_periodicite(id) ON DELETE CASCADE ON UPDATE cascade ; EXCEPTION WHEN OTHERS then end; $$;
+commit;do $$ begin alter table arc.ihm_ws_context add CONSTRAINT ihm_norme_periodicite_fkey FOREIGN KEY (periodicite) REFERENCES arc.ext_mod_periodicite(id) ON DELETE CASCADE ON UPDATE cascade ; EXCEPTION WHEN OTHERS then end; $$;
 
 CREATE TABLE IF NOT EXISTS arc.ext_webservice_queryview 
 ( 
@@ -400,7 +400,7 @@ REFERENCES arc.ihm_ws_context (service_name, call_id) MATCH SIMPLE
 ON UPDATE CASCADE ON DELETE CASCADE 
 ); 
 
-do $$ begin alter table arc.ihm_ws_query  add CONSTRAINT ihm_ws_query_query_view_fkey FOREIGN KEY (query_view) REFERENCES arc.ext_webservice_queryview(id) ON DELETE CASCADE ON UPDATE cascade ; EXCEPTION WHEN OTHERS then end; $$;
+commit;do $$ begin alter table arc.ihm_ws_query  add CONSTRAINT ihm_ws_query_query_view_fkey FOREIGN KEY (query_view) REFERENCES arc.ext_webservice_queryview(id) ON DELETE CASCADE ON UPDATE cascade ; EXCEPTION WHEN OTHERS then end; $$;
 
 CREATE TABLE IF NOT EXISTS arc.ext_webservice_type 
 ( 
@@ -427,7 +427,7 @@ INSERT INTO arc.ext_export_format VALUES ('0','NA'), ('1','ZIP'), ('2','GZ') ON 
  *  PATCHS version
  */
 -- PATCH SUPPRESION DES TABLES OBSOLETES arc.test_ihm_...
-do $$
+commit;do $$
 declare
 	table_test text;
 BEGIN
@@ -441,7 +441,7 @@ $$;
 
 -- PATCH SUPPRESSION FILTRAGE
 -- 1. mise à jour des tables de pilotage
-do $$
+commit;do $$
 declare table_to_update text;
 BEGIN
 for table_to_update in (select schemaname||'.'||tablename from pg_tables where tablename='pilotage_fichier' and schemaname like 'arc%')
@@ -470,7 +470,7 @@ end;
 $$;
 
 -- 2. recopie des règles de filtrage dans le contrôle + suppression des tables de regles de filtrage
-do $$
+commit;do $$
 declare
 	table_filtrage text;
 	table_controle text;
@@ -519,7 +519,7 @@ $$;
 
 -- PATCH 03/07/2023
 -- 3. suppression et recopie des tables de filtrage de données
-do $$
+commit;do $$
 declare
 	table_filtrage text;
 BEGIN
@@ -532,7 +532,7 @@ end;
 $$;
 
 -- cas des filtrages ko
-do $$
+commit;do $$
 declare
 	table_filtrage_ko text;
 	table_filtrage_ok text;
@@ -581,7 +581,7 @@ end;
 $$;
 
 -- cas simple des filtrages ok
-do $$
+commit;do $$
 declare
 	table_filtrage_ok text;
 	table_controle_ok text;

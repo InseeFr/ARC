@@ -58,22 +58,22 @@ ALTER TABLE arc.ihm_controle_regle add column IF NOT exists error_row_processing
 alter table arc.ihm_controle_regle alter column id_classe set NOT NULL;
 alter table arc.ihm_controle_regle alter column error_row_processing set NOT NULL;
 
-do $$ begin alter table arc.ihm_controle_regle ADD CONSTRAINT ihm_controle_regle_id_classe_fkey FOREIGN KEY (id_classe) REFERENCES arc.ext_type_controle (id) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE; EXCEPTION WHEN OTHERS then end; $$;
-do $$ begin alter table arc.ihm_controle_regle ADD CONSTRAINT ihm_controle_regle_error_fkey FOREIGN KEY (error_row_processing) REFERENCES arc.ext_error_row_processing (id) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE; EXCEPTION WHEN OTHERS then end; $$;
+commit;do $$ begin alter table arc.ihm_controle_regle ADD CONSTRAINT ihm_controle_regle_id_classe_fkey FOREIGN KEY (id_classe) REFERENCES arc.ext_type_controle (id) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE; EXCEPTION WHEN OTHERS then end; $$;
+commit;do $$ begin alter table arc.ihm_controle_regle ADD CONSTRAINT ihm_controle_regle_error_fkey FOREIGN KEY (error_row_processing) REFERENCES arc.ext_error_row_processing (id) MATCH SIMPLE ON UPDATE CASCADE ON DELETE CASCADE; EXCEPTION WHEN OTHERS then end; $$;
 
 ALTER TABLE arc.ihm_controle_regle drop constraint if exists ihm_controle_regle_seuil_bloquant_check;
-do $$ begin ALTER TABLE arc.ihm_controle_regle add constraint ihm_controle_regle_seuil_bloquant_check check (blocking_threshold ~ '^(>|>=)[0123456789.]+[%u]$'); exception when others then end; $$;
+commit;do $$ begin ALTER TABLE arc.ihm_controle_regle add constraint ihm_controle_regle_seuil_bloquant_check check (blocking_threshold ~ '^(>|>=)[0123456789.]+[%u]$'); exception when others then end; $$;
 
 DROP TRIGGER IF EXISTS doublon ON arc.ihm_controle_regle CASCADE;
 
-do $$ begin CREATE TRIGGER tg_insert_controle BEFORE INSERT ON arc.ihm_controle_regle FOR EACH ROW EXECUTE PROCEDURE arc.insert_controle(); exception when others then end; $$;
+commit;do $$ begin CREATE TRIGGER tg_insert_controle BEFORE INSERT ON arc.ihm_controle_regle FOR EACH ROW EXECUTE PROCEDURE arc.insert_controle(); exception when others then end; $$;
 
 
 
 -- PATCH 06/10/2023 Remove deprecated rules
 DELETE FROM arc.ext_type_controle where id='STRUCTURE';
 
-do $$
+commit;do $$
 declare
 	table_regle_controle text;
 BEGIN

@@ -15,7 +15,7 @@ postgresql::server::config_entry:
   max_connections:
     value: "1000"
 */
-do $$
+commit;do $$
 declare
 c record;
 BEGIN
@@ -44,7 +44,7 @@ end;
 $$ LANGUAGE plpgsql;
 
 -- fonctions technique sur les tableaux
-do $$ begin create type public.cle_valeur as (i bigint, v text collate "C"); exception when others then end; $$;
+commit;do $$ begin create type public.cle_valeur as (i bigint, v text collate "C"); exception when others then end; $$;
 
 -- multi dimensionnal array decomposition  
 CREATE OR REPLACE FUNCTION public.decompose(ANYARRAY, OUT a ANYARRAY)
@@ -59,7 +59,7 @@ $func$  LANGUAGE plpgsql IMMUTABLE;
 
 
 -- global sequence and invokation function
-do $$ begin CREATE SEQUENCE arc.number_generator cycle; exception when others then end; $$; 
+commit;do $$ begin CREATE SEQUENCE arc.number_generator cycle; exception when others then end; $$; 
 
         
 CREATE OR REPLACE FUNCTION public.curr_val(text) 
@@ -141,7 +141,7 @@ $BODY$
   LANGUAGE sql IMMUTABLE STRICT
   COST 100;
 
-do $$ begin
+commit;do $$ begin
 CREATE AGGREGATE public.array_agg_distinct(public.cle_valeur) (
   SFUNC=array_agg_distinct_gather,
   STYPE=public.cle_valeur[],
@@ -295,14 +295,14 @@ REVOKE ALL ON SCHEMA public FROM public;
 REVOKE ALL ON SCHEMA arc FROM public; 
 
 -- restricted role for service execution
-do $$ 
+commit;do $$ 
 begin
 if ('{{userRestricted}}'!='') then 
 	execute 'CREATE ROLE {{userRestricted}} with NOINHERIT; GRANT {{userRestricted}} TO current_role;';
 end if;
 exception when others then end; $$;
 
-do $$ begin
+commit;do $$ begin
 if ('{{userRestricted}}'!='') then 
 	execute 'GRANT USAGE ON SCHEMA public TO {{userRestricted}}; GRANT USAGE ON SCHEMA arc TO {{userRestricted}}; GRANT EXECUTE ON FUNCTION arc.isdate to {{userRestricted}}; GRANT USAGE, SELECT, UPDATE ON SEQUENCE arc.number_generator to {{userRestricted}};';
 end if; 
