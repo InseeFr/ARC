@@ -359,7 +359,7 @@ select public.check_function('preaction', 'public.check_sql');
 select public.check_function('rubrique', 'public.check_identifier_with_schema');
 
 
-do $$ begin alter table arc.ihm_normage_regle drop constraint ihm_normage_regle_rubrique_nmcl_c; exception when others then end;  $$; 
+commit;do $$ begin alter table arc.ihm_normage_regle drop constraint ihm_normage_regle_rubrique_nmcl_c; exception when others then end;  $$; 
 alter table arc.ihm_normage_regle add constraint ihm_normage_regle_rubrique_nmcl_c 
 check (
 case when id_classe= 'partition' 
@@ -392,7 +392,7 @@ select public.check_function('id_entrepot', 'public.check_directory_token');
 select public.check_function('id_loader', 'public.check_directory_token');
 
 -- parameters rules
-do $$ begin alter table arc.parameter drop constraint parameter_val_c; exception when others then end;  $$; 
+commit;do $$ begin alter table arc.parameter drop constraint parameter_val_c; exception when others then end;  $$; 
 alter table arc.parameter add constraint parameter_val_c 
 check (
 case 
