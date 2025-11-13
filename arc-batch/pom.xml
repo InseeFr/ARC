@@ -27,11 +27,6 @@
 
 		<plugins>
 			<plugin>
-			    <groupId>org.jacoco</groupId>
-			    <artifactId>jacoco-maven-plugin</artifactId>
-				<version>${project.jacoco.version}</version>
-			</plugin>
-			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>${project.maven.compiler.version}</version>
@@ -87,8 +82,21 @@
 		</plugins>
 	</build>
 
+	<profiles>
+		<profile>
+			<id>coverage</id>
+			<build>
+			<plugins>
+				<plugin>
+				    <groupId>org.jacoco</groupId>
+				    <artifactId>jacoco-maven-plugin</artifactId>
+				</plugin>
+			</plugins>
+			</build>
+		</profile>
+	</profiles>			
+
 	<dependencies>
-	
 		<dependency>
 		  <groupId>fr.insee.arc</groupId>
 		  <artifactId>arc-utils</artifactId>

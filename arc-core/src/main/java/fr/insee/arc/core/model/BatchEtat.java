@@ -1,7 +1,5 @@
 package fr.insee.arc.core.model;
 
-import java.util.Arrays;
-
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 
