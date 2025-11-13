@@ -24,6 +24,8 @@
 		<project.commons.compress.version>1.26.0</project.commons.compress.version>
 		<project.commons.fileupload.version>1.6.0</project.commons.fileupload.version>
 
+		<project.jacoco.version>0.8.11</project.jacoco.version>
+
 		<env.arcVersion>${project.version}</env.arcVersion>
 		<env.arcVersionDate>unspecified</env.arcVersionDate>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -344,7 +346,7 @@
 					<plugin>
 						<groupId>org.jacoco</groupId>
 						<artifactId>jacoco-maven-plugin</artifactId>
-						<version>0.8.11</version>
+						<version>${project.jacoco.version}</version>
 						<executions>
 							<execution>
 								<id>prepare-agent</id>
