@@ -20,11 +20,14 @@
 		<project.java.version>17</project.java.version>
 		<project.jakarta.version>6.1.0-M1</project.jakarta.version>
 		<project.maven.compiler.version>3.14.0</project.maven.compiler.version>
+		<project.maven.jar.plugin>3.3.0</project.maven.jar.plugin>
 		<project.org.json.version>20231013</project.org.json.version>
 		<project.commons.compress.version>1.26.0</project.commons.compress.version>
 		<project.commons.fileupload.version>1.6.0</project.commons.fileupload.version>
 
-		<project.jacoco.version>0.8.11</project.jacoco.version>
+	    <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+
+		<project.jacoco.version>0.8.14</project.jacoco.version>
 
 		<env.arcVersion>${project.version}</env.arcVersion>
 		<env.arcVersionDate>unspecified</env.arcVersionDate>
@@ -343,7 +346,6 @@
 		<profile>
 			<id>coverage</id>
 			<build>
-			<pluginManagement>
 			    <plugins>
 			    	<plugin>
 			        <groupId>org.jacoco</groupId>
@@ -358,16 +360,18 @@
 				                </goals>
 				            </execution>
 				            <execution>
-				                <id>report</id>
+				                <id>report-aggregate</id>
 				                <goals>
 				                    <goal>report-aggregate</goal>
 				                </goals>
+								 <configuration>
+					              <dataFileIncludes>**/target/jacoco.exec</dataFileIncludes>
+					            </configuration>
 				                <phase>verify</phase>
 	            				</execution>
 	        				</executions>
 	        			</plugin>
     				</plugins>
-				</pluginManagement>
 			</build>
 		</profile>
 	</profiles>
