@@ -344,7 +344,6 @@
 		<profile>
 			<id>coverage</id>
 			<build>
-			<pluginManagement>
 				<plugins>
 					<plugin>
 						<groupId>org.jacoco</groupId>
@@ -353,46 +352,19 @@
 						<executions>
 							<execution>
 								<id>prepare-agent</id>
-								<phase>initialize</phase>
 								<goals>
 									<goal>prepare-agent</goal>
 								</goals>
 							</execution>
 							<execution>
 								<id>report</id>
-								<phase>verify</phase>
 								<goals>
 									<goal>report</goal>
 								</goals>
 							</execution>
 						</executions>
 					</plugin>
-				</plugins>
-				</pluginManagement>
-				
-				<plugins>
-				<plugin>
-				    <groupId>org.jacoco</groupId>
-				    <artifactId>jacoco-maven-plugin</artifactId>
-				    <version>${project.jacoco.version}</version>
-				    <inherited>false</inherited>
-				    <executions>
-				        <execution>
-				            <id>jacoco-site-aggregate</id>
-				            <phase>verify</phase>
-				            <goals>
-				                <goal>report-aggregate</goal>
-				            </goals>
-				            <configuration>
-	 							<dataFileIncludes>
-	                                <dataFileInclude>**/jacoco.exec</dataFileInclude>
-	                            </dataFileIncludes>
-                            </configuration>
-				        </execution>
-				    </executions>
-				</plugin>
-				</plugins>
-				
+				</plugins>			
 			</build>
 		</profile>
 	</profiles>
