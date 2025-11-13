@@ -25,7 +25,7 @@
 		<project.commons.compress.version>1.26.0</project.commons.compress.version>
 		<project.commons.fileupload.version>1.6.0</project.commons.fileupload.version>
 
-	    <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+		<sonar.jacoco.reportPath>${project.basedir}/../target/jacoco.exec</sonar.jacoco.reportPath>
 
 		<project.jacoco.version>0.8.14</project.jacoco.version>
 
@@ -359,17 +359,22 @@
 				                    <goal>prepare-agent</goal>
 				                </goals>
 				            </execution>
-				            <execution>
-				                <id>report-aggregate</id>
-				                <goals>
-				                    <goal>report-aggregate</goal>
-				                </goals>
-								 <configuration>
-								  <outputDirectory>${project.basedir}/target/site/jacoco-aggregate</outputDirectory>
-					              <dataFileIncludes>**/target/jacoco.exec</dataFileIncludes>
-					            </configuration>
-				                <phase>verify</phase>
-	            				</execution>
+		                    <execution>
+		                        <id>merge</id>
+		                        <goals>
+		                            <goal>merge</goal>
+		                        </goals>
+		                        <configuration>
+		                            <fileSets>
+		                                <fileSet implementation="org.apache.maven.shared.model.fileset.FileSet">
+		                                    <directory>${project.basedir}</directory>
+		                                    <includes>
+		                                        <include>**/*.exec</include>
+		                                    </includes>
+		                                </fileSet>
+		                            </fileSets>
+		                        </configuration>
+		                    </execution>
 	        				</executions>
 	        			</plugin>
     				</plugins>
