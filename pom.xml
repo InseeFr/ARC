@@ -365,6 +365,7 @@
 				                    <goal>report-aggregate</goal>
 				                </goals>
 								 <configuration>
+								  <outputDirectory>${project.basedir}/target/site/jacoco-aggregate</outputDirectory>
 					              <dataFileIncludes>**/target/jacoco.exec</dataFileIncludes>
 					            </configuration>
 				                <phase>verify</phase>
