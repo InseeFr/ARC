@@ -18,6 +18,20 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 	</properties>
 
+		<profiles>
+		<profile>
+			<id>coverage</id>
+			<build>
+			<plugins>
+			<plugin>
+		    	<groupId>org.jacoco</groupId>
+		    	<artifactId>jacoco-maven-plugin</artifactId>
+			</plugin>
+			</plugins>
+			</build>
+		</profile>
+		</profiles>
+
 	<dependencies>
 		<dependency>
 		  <groupId>fr.insee.arc</groupId>
