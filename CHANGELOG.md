@@ -3,6 +3,10 @@
 ## TODO List
 - enable tar compression for bigger files
 - All notable changes to this project will be documented in this file.
+- jacoco aggregate
+
+## version-94.2.26b
+- postgres 18 support
 
 ## version-94.2.25b
 - duckdb upgrade version 1.4

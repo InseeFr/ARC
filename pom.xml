@@ -356,12 +356,6 @@
 									<goal>prepare-agent</goal>
 								</goals>
 							</execution>
-							<execution>
-								<id>report</id>
-								<goals>
-									<goal>report</goal>
-								</goals>
-							</execution>
 						</executions>
 					</plugin>
 				</plugins>			
@@ -375,5 +369,6 @@
 		<module>arc-web</module>
 		<module>arc-ws</module>
 		<module>arc-utils</module>
+		<module>arc-report</module>
 	</modules>
 </project>
