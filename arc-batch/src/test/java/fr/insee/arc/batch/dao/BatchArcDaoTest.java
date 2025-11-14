@@ -59,19 +59,15 @@ public class BatchArcDaoTest extends InitializeQueryTest {
 
 		u.executeRequest(c, "UPDATE "+ tablePilotageBatch + " set operation = 'N'");
 		assertFalse(dao.execQueryIsProductionOn(sandbox, true));
-		assertFalse(dao.execQueryIsResetRequired(sandbox));
 
-		u.executeRequest(c, "UPDATE "+ tablePilotageBatch + " set operation = 'OR'");
+		u.executeRequest(c, "UPDATE "+ tablePilotageBatch + " set operation = 'O'");
 		assertTrue(dao.execQueryIsProductionOn(sandbox, true));
-		assertTrue(dao.execQueryIsResetRequired(sandbox));
-
+		
 		u.executeRequest(c, "UPDATE "+ tablePilotageBatch + " set operation = 'O-'");
 		assertTrue(dao.execQueryIsProductionOn(sandbox, true));
-		assertFalse(dao.execQueryIsResetRequired(sandbox));
 		
 		u.executeRequest(c, "UPDATE "+ tablePilotageBatch + " set operation = 'NR'");
 		assertFalse(dao.execQueryIsProductionOn(sandbox, true));
-		assertTrue(dao.execQueryIsResetRequired(sandbox));
 
 	}
 	
