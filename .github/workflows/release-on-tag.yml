@@ -54,6 +54,13 @@ jobs:
         context: .
         file: ./docker/app-web.Dockerfile
         tags: 'inseefr/arc:${{ steps.split.outputs.fragment }}'
+    - name: Push arc-web latest to Docker Hub
+      uses: docker/build-push-action@v2
+      with:
+        push: true
+        context: .
+        file: ./docker/app-web.Dockerfile
+        tags: 'inseefr/arc:latest'
     - name: Push arc-ws to Docker Hub
       uses: docker/build-push-action@v2
       with:
@@ -61,6 +68,13 @@ jobs:
         context: .
         file: ./docker/app-ws.Dockerfile
         tags: 'inseefr/arc-ws:${{ steps.split.outputs.fragment }}'
+    - name: Push arc-ws latest to Docker Hub
+      uses: docker/build-push-action@v2
+      with:
+        push: true          
+        context: .
+        file: ./docker/app-ws.Dockerfile
+        tags: 'inseefr/arc-ws:latest'
     - name: Push arc-batch to Docker Hub
       uses: docker/build-push-action@v2
       with:
@@ -68,3 +82,10 @@ jobs:
         context: .
         file: ./docker/app-batch.Dockerfile
         tags: 'inseefr/arc-batch:${{ steps.split.outputs.fragment }}'
+    - name: Push arc-batch latest to Docker Hub
+      uses: docker/build-push-action@v2
+      with:
+        push: true          
+        context: .
+        file: ./docker/app-batch.Dockerfile
+        tags: 'inseefr/arc-batch:latest'
