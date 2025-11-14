@@ -218,18 +218,6 @@ public class BatchArcDao {
 		return UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).hasResults(batchConnection, query);
 	}
 	
-	
-	/**
-	 * Test if sandbox musty be reset
-	 */
-	public Boolean execQueryIsResetRequired(String envExecution) throws ArcException {
-		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
-		query.build(SQL.SELECT, "1", SQL.FROM, ViewEnum.PILOTAGE_BATCH.getFullName(envExecution));
-		query.build(SQL.WHERE, BatchEtat.RESET.isCodeInOperation());
-		return UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).hasResults(batchConnection, query);
-	}
-	
-	
 	/**
 	 * The initialization phase can trigger when the current date is more than
 	 * the initialization date stored in database

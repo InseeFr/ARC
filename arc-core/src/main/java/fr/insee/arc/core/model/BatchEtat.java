@@ -6,7 +6,7 @@ import fr.insee.arc.core.dataobjects.ColumnEnum;
 public enum BatchEtat {
 
 	
-	ON("O",1), OFF("N",1), RESET("R",2), NORESET("",2);
+	ON("O",1), OFF("N",1);
 	
 	private String code;
 	private Integer digit;
