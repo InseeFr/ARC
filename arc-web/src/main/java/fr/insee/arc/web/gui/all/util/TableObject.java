@@ -5,7 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 
 /** Tableau du contenu de la requete (ligne, colonne) */
-public class TableObject implements Cloneable, Iterable<LineObject> {
+public class TableObject implements Iterable<LineObject> {
 
 	/** Lignes du tableau.*/
     public List<LineObject> t = new ArrayList<>();

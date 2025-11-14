@@ -5,7 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 
 /** Ligne du tableau */
-public class LineObject implements Cloneable, Iterable<String> {
+public class LineObject implements Iterable<String> {
 
     public LineObject() {
         super();
