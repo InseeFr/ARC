@@ -5,6 +5,10 @@
 - All notable changes to this project will be documented in this file.
 - jacoco aggregate
 
+## version-94.2.28
+- added jacoco aggregate for sonar accuracy
+- non beta version
+
 ## version-94.2.26b
 - postgres 18 support
 
