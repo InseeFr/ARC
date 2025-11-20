@@ -23,7 +23,7 @@ public class BuildJsonConfigurationTest {
 		properties.setKubernetesExecutorRam("8Gi");
 		properties.setKubernetesExecutorEphemeral("50Gi");
 		properties.setKubernetesExecutorEphemeralVolumeSize("400Gi");
-		properties.setKubernetesExecutorTemptablespaceMedium("Memory");
+		properties.setKubernetesExecutorTemptablespaceMedium("100Gi");
 		
 		String expectedTemplate = 
 """
@@ -234,10 +234,19 @@ public class BuildJsonConfigurationTest {
             "name": "dshm"
           },
           {
-            "emptyDir": {
-              "medium": "Memory"
-            },
-            "name": "tbstmp"
+            "name": "tbstmp",
+            "ephemeral": {
+              "volumeClaimTemplate": {
+                "spec": {
+                  "accessModes": ["ReadWriteOnce"],
+                  "resources": {
+                    "requests": {
+                      "storage": "100Gi"
+                    }
+                  }
+                }
+              }
+            }
           },
           {
             "name": "tmp-volume",
