@@ -215,10 +215,19 @@ public class ExecutorDatabaseStatefulTemplate {
             "name": "dshm"
           },
           {
-            "emptyDir": {
-              "medium": "{temporary_tablespace_medium}"
-            },
-            "name": "tbstmp"
+            "name": "tbstmp",
+            "ephemeral": {
+              "volumeClaimTemplate": {
+                "spec": {
+                  "accessModes": ["ReadWriteOnce"],
+                  "resources": {
+                    "requests": {
+                      "storage": "{temporary_tablespace_medium}"
+                    }
+                  }
+                }
+              }
+            }
           },
           {
             "name": "tmp-volume",
