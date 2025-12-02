@@ -1,12 +1,12 @@
 package fr.insee.arc.core.service.p1reception.provider;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.time.Year;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import fr.insee.arc.utils.utils.PrivateConstructorTest;
 

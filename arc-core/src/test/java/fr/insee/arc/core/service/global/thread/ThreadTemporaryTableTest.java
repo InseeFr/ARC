@@ -2,7 +2,7 @@ package fr.insee.arc.core.service.global.thread;
 
 import java.lang.reflect.InvocationTargetException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import fr.insee.arc.utils.utils.PrivateConstructorTest;
 

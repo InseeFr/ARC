@@ -1,8 +1,8 @@
 package fr.insee.arc.core.service.p6export.parquet;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,9 +11,8 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import fr.insee.arc.utils.dao.GenericPreparedStatementBuilder;
 import fr.insee.arc.utils.dao.SQL;
@@ -25,8 +24,8 @@ import fr.insee.arc.utils.query.InitializeQueryTest;
 
 public class ParquetDaoTest extends ParquetDao {
 
-	@Rule
-	public TemporaryFolder testFolder = new TemporaryFolder();
+	@TempDir
+	public File testFolder;
 
 	@Test
 	public void attachmentNameTest() {
@@ -42,7 +41,10 @@ public class ParquetDaoTest extends ParquetDao {
 
 	@Test
 	public void exportParquetTestOnExecutor() throws SQLException, IOException, ArcException {
-		File root = testFolder.newFolder("root");
+		
+		File root= new File(testFolder, "root");
+		root.mkdir();
+		
 		String repertoire = root.getAbsolutePath();
 
 		InitializeQueryTest.buildPropertiesWithTwoExecutors(repertoire);

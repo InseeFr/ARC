@@ -1,13 +1,12 @@
 package fr.insee.arc.web.util;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import fr.insee.arc.web.gui.all.util.TableObject;
 import fr.insee.arc.web.gui.all.util.VObject;
@@ -17,7 +16,7 @@ public class VObjectTest {
 	private VObject defaultTestVobject;
 	private List<List<String>> defaultContent;
 	
-	@Before
+	@BeforeEach
 	public void before() {
 		this.defaultTestVobject = new VObject();
 		List<String> headersDLabel = new ArrayList<>();
@@ -40,15 +39,15 @@ public class VObjectTest {
 
 	@Test
 	public void listContentOk() {
-		assertThat(defaultTestVobject.listContent(), equalTo(defaultContent));
+		assertEquals(defaultTestVobject.listContent(),defaultContent);
 	}
 
 	@Test
 	public void mapContentOk() {
-		assertThat(defaultTestVobject.mapContent().get("first_field").get(1), 
-				equalTo("first_field_value2"));
-		assertThat(defaultTestVobject.mapContent().get("second_field").get(0), 
-				equalTo("second_field_value1"));
+		assertEquals(defaultTestVobject.mapContent().get("first_field").get(1), 
+				"first_field_value2");
+		assertEquals(defaultTestVobject.mapContent().get("second_field").get(0), 
+				"second_field_value1");
 	}
 
 	@Test
@@ -61,8 +60,8 @@ public class VObjectTest {
 		newContent.get(1).add("first_field_value2");
 		newContent.get(1).add("second_field_value2");
 		this.defaultTestVobject.setContent(TableObject.as(newContent));
-		assertThat(defaultTestVobject.listContentBeforeUpdate().get(0).get(0), equalTo("first_field_value1"));
-		assertThat(defaultTestVobject.listContentBeforeUpdate().size(), equalTo(1));
+		assertEquals(defaultTestVobject.listContentBeforeUpdate().get(0).get(0), "first_field_value1");
+		assertEquals(defaultTestVobject.listContentBeforeUpdate().size(), 1);
 	}
 
 	@Test
@@ -75,11 +74,11 @@ public class VObjectTest {
 		newContent.get(1).add("first_field_new");
 		newContent.get(1).add("second_field_value2");
 		this.defaultTestVobject.setContent(TableObject.as(newContent));
-		assertThat(defaultTestVobject.listUpdatedContent().get(0).get(0), equalTo("first_field_value1"));
-		assertThat(defaultTestVobject.listUpdatedContent().get(0).get(1), equalTo("second_field_value1"));
-		assertThat(defaultTestVobject.listUpdatedContent().get(1).get(0), equalTo("first_field_new"));
-		assertThat(defaultTestVobject.listUpdatedContent().get(1).get(1), equalTo("second_field_value2"));
-		assertThat(defaultTestVobject.listUpdatedContent().size(), equalTo(2));
+		assertEquals(defaultTestVobject.listUpdatedContent().get(0).get(0), "first_field_value1");
+		assertEquals(defaultTestVobject.listUpdatedContent().get(0).get(1), "second_field_value1");
+		assertEquals(defaultTestVobject.listUpdatedContent().get(1).get(0), "first_field_new");
+		assertEquals(defaultTestVobject.listUpdatedContent().get(1).get(1), "second_field_value2");
+		assertEquals(defaultTestVobject.listUpdatedContent().size(), 2);
 	}
 	
 	@Test
@@ -96,9 +95,9 @@ public class VObjectTest {
 		this.defaultContent.get(1).add("second_field_value3");
 		this.defaultTestVobject.setSavedContent(TableObject.as(this.defaultContent));
 		this.defaultTestVobject.setContent(TableObject.as(newContent));
-		assertThat(defaultTestVobject.listOnlyUpdatedContent().get(0).get(0), equalTo("first_field_new"));
-		assertThat(defaultTestVobject.listOnlyUpdatedContent().get(0).get(1), equalTo("second_field_value2"));
-		assertThat(defaultTestVobject.listOnlyUpdatedContent().size(), equalTo(1));
+		assertEquals(defaultTestVobject.listOnlyUpdatedContent().get(0).get(0), "first_field_new");
+		assertEquals(defaultTestVobject.listOnlyUpdatedContent().get(0).get(1), "second_field_value2");
+		assertEquals(defaultTestVobject.listOnlyUpdatedContent().size(), 1);
 	}
 
 	@Test
@@ -111,8 +110,8 @@ public class VObjectTest {
 		newContent.get(1).add("first_field_new");
 		newContent.get(1).add("second_field_value2");
 		this.defaultTestVobject.setContent(TableObject.as(newContent));
-		assertThat(defaultTestVobject.listContentAfterUpdate().get(0).get(0), equalTo("first_field_new"));
-		assertThat(defaultTestVobject.listContentAfterUpdate().size(), equalTo(1));
+		assertEquals(defaultTestVobject.listContentAfterUpdate().get(0).get(0), "first_field_new");
+		assertEquals(defaultTestVobject.listContentAfterUpdate().size(), 1);
 	}
 
 	@Test
@@ -121,8 +120,8 @@ public class VObjectTest {
 		selectedLines.add(null);
 		selectedLines.add(true);
 		this.defaultTestVobject.setSelectedLines(selectedLines);
-		assertThat(defaultTestVobject.listContentSelected().get(0).get(0), equalTo("first_field_value2"));
-		assertThat(defaultTestVobject.listContentSelected().size(), equalTo(1));
+		assertEquals(defaultTestVobject.listContentSelected().get(0).get(0), "first_field_value2");
+		assertEquals(defaultTestVobject.listContentSelected().size(), 1);
 	}
 
 	@Test
@@ -131,8 +130,8 @@ public class VObjectTest {
 		selectedColumns.add(null);
 		selectedColumns.add(true);
 		this.defaultTestVobject.setSelectedColumns(selectedColumns);
-		assertThat(defaultTestVobject.listHeadersSelected().get(0), equalTo("second_field"));
-		assertThat(defaultTestVobject.listHeadersSelected().size(), equalTo(1));
+		assertEquals(defaultTestVobject.listHeadersSelected().get(0), "second_field");
+		assertEquals(defaultTestVobject.listHeadersSelected().size(), 1);
 	}
 
 }

@@ -1,8 +1,8 @@
 package fr.insee.arc.batch.threadrunners;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import fr.insee.arc.core.model.TraitementPhase;
 

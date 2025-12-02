@@ -1,7 +1,8 @@
 package fr.insee.arc.web.gui.pilotage.dao;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,10 +15,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.BeforeClass;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
@@ -45,7 +45,7 @@ public class PilotageDaoTest extends InitializeQueryTest {
 	private static DataObjectService dao;
 	private static PilotageDao pdao;
 
-	@BeforeClass
+	@BeforeAll
 	public static void setup() throws ArcException {
 		
 		BddPatcherTest.createDatabase();
@@ -62,8 +62,8 @@ public class PilotageDaoTest extends InitializeQueryTest {
 		pdao.initialize(vObjectService, dao);
 	}
 	
-	@Rule
-	public TemporaryFolder testFolder = new TemporaryFolder();
+	@TempDir
+	public File testFolder;
 
 	@Test
 	public void initializePilotageBAS() {
@@ -120,7 +120,9 @@ public class PilotageDaoTest extends InitializeQueryTest {
 	@Test
 	public void downloadFichierBAS() throws ArcException, IOException, SQLException {
 
-		File root = testFolder.newFolder("root");
+		File root= new File(testFolder, "root");
+		root.mkdir();
+		
 		String repertoire = root.getAbsolutePath();
 
 		String testSandbox1 = "arc_bas1";
@@ -159,7 +161,9 @@ public class PilotageDaoTest extends InitializeQueryTest {
 	@Test
 	public void downloadEnvelopeBAS() throws ArcException, IOException, SQLException {
 
-		File root = testFolder.newFolder("root");
+		File root= new File(testFolder, "root");
+		root.mkdir();
+		
 		String repertoire = root.getAbsolutePath();
 
 		String testSandbox1 = "arc_bas1";

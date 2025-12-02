@@ -1,14 +1,14 @@
 package fr.insee.arc.core.util;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.sql.Connection;
 
 import org.apache.logging.log4j.LogManager;
-import org.junit.BeforeClass;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.DataObjectService;
@@ -26,10 +26,10 @@ public class BDParametersTest {
 	public static Connection nullConnexion;
 	public static UtilitaireDao u;
 
-	@Rule
+	@RegisterExtension
 	public LogAppenderResource appender = new LogAppenderResource(LogManager.getLogger(BDParameters.class));
 
-	@BeforeClass
+	@BeforeAll
 	public static void setup() throws ArcException {
 		BddPatcherTest.createDatabase();
 		c = BddPatcherTest.c;

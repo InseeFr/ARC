@@ -1,11 +1,11 @@
 package fr.insee.arc.web.gui.maintenanceparametre.dao;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.dataobjects.DataObjectService;
@@ -24,7 +24,7 @@ public class MaintenanceParametreDaoTest extends InitializeQueryTest {
 	private static DataObjectService dao;
 	private static MaintenanceParametreDao pdao;
 
-	@BeforeClass
+	@BeforeAll
 	public static void setup() throws ArcException {
 		
 		BddPatcherTest.createDatabase();

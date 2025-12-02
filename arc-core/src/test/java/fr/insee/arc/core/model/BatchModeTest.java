@@ -1,10 +1,10 @@
 package fr.insee.arc.core.model;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.lang.reflect.InvocationTargetException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.PrivateConstructorTest;

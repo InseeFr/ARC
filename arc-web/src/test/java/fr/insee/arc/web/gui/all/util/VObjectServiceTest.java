@@ -1,6 +1,6 @@
 package fr.insee.arc.web.gui.all.util;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,10 +11,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.BeforeClass;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.service.engine.initialisation.BddPatcherTest;
@@ -29,7 +28,7 @@ public class VObjectServiceTest extends InitializeQueryTest {
 
 	private static VObjectService vObjectService;
 
-	@BeforeClass
+	@BeforeAll
 	public static void setup() throws ArcException {
 		
 		BddPatcherTest.createDatabase();
@@ -43,13 +42,15 @@ public class VObjectServiceTest extends InitializeQueryTest {
 
 	}
 	
-	@Rule
-	public TemporaryFolder testFolder = new TemporaryFolder();
+	@TempDir
+	public File testFolder;
 
 	@Test
 	public void download() throws ArcException, IOException, SQLException {
 
-		File root = testFolder.newFolder("root");
+		File root= new File(testFolder, "root");
+		root.mkdir();
+		
 		String repertoire = root.getAbsolutePath();
 		
 		buildPropertiesWithoutScalability(repertoire);

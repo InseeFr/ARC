@@ -1,6 +1,6 @@
 package fr.insee.arc.utils.exception;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.File;
 import java.io.IOException;
@@ -8,14 +8,14 @@ import java.nio.file.Files;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import fr.insee.arc.utils.utils.LogAppenderResource;
 
 public class ArcExceptionTest {
 
-	@Rule
+	@RegisterExtension
 	public LogAppenderResource appender = new LogAppenderResource(LogManager.getLogger(ArcException.class));
 
 	private final static File UNKNOWN_FILE = new File("f.test");

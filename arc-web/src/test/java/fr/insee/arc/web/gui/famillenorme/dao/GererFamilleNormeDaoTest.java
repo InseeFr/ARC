@@ -1,13 +1,14 @@
 package fr.insee.arc.web.gui.famillenorme.dao;
 
-import static org.junit.Assert.assertEquals;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
@@ -34,7 +35,7 @@ public class GererFamilleNormeDaoTest extends InitializeQueryTest {
 	private static DataObjectService dao;
 	private static GererFamilleNormeDao pdao;
 
-	@BeforeClass
+	@BeforeAll
 	public static void setup() throws ArcException {
 		
 		BddPatcherTest.createDatabase();

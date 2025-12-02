@@ -1,10 +1,10 @@
 package fr.insee.arc.core.service.p2chargement.operation;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.sql.Connection;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.service.global.bo.FileIdCard;
@@ -27,21 +27,22 @@ public class ChargementRulesOperationTest {
 		u.executeRequest(c, "DROP SCHEMA IF EXISTS arc_bas1 CASCADE;");
 		u.executeRequest(c, "CREATE SCHEMA IF NOT EXISTS arc_bas1;");
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
-		query.build("CREATE TABLE arc_bas1.chargement_regle (\r\n"
-				+ "	id_regle int8 NULL,\r\n"
-				+ "	id_norme text NULL,\r\n"
-				+ "	validite_inf date NULL,\r\n"
-				+ "	validite_sup date NULL,\r\n"
-				+ "	\"version\" text NULL,\r\n"
-				+ "	periodicite text NULL,\r\n"
-				+ "	type_fichier text NULL,\r\n"
-				+ "	\"delimiter\" text NULL,\r\n"
-				+ "	format text NULL,\r\n"
-				+ "	commentaire text NULL\r\n"
-				+ ")\r\n"
-				+ "WITH (\r\n"
-				+ "	autovacuum_enabled=false\r\n"
-				+ ");");
+		query.build("CREATE TABLE arc_bas1.chargement_regle ("
+				, "id_regle int8 NULL," //
+				, "id_norme text NULL," //
+				, "validite_inf date NULL," //
+				, "validite_sup date NULL," //
+				, "version text NULL," //
+				, "periodicite text NULL," //
+				, "type_fichier text NULL," //
+				, "delimiter text NULL," //
+				, "format text NULL," //
+				, "commentaire text NULL" //
+				, ")" //
+				, "WITH (autovacuum_enabled=false)"
+				, SQL.END_QUERY
+				);
+
 		query.build(SQL.INSERT_INTO, "arc_bas1.chargement_regle", SQL.VALUES, "(1, 'TEST', '2020-01-01', '2025-01-01', 'v01', 'A', 'plat', 'E''\1''', '<encoding>WIN1252</encoding>', '')", SQL.END_QUERY);
 		// hors calendrier
 		query.build(SQL.INSERT_INTO, "arc_bas1.chargement_regle", SQL.VALUES, "(1, 'TEST', '1998-01-01', '2020-01-01', 'v01', 'A', 'plat', 'separator_invalid', '<encoding>WIN1252</encoding>', '')", SQL.END_QUERY);

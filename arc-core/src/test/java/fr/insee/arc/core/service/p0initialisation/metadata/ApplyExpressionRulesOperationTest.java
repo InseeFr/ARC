@@ -1,12 +1,13 @@
 package fr.insee.arc.core.service.p0initialisation.metadata;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class ApplyExpressionRulesOperationTest {
 
@@ -15,7 +16,7 @@ public class ApplyExpressionRulesOperationTest {
 	private ArrayList<String> headers;
 	private ArrayList<String> types;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		expressionService = new ApplyExpressionRulesOperation();
 		headers = new ArrayList<>();

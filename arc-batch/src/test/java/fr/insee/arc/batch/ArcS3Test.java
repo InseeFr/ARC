@@ -1,8 +1,9 @@
 package fr.insee.arc.batch;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -10,11 +11,9 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Assume;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.support.AbstractApplicationContext;
 
@@ -24,10 +23,10 @@ import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 
 public class ArcS3Test {
 
-	@Rule
-	public TemporaryFolder testFolder = new TemporaryFolder();
+	@TempDir
+	public File testFolder;
 	
-	@Before
+	@BeforeEach
 	public void assumePropertiesNotEmpty() {
 		
 		try (AbstractApplicationContext context = new AnnotationConfigApplicationContext(BatchConfig.class))
@@ -36,13 +35,14 @@ public class ArcS3Test {
 			PropertiesHandler.getInstance();
 		}
 		
-		Assume.assumeFalse(PropertiesHandler.getInstance().getS3InputApiUri().isEmpty());
+		assumeFalse(PropertiesHandler.getInstance().getS3InputApiUri().isEmpty());
 	}
 
 	@Test
 	public void executeArcS3Tests() throws ArcException, IOException {
 		
-		File root = testFolder.newFolder("root");
+		File root= new File(testFolder, "root");
+		root.mkdir();
 		String repertoire = root.getAbsolutePath();
 		
 		scenarioCreateDeleteDir();

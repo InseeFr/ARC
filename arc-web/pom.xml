@@ -42,6 +42,14 @@
 	<!-- *************************************** LA GESTION DES DEPENDANCES 
 		COMMENCE ICI *************************************** -->
 	<dependencies>
+
+		<dependency>
+		    <groupId>org.hamcrest</groupId>
+		    <artifactId>hamcrest</artifactId>
+		    <version>${project.hamcrest.version}</version>
+		    <scope>test</scope>
+		</dependency>
+	
 		<dependency>
 		  <groupId>fr.insee.arc</groupId>
 		  <artifactId>arc-utils</artifactId>
@@ -56,16 +64,6 @@
 		  <type>test-jar</type>
 		  <scope>test</scope>
 		</dependency>
-		<!-- C'est ici que seront declarées toutes les dépendances du projet. La 
-			déclaration d'une dépendance se fait de la manière suivante : <dependency> 
-			<groupId>junit</groupId> <artifactId>junit</artifactId> <version>4.8.2</version> 
-			<scope>test</scope> </dependency> Les tags <groupId>, <artifactId> et <version> 
-			servent à identifier la librairie que vous souhaitez ajouter en dépendance. 
-			Le tag <scope> correspond à la portée des dépendances : - compile (valeur 
-			par defaut si le tag est omis) : pour la compilation ET l'exécution - runtime 
-			: pour l'exécution uniquement - test : pour l'exécution des tests - provided 
-			: librairie déjà présente sur l'environnement d'exécution (exemple : la librairie 
-			servlet-api, qui sera portée par le serveur d'application) -->
 		<dependency>
 			<groupId>commons-fileupload</groupId>
 			<artifactId>commons-fileupload</artifactId>

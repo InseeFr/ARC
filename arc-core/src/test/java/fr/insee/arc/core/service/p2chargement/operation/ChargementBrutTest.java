@@ -1,6 +1,6 @@
 package fr.insee.arc.core.service.p2chargement.operation;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -9,9 +9,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.files.BoundedBufferedReader;
@@ -20,13 +19,16 @@ import fr.insee.arc.utils.utils.ManipString;
 
 public class ChargementBrutTest extends ChargementBrut {
 
-	@Rule
-	public TemporaryFolder testFolder = new TemporaryFolder();
+	@TempDir
+	public File testFolder;
 	
 	
 	@Test
 	public void boundedBufferedReaderTestLimit() throws IOException, ArcException {
-		File root = testFolder.newFolder("root");
+		
+		File root= new File(testFolder, "root");
+		root.mkdir();
+		
 		String repertoire = root.getAbsolutePath();
 		
 		File fileTest = new File(repertoire, "test");
@@ -61,7 +63,10 @@ public class ChargementBrutTest extends ChargementBrut {
 	
 	@Test
 	public void requeteFichierBrutalementTest() throws IOException, ArcException {
-		File root = testFolder.newFolder("root");
+		
+		File root= new File(testFolder, "root");
+		root.mkdir();
+				
 		String repertoire = root.getAbsolutePath();
 		
 		File fileTest = new File(repertoire, "test");

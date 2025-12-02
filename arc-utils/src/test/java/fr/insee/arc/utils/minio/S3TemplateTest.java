@@ -1,8 +1,7 @@
 package fr.insee.arc.utils.minio;
 
-import static org.junit.Assert.*;
-
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.Test;
 
 public class S3TemplateTest {
 
