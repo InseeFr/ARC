@@ -1,24 +1,25 @@
 package fr.insee.arc.utils.files;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.PrivateConstructorTest;
 
 public class FileUtilsArcTest {
 
-	@Rule
-	public TemporaryFolder testFolder= new TemporaryFolder();
+	@TempDir
+	public File testFolder;
 
 	@Test
 	public void testServiceFileUtilsArcIsUtilityClass() throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
@@ -33,7 +34,9 @@ public class FileUtilsArcTest {
 	 */
 	public void deleteDirectoryTest() throws IOException, ArcException {
 
-		File root=testFolder.newFolder("root");
+		
+		File root= new File(testFolder, "root");
+		root.mkdir();
 		
 		File testDir=new File(root,"testDir");
 		testDir.mkdir();
@@ -66,7 +69,7 @@ public class FileUtilsArcTest {
 		
 	}
 	
-	@Test(expected = ArcException.class)
+	@Test
 	/** Test for not existing directory
 	 *  must return false
 	 * @throws IOException
@@ -74,15 +77,18 @@ public class FileUtilsArcTest {
 	 */
 	public void deleteDirectoryTestDirectoryNotExists() throws IOException, ArcException {
 
-		File root=testFolder.newFolder("root");
-		
-		File testDir=new File(root,"testDir");
-		testDir.mkdir();
-		
-		File directoryNotExists=new File(testDir, "dirnotexists");
-		
-		FileUtilsArc.deleteDirectory(directoryNotExists);
+		Assertions.assertThrows(ArcException.class, () -> {
+			File root= new File(testFolder, "root");
+			root.mkdir();
 
+			File testDir = new File(root, "testDir");
+			testDir.mkdir();
+
+			File directoryNotExists = new File(testDir, "dirnotexists");
+
+			FileUtilsArc.deleteDirectory(directoryNotExists);
+		});
+		
 	}
 	
 	
@@ -93,7 +99,9 @@ public class FileUtilsArcTest {
 	 */
 	@Test
 	public void deleteAndRecreateDirectoryTest() throws IOException, ArcException {
-		File root=testFolder.newFolder("root");
+		File root= new File(testFolder, "root");
+		root.mkdir();
+
 		
 		File testDir=new File(root,"testDir");
 		testDir.mkdir();
@@ -129,7 +137,9 @@ public class FileUtilsArcTest {
 	@Test
 	public void isCompletelyWrittenTest() throws IOException
 	{
-		File root=testFolder.newFolder("root");
+		File root= new File(testFolder, "root");
+		root.mkdir();
+
 		
 		File testDir=new File(root,"testDir");
 		testDir.mkdir();
@@ -145,7 +155,9 @@ public class FileUtilsArcTest {
 	@Test
 	public void renameToTest_OK() throws IOException, ArcException
 	{
-		File root=testFolder.newFolder("root");
+		File root= new File(testFolder, "root");
+		root.mkdir();
+
 		File testDir=new File(root,"testDir");
 		testDir.mkdir();
 		
@@ -172,10 +184,13 @@ public class FileUtilsArcTest {
 		
 	}
 	
-	@Test(expected = ArcException.class)
+	@Test
 	public void renameToTest_KO() throws IOException, ArcException
 	{
-		File root=testFolder.newFolder("root");
+		Assertions.assertThrows(ArcException.class, () -> {
+		File root= new File(testFolder, "root");
+		root.mkdir();
+
 		File testDirA=new File(root,"a");
 		testDirA.mkdir();
 		
@@ -188,13 +203,16 @@ public class FileUtilsArcTest {
 		
 		// file already exists; rename will fail
 		FileUtilsArc.renameTo(fileToRenameA, fileToRenameB);
+		});
 		
 	}
 	
 	@Test
 	public void createDirIfNotexistTest() throws IOException
 	{
-		File root=testFolder.newFolder("root");
+		File root= new File(testFolder, "root");
+		root.mkdir();
+
 		File testDir=new File(root,"/a/b/c");
 		String testDirPath=testDir.getAbsoluteFile().toString();
 		File testDirB=new File(root,"/a/b");
@@ -221,7 +239,9 @@ public class FileUtilsArcTest {
 	@Test
 	public void deplacerFichierTest() throws IOException, ArcException
 	{
-		File root=testFolder.newFolder("root");
+		File root= new File(testFolder, "root");
+		root.mkdir();
+
 		File dirA=new File(root,"/a");
 		File dirB=new File(root,"/b");
 		dirA.mkdir();

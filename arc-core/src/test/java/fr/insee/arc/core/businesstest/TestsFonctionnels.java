@@ -1,21 +1,20 @@
 package fr.insee.arc.core.businesstest;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
+
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.rmi.server.ExportException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.factory.ApiServiceFactory;
@@ -34,14 +33,16 @@ import fr.insee.arc.utils.structure.GenericBean;
 
 public class TestsFonctionnels extends InitializeQueryTest {
 
-	@Rule
-	public TemporaryFolder testFolder = new TemporaryFolder();
+	@TempDir
+	public File testFolder;
 
 	@Test
 	public void executeFunctionnalTests() throws IOException, SQLException, ArcException {
 		BddPatcherTest.createDatabase();
 
-		File root = testFolder.newFolder("root");
+		File root= new File(testFolder, "root");
+		root.mkdir();
+				
 		String repertoire = root.getAbsolutePath();
 
 		buildPropertiesWithoutScalability(repertoire);

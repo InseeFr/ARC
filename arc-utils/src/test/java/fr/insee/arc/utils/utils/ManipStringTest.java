@@ -1,10 +1,11 @@
 package fr.insee.arc.utils.utils;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Arrays;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class ManipStringTest extends ManipString {
 
@@ -169,9 +170,12 @@ public class ManipStringTest extends ManipString {
 		assertEquals(Arrays.asList("a","b","cde"),ManipString.stringToList("a,b,cde",","));
     }
 	
-	@Test(expected = NullPointerException.class)
+	@Test
 	 public void stringToList2() {
+		assertThrows(NullPointerException.class, () ->
+		{
 		ManipString.stringToList(null,",");
+		});
     }
 	
 	@Test

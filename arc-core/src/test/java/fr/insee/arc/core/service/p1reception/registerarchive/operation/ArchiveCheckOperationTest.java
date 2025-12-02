@@ -1,8 +1,9 @@
 package fr.insee.arc.core.service.p1reception.registerarchive.operation;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import fr.insee.arc.utils.exception.ArcException;
 
@@ -20,8 +21,12 @@ public class ArchiveCheckOperationTest extends ArchiveCheckOperation {
 		assertEquals("DEFAULT_entry1", addEntrepotPrefixToEntryName("DEFAULT_","DEFAULT_archive.tar.gz","entry1"));
 	}
 
-	@Test(expected = ArcException.class)
+	@Test
 	public void addEntrepotPrefixToEntryNameTestUnknownArchiveType() throws ArcException {
-		addEntrepotPrefixToEntryName("DEFAULT_","DEFAULT_archive.unkown_extension","entry");
+		
+		assertThrows(ArcException.class, () -> {
+			addEntrepotPrefixToEntryName("DEFAULT_","DEFAULT_archive.unkown_extension","entry");
+		});
+		
 	}
 }

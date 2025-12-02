@@ -1,16 +1,16 @@
 package fr.insee.arc.core.service.p1reception.registerfiles.dao;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.service.global.bo.Sandbox;
@@ -24,7 +24,7 @@ public class FileRegistrationDaoTest extends InitializeQueryTest {
 	private String tablePilTemp = "arc_bas1.pilotage_fichier_tmp";
 	private FileRegistrationDao dao;
 
-	@Before
+	@BeforeEach
 	public void initDatabaseBeforeTest() throws SQLException, ArcException {
 		buildPropertiesWithoutScalability("tmp");
 
@@ -62,7 +62,7 @@ public class FileRegistrationDaoTest extends InitializeQueryTest {
 		this.dao = new FileRegistrationDao(new Sandbox(c, "arc_bas1"), tablePilTemp);
 	}
 
-	@After
+	@AfterEach
 	public void cleanDatabaseAfterTest() throws SQLException, ArcException {
 		// clear
 		u.executeRequest(c, "DROP SCHEMA IF EXISTS arc_bas1 CASCADE;");

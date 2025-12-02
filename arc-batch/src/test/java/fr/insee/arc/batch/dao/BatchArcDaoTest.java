@@ -1,17 +1,18 @@
 package fr.insee.arc.batch.dao;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.service.global.bo.ArcDateFormat;
@@ -23,7 +24,7 @@ public class BatchArcDaoTest extends InitializeQueryTest {
 	private String sandbox = "arc_bas1";
 	private String tablePilotageBatch=ViewEnum.PILOTAGE_BATCH.getFullName(sandbox);
 	
-	@Before
+	@BeforeEach
 	public void initDatabaseBeforeTest() throws SQLException, ArcException {
 		buildPropertiesWithoutScalability("tmp");
 
@@ -39,7 +40,7 @@ public class BatchArcDaoTest extends InitializeQueryTest {
 
 	
 
-	@After
+	@AfterEach
 	public void cleanDatabaseAfterTest() throws SQLException, ArcException {
 		// clear
 		u.executeRequest(c, "DROP SCHEMA IF EXISTS arc_bas1 CASCADE;");

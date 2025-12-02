@@ -1,9 +1,8 @@
 package fr.insee.arc.core.dataobjects;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.exception.ArcException;
@@ -14,7 +13,7 @@ public class ArcPreparedStatementBuilderTest {
 	public void sqlListeColumnsByList() {
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 
-		Assert.assertEquals(new StringBuilder("id_famille,id_norme").toString(),
+		assertEquals(new StringBuilder("id_famille,id_norme").toString(),
 				query.sqlListeOfColumnsFromModel(ColumnEnum.ID_FAMILLE, ColumnEnum.ID_NORME).toString());
 
 	}
@@ -22,21 +21,21 @@ public class ArcPreparedStatementBuilderTest {
 	@Test
 	public void sqlDDLColumnsByList() {
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
-		Assert.assertEquals(new StringBuilder("id_famille text,id_norme text").toString(),
+		assertEquals(new StringBuilder("id_famille text,id_norme text").toString(),
 				query.sqlDDLOfColumnsFromModel(ColumnEnum.ID_FAMILLE, ColumnEnum.ID_NORME).toString());
 	}
 	
 	@Test
 	public void sqlListeColumnsByView() {
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
-		Assert.assertEquals(new StringBuilder("test1,test2").toString(),
+		assertEquals(new StringBuilder("test1,test2").toString(),
 				query.sqlListeOfColumnsFromModel(ViewEnum.TABLE_TEST_IN_TEMPORARY).toString());
 	}
 
 	@Test
 	public void sqlDDLColumnsByView() {
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
-		Assert.assertEquals(new StringBuilder("test1 text,test2 text").toString(),
+		assertEquals(new StringBuilder("test1 text,test2 text").toString(),
 				query.sqlDDLOfColumnsFromModel(ViewEnum.TABLE_TEST_IN_TEMPORARY).toString());
 	}
 

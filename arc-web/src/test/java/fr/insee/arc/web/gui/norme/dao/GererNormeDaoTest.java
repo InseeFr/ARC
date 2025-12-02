@@ -1,6 +1,6 @@
 package fr.insee.arc.web.gui.norme.dao;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,8 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -47,7 +47,7 @@ public class GererNormeDaoTest extends InitializeQueryTest {
 	private static DataObjectService dao;
 	private static GererNormeDao pdao;
 
-	@BeforeClass
+	@BeforeAll
 	public static void setup() throws ArcException, SQLException {
 
 		buildPropertiesWithoutScalability(null);

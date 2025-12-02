@@ -5,7 +5,9 @@ import org.apache.logging.log4j.core.Logger;
 import org.apache.logging.log4j.core.StringLayout;
 import org.apache.logging.log4j.core.appender.WriterAppender;
 import org.apache.logging.log4j.core.layout.PatternLayout;
-import org.junit.rules.ExternalResource;
+import org.junit.jupiter.api.extension.AfterEachCallback;
+import org.junit.jupiter.api.extension.BeforeEachCallback;
+import org.junit.jupiter.api.extension.ExtensionContext;
 
 import java.io.CharArrayWriter;
 
@@ -13,7 +15,7 @@ import java.io.CharArrayWriter;
  * JUnit rule for testing output to Log4j. Handy for verifying logging.
  * This sets up and tears down an Appender resource on a given Logger.
  */
-public class LogAppenderResource extends ExternalResource {
+public class LogAppenderResource implements BeforeEachCallback, AfterEachCallback {
 
     private static final String APPENDER_NAME = "log4jRuleAppender";
 
@@ -32,7 +34,7 @@ public class LogAppenderResource extends ExternalResource {
     }
 
     @Override
-    protected void before() {
+	public void beforeEach(ExtensionContext extensionContext) {
         StringLayout layout = PatternLayout.newBuilder().withPattern(PATTERN).build();
         appender = WriterAppender.newBuilder()
                 .setTarget(outContent)
@@ -43,7 +45,7 @@ public class LogAppenderResource extends ExternalResource {
     }
 
     @Override
-    protected void after() {
+	public void afterEach(ExtensionContext extensionContext) {
         logger.removeAppender(appender);
     }
 

@@ -1,38 +1,41 @@
 package fr.insee.arc.ws.services.importServlet;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.ws.services.importServlet.dao.InitializeTestDataScalability;
 
 public class ImportOKScalabilityTest {
 
-	@BeforeClass
+	@BeforeAll
 	public static void setup() throws SQLException, ArcException {
 		InitializeTestDataScalability.destroyTestData();
 		InitializeTestDataScalability.initializeTestData(true);
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void tearDown() throws SQLException, ArcException {
 		InitializeTestDataScalability.destroyTestData();
 	}
 
-	@Test(expected = ArcException.class)
+	@Test
 	public void testExecuteFamilyNotValid() throws ArcException, UnsupportedEncodingException {
-		RunImport.testExecuteFamilyNotValid();
+		assertThrows(ArcException.class, () -> {
+			RunImport.testExecuteFamilyNotValid();
+		});
 	}
 
 	@Test
 	public void testExecute() throws ArcException, IOException {
 		RunImport.testExecute();
 	}
-	
 
 }

@@ -1,13 +1,14 @@
 package fr.insee.arc.core.model;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.stream.Stream;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+
 
 public class TraitementPhaseTest {
 
@@ -25,7 +26,7 @@ public class TraitementPhaseTest {
 	@Test
 	public void getListPhaseExecutableInBasShouldNotContainsUnordoredElements() {
 		for (TraitementPhase phase : TraitementPhase.getListPhaseExecutableInBas()) {
-			assertTrue(phase.toString(), phase.getOrdre() >= 0);
+			assertTrue(phase.getOrdre() >= 0);
 		}
 	}
 	

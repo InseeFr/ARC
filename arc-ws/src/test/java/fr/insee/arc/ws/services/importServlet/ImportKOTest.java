@@ -1,14 +1,14 @@
 package fr.insee.arc.ws.services.importServlet;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayOutputStream;
 import java.sql.SQLException;
 
 import org.json.JSONObject;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
@@ -26,13 +26,13 @@ public class ImportKOTest extends ServletArc {
 
 
 
-	@BeforeClass
+	@BeforeAll
     public static void setup() throws SQLException, ArcException {
 		InitializeTestDataNoScalability.destroyTestData();
 		InitializeTestDataNoScalability.initializeTestData(false);
 	}
 	
-	@AfterClass
+	@AfterAll
     public static void tearDown() throws SQLException, ArcException {
 		InitializeTestDataNoScalability.destroyTestData();
     }

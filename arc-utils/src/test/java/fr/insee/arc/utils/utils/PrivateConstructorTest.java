@@ -1,13 +1,13 @@
 package fr.insee.arc.utils.utils;
 
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class PrivateConstructorTest {
 
@@ -20,9 +20,11 @@ public class PrivateConstructorTest {
 	    }); //this add the full coverage on private constructor
 	}
 	
-	@Test(expected = AssertionError.class)
+	@Test
 	public void testConstructorIsPrivateTest() throws IllegalAccessException, InvocationTargetException, InstantiationException, NoSuchMethodException {
+		assertThrows(AssertionError.class, () -> {
 		testConstructorIsPrivate(PrivateConstructorTest.class);
+		});
 	}
 	
 }

@@ -1,8 +1,8 @@
 package fr.insee.arc.web.util;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import fr.insee.arc.web.gui.all.util.ArcStringUtils;
 

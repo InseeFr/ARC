@@ -1,16 +1,16 @@
 package fr.insee.arc.core.service.engine.mapping;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import fr.insee.arc.core.service.p5mapping.bo.TableMapping;
 import fr.insee.arc.core.service.p5mapping.bo.VariableMapping;
@@ -22,7 +22,7 @@ public class RequeteMappingTest {
 	
 	private MappingQueries mappingRequest;
 	
-	@Before
+	@BeforeEach
 	public void setUp() {
 		MappingQueriesFactory mappingRuleFactory = new MappingQueriesFactory(null, "", null, null);
 		mappingRequest = new MappingQueries(null, mappingRuleFactory, "", null, "", "", 0);
