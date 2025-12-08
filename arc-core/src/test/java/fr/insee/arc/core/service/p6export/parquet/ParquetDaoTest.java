@@ -1,5 +1,6 @@
 package fr.insee.arc.core.service.p6export.parquet;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -14,6 +15,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import fr.insee.arc.core.service.p6export.parquet.ParquetEncryptionKey.EncryptionType;
 import fr.insee.arc.utils.dao.GenericPreparedStatementBuilder;
 import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
@@ -38,13 +40,12 @@ public class ParquetDaoTest extends ParquetDao {
 		assertEquals("pg_0.arc_bas1.ma_table", this.duckdbDao.attachedTableName(0, "arc_bas1.ma_table"));
 	}
 
-
 	@Test
 	public void exportParquetTestOnExecutor() throws SQLException, IOException, ArcException {
-		
-		File root= new File(testFolder, "root");
+
+		File root = new File(testFolder, "root");
 		root.mkdir();
-		
+
 		String repertoire = root.getAbsolutePath();
 
 		InitializeQueryTest.buildPropertiesWithTwoExecutors(repertoire);
@@ -59,24 +60,31 @@ public class ParquetDaoTest extends ParquetDao {
 		// create a test table on executor 1
 		createTestTable(InitializeQueryTest.e2, testTable2);
 
-		
 		// directory is empty
-		assertEquals(0,root.listFiles().length);
-		
+		assertEquals(0, root.listFiles().length);
+
 		exportToParquet(Arrays.asList(new TableToRetrieve(ArcDatabase.COORDINATOR, testTable1),
 				new TableToRetrieve(ArcDatabase.EXECUTOR, testTable2)), repertoire, null);
 
-		
-		List<String> f = Arrays.asList(root.listFiles()).stream().map(t->t.getName()).toList();
+		List<String> f = Arrays.asList(root.listFiles()).stream().map(t -> t.getName()).toList();
 		assertEquals(2, f.size());
 		assertTrue(f.contains("test_table1.parquet"));
 		assertTrue(f.contains("test_table2.parquet"));
 
+		// test parquet encryption is working
+		assertDoesNotThrow(() -> {
+			ParquetEncryptionKey p256 = new ParquetEncryptionKey(EncryptionType.KEY256,
+					"01234567891123450123456789112345");
+			exportToParquet(Arrays.asList(new TableToRetrieve(ArcDatabase.COORDINATOR, testTable1),
+					new TableToRetrieve(ArcDatabase.EXECUTOR, testTable2)), repertoire, p256);
+		});
+
 	}
-	
+
 	@Test
 	public void checkNotEmptyTest() throws ArcException {
-		assertTrue(checkNotEmpty(InitializeQueryTest.c, new GenericPreparedStatementBuilder("SELECT * FROM (VALUES (1),(2),(3)) t (col)")));
+		assertTrue(checkNotEmpty(InitializeQueryTest.c,
+				new GenericPreparedStatementBuilder("SELECT * FROM (VALUES (1),(2),(3)) t (col)")));
 		assertFalse(checkNotEmpty(InitializeQueryTest.c, new GenericPreparedStatementBuilder("SELECT 1 WHERE 1=0")));
 	}
 
@@ -107,4 +115,3 @@ public class ParquetDaoTest extends ParquetDao {
 	}
 
 }
-
