@@ -90,8 +90,8 @@ public class ParquetDao {
 		}
 		
 		GenericPreparedStatementBuilder query = new GenericPreparedStatementBuilder();
-		query.append("PRAGMA add_parquet_key(" + query.quoteText(encryptionKey.getType().getAlias()) + ","
-					+ query.quoteText(encryptionKey.getValue()) + ");");
+		query.append("PRAGMA add_parquet_key(" + FormatSQL.quoteText(encryptionKey.getType().getAlias()) + ","
+					+ FormatSQL.quoteText(encryptionKey.getValue()) + ");");
 
 		duckdbDao.executeQuery(connection, query);		
 

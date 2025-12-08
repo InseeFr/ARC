@@ -3,7 +3,6 @@ package fr.insee.arc.ws.services.importServlet;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 
 import org.junit.jupiter.api.AfterAll;
