@@ -27,10 +27,8 @@ public class ImportOKScalabilityTest {
 	}
 
 	@Test
-	public void testExecuteFamilyNotValid() throws ArcException, UnsupportedEncodingException {
-		assertThrows(ArcException.class, () -> {
-			RunImport.testExecuteFamilyNotValid();
-		});
+	public void testExecuteFamilyNotValid() {
+		assertThrows(ArcException.class, RunImport::testExecuteFamilyNotValid);
 	}
 
 	@Test
