@@ -25,6 +25,7 @@ import fr.insee.arc.utils.files.FileUtilsArc;
 import fr.insee.arc.utils.parquet.ParquetExtension;
 import fr.insee.arc.utils.ressourceUtils.ConnectionAttribute;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
+import fr.insee.arc.utils.utils.FormatSQL;
 
 public class DuckdbDao {
 
@@ -73,9 +74,9 @@ public class DuckdbDao {
 
 			GenericPreparedStatementBuilder query = new GenericPreparedStatementBuilder();
 			
-			query.append("SET custom_extension_repository = " + query.quoteText(DUCKDB_EXTENSION_INSTALLATION_DIRECTORY)
+			query.append("SET custom_extension_repository = " + FormatSQL.quoteText(DUCKDB_EXTENSION_INSTALLATION_DIRECTORY)
 					+ ";\n");
-			query.append("SET extension_directory  = " + query.quoteText(DUCKDB_EXTENSION_INSTALLATION_DIRECTORY) + ";\n");
+			query.append("SET extension_directory  = " + FormatSQL.quoteText(DUCKDB_EXTENSION_INSTALLATION_DIRECTORY) + ";\n");
 			query.append("INSTALL postgres;\n");
 					
 			for (int connectionIndex = 0; connectionIndex < numberOfPods; connectionIndex++) {
@@ -83,7 +84,7 @@ public class DuckdbDao {
 				ConnectionAttribute c = postgresConnections[connectionIndex];
 				String connexionChain = c.getConnectionChainInLibpqFormat();
 
-				query.append("ATTACH " + query.quoteText(connexionChain) + " AS " + attachmentName(connectionIndex)
+				query.append("ATTACH " + FormatSQL.quoteText(connexionChain) + " AS " + attachmentName(connectionIndex)
 						+ " (TYPE postgres);\n");
 			}
 			executeQuery(connection, query);		
@@ -91,7 +92,14 @@ public class DuckdbDao {
 	
 
 	public void executeQuery(Connection connection, GenericPreparedStatementBuilder query) throws ArcException {
-		try (PreparedStatement stmt = connection.prepareStatement(query.getQueryWithParameters())) {
+
+		try (PreparedStatement stmt = connection.prepareStatement(query.getQuery().toString())) {
+			
+			// register bind variables
+			for (int i = 0; i < query.getParameters().size(); i++) {
+				UtilitaireDao.registerBindVariable(stmt, query, i);
+			}
+			
 			stmt.execute();
 		}
 		catch (SQLException e)

@@ -18,7 +18,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -452,11 +451,11 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * @param bindVariableIndex
 	 * @throws SQLException
 	 */
-	private static void registerBindVariable(PreparedStatement targetPreparedStatement,
+	public static void registerBindVariable(PreparedStatement targetPreparedStatement,
 			GenericPreparedStatementBuilder requete, int bindVariableIndex) throws SQLException {
 		if (requete.getParameters().get(bindVariableIndex).getType().equals(ParameterType.STRING)) {
 			targetPreparedStatement.setString(bindVariableIndex + 1,
-					(String) requete.getParameters().get(bindVariableIndex).getValue());
+					(String) requete.getParameters().get(bindVariableIndex).getValue());		
 		} else if (requete.getParameters().get(bindVariableIndex).getType().equals(ParameterType.INT)) {
 			targetPreparedStatement.setInt(bindVariableIndex + 1,
 					(Integer) requete.getParameters().get(bindVariableIndex).getValue());
