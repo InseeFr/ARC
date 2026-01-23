@@ -101,14 +101,7 @@ public class SynchronizeDataByPilotageDao {
 	@SqlInjectionChecked
 	public static ArcPreparedStatementBuilder requeteListAllTemporaryTablesInEnv(String envExecution) {
 		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
-		TraitementPhase[] phase = TraitementPhase.values();
-		// on commence après la phase "initialisation". i=2
-		for (int i = 0; i < phase.length; i++) {
-			if (i > 0) {
-				requete.append(SQL.UNION_ALL);
-			}
-			requete.append(FormatSQL.tableExists(ViewEnum.getFullName(envExecution, phase[i] + "%" + FormatSQL.TMP+ "%")));
-		}
+		requete.append(FormatSQL.tableExists(ViewEnum.getFullName(envExecution, "%" + FormatSQL.TMP+ "%")));
 		return requete;
 	}
 

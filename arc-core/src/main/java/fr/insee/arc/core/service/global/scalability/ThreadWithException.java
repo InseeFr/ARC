@@ -7,7 +7,7 @@ import fr.insee.arc.utils.exception.ArcExceptionMessage;
 
 // sonar cannot detect that the runnables are defined in children classes
 @SuppressWarnings("java:S2134")
-public class ThreadDispatchOn extends Thread {
+public class ThreadWithException extends Thread {
 
 	
 	private boolean errorInThread = false;
@@ -36,10 +36,10 @@ public class ThreadDispatchOn extends Thread {
 	 * @param threadsToJoin
 	 * @throws ArcException
 	 */
-	public static void execute(List<ThreadDispatchOn> threadsToJoin) throws ArcException {
+	public static void execute(List<ThreadWithException> threadsToJoin) throws ArcException {
 
 		// start threads
-		for (ThreadDispatchOn t : threadsToJoin)
+		for (ThreadWithException t : threadsToJoin)
 		{
 			t.start();
 		}
@@ -47,7 +47,7 @@ public class ThreadDispatchOn extends Thread {
 		// finish threads and report
 		boolean errorInThreads = false;
 
-		for (ThreadDispatchOn t:threadsToJoin)
+		for (ThreadWithException t:threadsToJoin)
 		{
 			t.finish();
 			errorInThreads = errorInThreads || t.isErrorInThread();

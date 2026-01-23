@@ -261,9 +261,9 @@ public class MultiThreading {
 	private static void configAndRestrictConnexion(int poolId, String anEnvExecution, String restrictedUsername,
 			Connection connection) throws ArcException {
 		UtilitaireDao.get(poolId).executeRequest(connection,
-				DatabaseConnexionConfiguration.configConnection(anEnvExecution)
-				.append((restrictedUsername.equals("") ? new GenericPreparedStatementBuilder() : FormatSQL.changeRole(restrictedUsername)))
+					DatabaseConnexionConfiguration.configAndRestrictConnexionQuery(anEnvExecution, restrictedUsername)
 				);
 	}
+
 
 }

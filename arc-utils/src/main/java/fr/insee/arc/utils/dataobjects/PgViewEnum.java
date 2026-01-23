@@ -24,6 +24,11 @@ public enum PgViewEnum {
 
 	// postgres meta table
 	, PG_TABLES("pg_tables", PgSchemaEnum.CATALOG, PgColumnEnum.SCHEMANAME, PgColumnEnum.TABLENAME)
+	
+	// fast update utility tables
+	, TABLE_FAST_UPDATE_CONTAINER("fuc",PgSchemaEnum.TEMPORARY)
+	, TABLE_FAST_UPDATE_IMAGE("fui",PgSchemaEnum.TEMPORARY)
+	
 	;
 
 	private PgViewEnum(String tableName, PgSchemaEnum location, PgColumnEnum...columns) {

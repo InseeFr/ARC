@@ -1,6 +1,8 @@
 package fr.insee.arc.core.service.engine.initialisation;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
@@ -25,7 +27,7 @@ import fr.insee.arc.utils.structure.GenericBean;
 public class BddPatcherTest extends InitializeQueryTest {
 
 	private static String newVersionBuildDate = "2024-04-11T13:25:42+0200";
-	private static String userWithRestrictedRights = "";
+	private static String userWithRestrictedRights = "arc_restricted";
 	
 	public static String testMetaDataSchema= "arc";
 
@@ -46,6 +48,7 @@ public class BddPatcherTest extends InitializeQueryTest {
 		// test an arc database
 		createDatabase(userWithRestrictedRights);
 		testDatabaseCreation();
+		testRestrictedRole();
 
 		createDatabase("");
 		testDatabaseCreation();
@@ -89,36 +92,244 @@ public class BddPatcherTest extends InitializeQueryTest {
 			}
 		}
 	}
+	
+	public static void testRestrictedRole() throws ArcException
+	{
+		
+		addSampleToTestArcRestrictedUser();
+		
+		switchToRestrictedUserTest();
+
+		arcRestrictedUserCanReadDataFromSandbox();
+		
+		arcRestrictedUserCannotWriteOnArcSchema();
+
+		arcRestrictedUserCanReadOnArcSchema();
+
+		arcRestrictedUserCannotWriteOnSandboxSchema();
+
+		arcRestrictedUserCanCreateNewTableOnSandboxSchema();
+		
+		switchToPowerUser();
+
+	}
+
+	/**
+	 * Switch back to power user
+	 * @throws ArcException
+	 */
+	private static void switchToPowerUser() throws ArcException {
+		GenericPreparedStatementBuilder query;
+		query = new GenericPreparedStatementBuilder();
+		query.append("RESET role;");
+		UtilitaireDao.get(0).executeRequest(c, query);
+	}
+
+	/**
+	 * Insert a line in the arc_bas1.pilotage sandbox table with power user
+	 * Used to see if arc restricted user will be able to read it as it should
+	 * @throws ArcException
+	 */
+	private static void addSampleToTestArcRestrictedUser() throws ArcException {
+		GenericPreparedStatementBuilder query;
+		query = new GenericPreparedStatementBuilder();
+		query = new GenericPreparedStatementBuilder();
+		query.append("insert into arc_bas1.pilotage_fichier (id_source) values ('test.txt');");
+		UtilitaireDao.get(0).executeRequest(c, query);
+	}
+
+	/**
+	 * Switch from the power user to the restricted user
+	 * It tests that the restricted user had been well created from the database initialization script
+	 * @throws ArcException
+	 */
+	private static void switchToRestrictedUserTest() throws ArcException {
+		GenericPreparedStatementBuilder query;
+
+		query = new GenericPreparedStatementBuilder();
+		query.build("SELECT set_config('role', ", query.quoteText(userWithRestrictedRights),", false);");
+		UtilitaireDao.get(0).executeRequest(c, query);
+		
+		// check the current user has switched to the restricted user
+		query = new GenericPreparedStatementBuilder();
+		query.append("select current_user");
+		assertEquals(userWithRestrictedRights, UtilitaireDao.get(0).getString(c, query));
+	}
+
+	/**
+	 * The restricted user shouldn't have any right to write on any sandbox schema
+	 * Test occurs on arc_bas1 schema
+	 */
+	private static void arcRestrictedUserCannotWriteOnSandboxSchema() {
+		assertThrows(ArcException.class,
+				() ->
+			{
+			GenericPreparedStatementBuilder q = new GenericPreparedStatementBuilder();
+
+			q = new GenericPreparedStatementBuilder();
+			q.append("insert into arc_bas1.pilotage_fichier (id_source) values ('test.txt');");
+			UtilitaireDao.get(0).executeRequest(c, q);
+			}
+		);
+
+		assertThrows(ArcException.class,
+				() ->
+			{
+			GenericPreparedStatementBuilder q = new GenericPreparedStatementBuilder();
+
+			q = new GenericPreparedStatementBuilder();
+			q.append("drop table arc_bas1.pilotage_fichier;");
+			UtilitaireDao.get(0).executeRequest(c, q);
+			}
+		);
+
+		assertThrows(ArcException.class,
+				() ->
+			{
+			GenericPreparedStatementBuilder q = new GenericPreparedStatementBuilder();
+
+			q = new GenericPreparedStatementBuilder();
+			q.append("delete from arc_bas1.pilotage_fichier;");
+			UtilitaireDao.get(0).executeRequest(c, q);
+			}
+		);
+	}
+
+	/**
+	 * The restricted user shouldn't have any right to write on the metadata arc schema
+	 */
+	private static void arcRestrictedUserCannotWriteOnArcSchema() {
+
+		assertThrows(ArcException.class,
+				() ->
+			{
+			GenericPreparedStatementBuilder q = new GenericPreparedStatementBuilder();
+			q = new GenericPreparedStatementBuilder();
+			q.append("insert into arc.ext_etat (id) values (3);");
+			UtilitaireDao.get(0).executeRequest(c, q);
+			}
+		);
+		
+		assertThrows(ArcException.class,
+				() ->
+			{
+			GenericPreparedStatementBuilder q = new GenericPreparedStatementBuilder();
+			q = new GenericPreparedStatementBuilder();
+			q.append("drop table if exists arc.ext_etat;");
+			UtilitaireDao.get(0).executeRequest(c, q);
+			}
+		);
+		
+		assertThrows(ArcException.class,
+				() ->
+			{
+			GenericPreparedStatementBuilder q = new GenericPreparedStatementBuilder();
+
+			q = new GenericPreparedStatementBuilder();
+			q.append("delete from arc.ext_etat;");
+			UtilitaireDao.get(0).executeRequest(c, q);
+			}
+		);
+	}
+
+	/**
+	 * The restricted user has the right to read on the metadata arc schema
+	 */
+	private static void arcRestrictedUserCanReadOnArcSchema() {
+
+		assertDoesNotThrow(
+				() ->
+			{
+			GenericPreparedStatementBuilder q = new GenericPreparedStatementBuilder();
+			q = new GenericPreparedStatementBuilder();
+			q.append("SELECT * FROM arc.ext_etat;");
+			UtilitaireDao.get(0).executeRequest(c, q);
+			}
+		);
+	}
+	
+	/**
+	 * The restricted user should be able to read any schema and use some function
+	 * @throws ArcException
+	 */
+	private static void arcRestrictedUserCanReadDataFromSandbox() throws ArcException {
+		
+		// check if the restricted user can use a function it should be able to use
+		GenericPreparedStatementBuilder query;
+		query = new GenericPreparedStatementBuilder();
+		query.append("select arc.isdate('20240101','YYYYMMDD')::text as result");
+		assertEquals("true", new GenericBean(UtilitaireDao.get(0).executeRequest(c, query)).getColumnValues("result").get(0));
+
+		// check is restricted user can read from the sandbox schema arc_bas1
+		query = new GenericPreparedStatementBuilder();
+		query.append("select count(*) from arc_bas1.pilotage_fichier");
+		assertEquals(1, UtilitaireDao.get(0).getInt(c, query));
+	}
+	
+	/**
+	 * Restricted user can create new schema
+	 * @throws ArcException
+	 */
+	private static void arcRestrictedUserCanCreateNewTableOnSandboxSchema() throws ArcException {
+		assertDoesNotThrow(
+				() ->
+		{	
+			GenericPreparedStatementBuilder query;
+			query = new GenericPreparedStatementBuilder();
+			query.append("CREATE TABLE arc_bas1.table_to_create (dummy text);");
+			query.append("DROP TABLE arc_bas1.table_to_create;");
+			UtilitaireDao.get(0).executeRequest(c, query);
+		}
+		);
+		
+	}
 
 	/**
 	 * create a blank arc database based on bddScript method
 	 * @throws ArcException
 	 */
 	private static void createDatabase(String restrictedUser) throws ArcException {
-		GenericPreparedStatementBuilder query;
-
-		query = new GenericPreparedStatementBuilder();
-		query.append("select distinct schemaname from pg_tables where schemaname like 'arc%';");
-		List<String> schemasToDelete = new GenericBean(UtilitaireDao.get(0).executeRequest(c, query)).getColumnValues("schemaname");
 		
-		// clean database
-		query = new GenericPreparedStatementBuilder();
-		for (String schemaToDelete:schemasToDelete)
-		{
-			query.append("DROP SCHEMA IF EXISTS " + schemaToDelete + " CASCADE;");
-		}
-		query.append("DROP SCHEMA IF EXISTS public CASCADE;");
-		UtilitaireDao.get(0).executeRequest(c, query);
+		resetDatabase();
 
 		BddPatcher patcher=new BddPatcher();
 		patcher.getProperties().setVersionDate(newVersionBuildDate);
-		patcher.getProperties().setDatabaseRestrictedUsername(userWithRestrictedRights);
+		patcher.getProperties().setDatabaseRestrictedUsername(restrictedUser);
 
 		// metadata schema creation
 		patcher.bddScript(c);
 		// sandbox schema creation
 		patcher.bddScript(c, testSandbox1, testSandbox2, testSandbox8);
 		
+	}
+
+	/**
+	 * reset the database and its user
+	 * @throws ArcException
+	 */
+	private static void resetDatabase() throws ArcException {
+
+		switchToPowerUser();
+				
+		GenericPreparedStatementBuilder query = new GenericPreparedStatementBuilder();
+		query.append("select distinct schemaname from pg_tables where schemaname like 'arc%';");
+		List<String> schemasToDelete = new GenericBean(UtilitaireDao.get(0).executeRequest(c, query)).getColumnValues("schemaname");
+		
+		// clean database
+		query = new GenericPreparedStatementBuilder();
+		
+		for (String schemaToDelete:schemasToDelete)
+		{
+			query.append("DROP SCHEMA IF EXISTS " + schemaToDelete + " CASCADE;");
+		}
+		query.append("DROP SCHEMA IF EXISTS public CASCADE;");
+		UtilitaireDao.get(0).executeRequest(c, query);
+		
+		// revoke and remove arc_restricted to be able to test its effect
+		query = new GenericPreparedStatementBuilder();
+		query.append("do $$ begin DROP OWNED BY "+userWithRestrictedRights+"; exception when others then end; $$; DROP ROLE IF EXISTS "+userWithRestrictedRights+" ");
+		
+		UtilitaireDao.get(0).executeRequest(c, query);
 	}
 	
 	/**

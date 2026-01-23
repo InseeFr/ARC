@@ -13,6 +13,7 @@ import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.service.p5mapping.bo.rules.RegleMappingClePrimaire;
 import fr.insee.arc.core.service.p5mapping.dao.MappingQueries;
+import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.database.Delimiters;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.format.Format;
@@ -61,6 +62,14 @@ public class TableMapping implements IConstanteCaractere, IConstanteNumerique {
 	private String nomTableTemporaire;
 
 	private Set<RegleMappingClePrimaire> ensembleRegleMappingClefPrimaire;
+	
+	// SQL clauses derivated from table
+	private StringBuilder select;
+	private StringBuilder groupBy;
+	private StringBuilder where;
+	private StringBuilder whereAllNonClefNull;
+	private StringBuilder allVar;
+	
 
 	public TableMapping(String anEnvironnement, String aNomTableCourt) {
 		this.nomTableCourt = aNomTableCourt;
@@ -68,7 +77,7 @@ public class TableMapping implements IConstanteCaractere, IConstanteNumerique {
 		this.ensembleVariableMapping = new TreeSet<>();
 		this.environnement = anEnvironnement;
 		this.ensembleRegleMappingClefPrimaire = new HashSet<>();
-		this.nomTableTemporaire = "tableMappingTemp_" + this.nomTableCourt;
+		this.nomTableTemporaire = ViewEnum.getFullName(anEnvironnement, FormatSQL.temporaryTableName(this.nomTableCourt));
 		this.ensembleIdentifiantsRubriques = new HashSet<>();
 		this.mapGroupeToEnsembleIdentifiantsRubriques = new TreeMap<>();
 		this.mapGroupeToEnsembleNomsRubriques = new TreeMap<>();
@@ -77,6 +86,11 @@ public class TableMapping implements IConstanteCaractere, IConstanteNumerique {
 		this.ensembleVariableClefString = new TreeSet<>();
 		this.ensembleVariableNonClef = new TreeSet<>();
 		this.isGroupe = false;
+		this.select = new StringBuilder();
+		this.groupBy = new StringBuilder();
+		this.where = new StringBuilder();
+		this.whereAllNonClefNull = new StringBuilder();
+		this.allVar = new StringBuilder();
 	}
 
 	public void ajouterVariable(VariableMapping variable) {
@@ -230,8 +244,10 @@ public class TableMapping implements IConstanteCaractere, IConstanteNumerique {
 
 	public ArcPreparedStatementBuilder requeteCreation() {
 		ArcPreparedStatementBuilder returned = new ArcPreparedStatementBuilder();
-		returned.append(FormatSQL.dropTable(this.getNomTableTemporaire()));
-		returned.append("CREATE TEMPORARY TABLE "+ this.getNomTableTemporaire() + " (");
+		returned.append(FormatSQL.dropTable(this.nomTableTemporaire));
+		
+		returned.build(SQL.CREATE, this.nomTableTemporaire.contains(".")?SQL.UNLOGGED:SQL.TEMPORARY , SQL.TABLE, this.nomTableTemporaire, " (");
+		
 		boolean isFirst = true;
 		for (VariableMapping variable : this.getEnsembleVariableMapping()) {
 			if (isFirst) {
@@ -309,14 +325,18 @@ public class TableMapping implements IConstanteCaractere, IConstanteNumerique {
 	 *
 	 * @return {@code INSERT INTO <table_definitive> (<champs>) SELECT <champs> FROM <table_temporaire>}
 	 */
-	public String requeteTransfererVersTableFinale() {
-		StringBuilder returned = new StringBuilder("INSERT INTO " + this.getNomTable());
+	public ArcPreparedStatementBuilder requeteTransfererVersTableFinale() {
+
 		StringBuilder nomsVariables = new StringBuilder();
 		sqlListeVariables(nomsVariables);
-		returned.append(" (" + nomsVariables + ")")//
-				.append("\nSELECT " + nomsVariables)//
-				.append("\nFROM " + this.getNomTableTemporaire() + semicolon + newline);
-		return returned.toString();
+
+		ArcPreparedStatementBuilder returned = new ArcPreparedStatementBuilder();
+		returned.build(SQL.INSERT_INTO, this.getNomTable(), "(", nomsVariables, ")");
+		returned.build(SQL.SELECT, nomsVariables, SQL.FROM, this.getNomTableTemporaire(), SQL.END_QUERY);
+		
+		returned.build(SQL.DROP, SQL.TABLE, SQL.IF_EXISTS, this.getNomTableTemporaire(), SQL.END_QUERY);
+		
+		return returned;
 	}
 
 	/**
@@ -398,8 +418,7 @@ public class TableMapping implements IConstanteCaractere, IConstanteNumerique {
 	 *                var4
 	 * @param alias
 	 */
-	public void sqlListeVariablesArrayAgg(StringBuilder select, StringBuilder groupBy, StringBuilder where,
-			StringBuilder whereAllNonClefNull, StringBuilder allVar, String alias) {
+	public void prepareSQLVariablesArrayAgg() {
 		boolean isFirst = true;
 		boolean isFirstGroupVar = true;
 		boolean isFirstAggVar = true;
@@ -621,5 +640,27 @@ public class TableMapping implements IConstanteCaractere, IConstanteNumerique {
 						.substringAfterFirst(ManipString.substringAfterFirst(this.getNomTableCourt(), "_"), "_"), "_")
 				.toLowerCase();
 	}
+
+	public StringBuilder getSelect() {
+		return select;
+	}
+
+	public StringBuilder getGroupBy() {
+		return groupBy;
+	}
+
+	public StringBuilder getWhere() {
+		return where;
+	}
+
+	public StringBuilder getWhereAllNonClefNull() {
+		return whereAllNonClefNull;
+	}
+
+	public StringBuilder getAllVar() {
+		return allVar;
+	}
+	
+	
 
 }

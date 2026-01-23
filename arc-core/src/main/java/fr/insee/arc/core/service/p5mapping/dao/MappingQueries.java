@@ -47,7 +47,7 @@ import fr.insee.arc.utils.utils.ManipString;
  * pseudo-SQL qu'il faudra interpréter) (voir
  * {@link #attribuerExpressionRegleMapping(Map)}). 3. Dérivation des règles en
  * composition d'éléments terminaux. La requête textuelle SQL de mapping
- * s'obtient par l'invocation de la méthode {@link #getRequete(String)}. La
+ * s'obtient par l'invocation de la méthode {@link #getQueriesThatInsertDataIntoTemporaryModelTable(String)}. La
  * première invocation calcule la requête, les suivantes la restituent telle que
  * calculée la première fois.
  */
@@ -80,8 +80,6 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 	/*
 	 * LA REQUÊTE TEXTUELLE
 	 */
-	private String requeteTextuelleInsertion;
-	private boolean isRequeteCalculee;
 	private String idFamille;
 	private JeuDeRegle jeuDeRegle;
 	private String environnement;
@@ -94,18 +92,17 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 	 * LES NOMS DES TABLES UTILES
 	 */
 	private String nomTableModVariableMetier;
-	private String nomTablePrecedente;
 	private String nomTableSource;
 	private String nomTableRegleMapping;
 	private String nomTableTemporairePrepUnion;
 	private String nomTableTemporaireIdTable;
-	private String nomTableTemporaireFinale;
-	private String nomTableFichierCourant;
+	private String tableLienIdentifiants;
 
 	private static final String ID_TABLE = "id_table";
+	
+	Map<String, String> reglesIdentifiantes;
 
 	private MappingQueries() {
-		this.isRequeteCalculee = false;
 		this.ensembleTableMapping = new HashSet<>();
 		this.ensembleVariableMapping = new HashSet<>();
 		this.ensembleGroupes = new TreeSet<>();
@@ -127,7 +124,7 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 		this.connexion = aConnexion;
 		this.jeuDeRegle = aJeuDeRegle;
 		this.environnement = anEnvironnement;
-		this.nomTablePrecedente = aNomTablePrecedente;
+		this.nomTableSource = aNomTablePrecedente;
 		this.nomTableModVariableMetier = ViewEnum.MOD_VARIABLE_METIER.getFullName(this.environnement);
 		this.nomTableRegleMapping = ViewEnum.MAPPING_REGLE.getFullName(this.environnement);
 	}
@@ -328,54 +325,90 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 		return mapVariable;
 	}
 
+	
+	/**
+	 * Calcul les identifiants de chaque table du modèle en les mettant en correspondance
+	 * @param aNomFichier
+	 * @return
+	 * @throws ArcException
+	 */
+	public String construireTableLienIdentifiants() throws ArcException {
+		StringBuilder requeteGlobale = new StringBuilder();
+
+		this.reglesIdentifiantes = new HashMap<>();
+		Map<String, String> nomsVariablesGroupe = new HashMap<>();
+		Map<String, String> linkedIds = new HashMap<>();
+
+		construireListeIdentifiants(this.reglesIdentifiantes, nomsVariablesGroupe, linkedIds);
+		
+		construireTableIdentifiantsFichierCourant(requeteGlobale, this.reglesIdentifiantes, nomsVariablesGroupe,
+				linkedIds);
+		
+		return requeteGlobale.toString();
+		
+	}
+	
 	/**
 	 *
 	 * @param aNomFichier
-	 * @return la requête de mapping pour le fichier {@code aNomFichier}
+	 * @return a map with the model table as key and the query that inserts data as value
 	 * @throws ArcException
 	 */
-	public String getRequete(String aNomFichier) throws ArcException {
+	public Map<TableMapping,StringBuilder> getQueriesThatInsertDataIntoTemporaryModelTable(String aNomFichier) throws ArcException {
 
-		if (!this.isRequeteCalculee) {
-			StringBuilder requeteGlobale = new StringBuilder("");
-
-			requeteGlobale.append(ModeRequete.NESTLOOP_OFF);
-
-			construireTablePrecedente(requeteGlobale);
-
-			Map<String, String> reglesIdentifiantes = new HashMap<>();
-			Map<String, String> nomsVariablesGroupe = new HashMap<>();
-			Map<String, String> linkedIds = new HashMap<>();
-
-			construireListeIdentifiants(reglesIdentifiantes, nomsVariablesGroupe, linkedIds);
-			construireTableIdentifiantsFichierCourant(requeteGlobale, reglesIdentifiantes, nomsVariablesGroupe,
-					linkedIds);
-			Map<TableMapping, List<TableMapping>> tablesFilles = ordonnerTraitementTable();
+			Map<TableMapping,StringBuilder> queryByTable = new HashMap<>();
 
 			for (TableMapping table : this.ensembleTableMapping) {
+				
+				StringBuilder requeteGlobale = new StringBuilder();
+				requeteGlobale.append(ModeRequete.NESTLOOP_OFF);
+				
 				this.nomTableTemporairePrepUnion = "prep_union";
 				this.nomTableTemporaireIdTable = "table_id";
-				this.nomTableTemporaireFinale = "table_finale_" + table.getNomTableCourt();
 
 				creerTablePrepUnion(requeteGlobale, table);
 				insererTablePrepUnion(requeteGlobale, table, reglesIdentifiantes);
-				calculerRequeteArrayAggGroup(requeteGlobale, table, tablesFilles);
-				calculerRequeteFinale(requeteGlobale, table);
+				
+				// compute sql expression
+				table.prepareSQLVariablesArrayAgg();
+				
+				calculerRequeteArrayAggGroup(table.getNomTableTemporaire(), requeteGlobale, table);
+				requeteGlobale.append(FormatSQL.dropTable(this.nomTableTemporairePrepUnion, this.nomTableTemporaireIdTable));
+				requeteGlobale.append(ModeRequete.NESTLOOP_ON);
 
-				requeteGlobale.append(FormatSQL.dropTable(this.nomTableTemporairePrepUnion));
-				requeteGlobale.append(FormatSQL.dropTable(this.nomTableTemporaireIdTable));
+				queryByTable.put(table, requeteGlobale);
 			}
-			requeteGlobale.append(FormatSQL.dropTable(this.nomTableFichierCourant));
 
-			requeteGlobale.append(ModeRequete.NESTLOOP_ON);
 
+			return queryByTable;
 			
-			this.requeteTextuelleInsertion = requeteGlobale.toString();
-			this.isRequeteCalculee = true;
-		}
-		return this.requeteTextuelleInsertion.replace(TOKEN_ID_SOURCE, aNomFichier);
 	}
 
+	/**
+	 * Delete empty records from model tables
+	 * @param aNomFichier
+	 * @return
+	 * @throws ArcException
+	 */
+	public String deleteEmptyRecords(String aNomFichier) throws ArcException {
+		
+		// tables must be sorted from children to parent in order to delete records in the right order
+		Map<TableMapping, List<TableMapping>> tablesFilles = ordonnerTraitementTable();
+
+		StringBuilder requeteGlobale = new StringBuilder();
+		
+		for (TableMapping table : this.ensembleTableMapping) {
+		
+			deleteEmptyRecords(table.getNomTableTemporaire(), requeteGlobale, table, tablesFilles);
+
+		}
+		requeteGlobale.append(FormatSQL.dropTable(this.tableLienIdentifiants));
+
+		return requeteGlobale.toString().replace(TOKEN_ID_SOURCE, aNomFichier);
+		
+	}
+	
+	
 	/**
 	 *
 	 * @param returned
@@ -594,10 +627,10 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 
 		returned.append("\n FROM ");
 		if (modeIdentifiantGroupe) {
-			returned.append(this.nomTableFichierCourant + " d ");
+			returned.append(this.tableLienIdentifiants + " d ");
 
 		} else {
-			returned.append("(select * from " + this.nomTableFichierCourant + " a where not exists (select 1 from "
+			returned.append("(select * from " + this.tableLienIdentifiants + " a where not exists (select 1 from "
 					+ this.nomTableTemporaireIdTable + " b where a.id_table=b.id_table)) d ");
 		}
 
@@ -646,12 +679,14 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 		 */
 		returned.append("\n DROP TABLE IF EXISTS TMP_DATA CASCADE; ");
 		returned.append("\n CREATE TEMPORARY TABLE TMP_DATA " + FormatSQL.WITH_NO_VACUUM
-				+ " AS (SELECT g.* FROM fichier g, TMP_ID f where f.id_table=g.id_table); ");
+				+ " AS (SELECT g.* FROM " + this.tableLienIdentifiants + " g, TMP_ID f where f.id_table=g.id_table); ");
 
 		/*
 		 * Insert dans prep union : on fait notre calcul de mise au format
 		 */
 
+		
+		
 		returned.append("\n set local work_mem='" + ModeRequeteImpl.SORT_WORK_MEM + "';");
 		returned.append("\n INSERT INTO " + this.nomTableTemporairePrepUnion + " ");
 		returned.append("\n SELECT ");
@@ -693,15 +728,6 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 		return returned;
 	}
 
-	private StringBuilder construireTablePrecedente(StringBuilder returned) {
-		this.nomTableSource = "parallel_mapping";
-		returned.append("DROP TABLE IF EXISTS " + nomTableSource + ";");
-		returned.append("\n CREATE TEMPORARY TABLE " + nomTableSource + " " + FormatSQL.WITH_NO_VACUUM + " AS ");
-		returned.append("\n SELECT * from " + this.nomTablePrecedente + " where " + ColumnEnum.ID_SOURCE.getColumnName()
-				+ "='" + TOKEN_ID_SOURCE + "' ; ");
-		return returned;
-	}
-
 	/**
 	 * Ajoute à la liste des requêtes à exécuter la requête de création de la table
 	 * des identifiants techniques et enregistrements de la table pour le fichier
@@ -715,12 +741,11 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 	private StringBuilder construireTableIdentifiantsFichierCourant(StringBuilder returned,
 			Map<String, String> reglesIdentifiantes, Map<String, String> nomsVariablesGroupe,
 			Map<String, String> linkedIds) {
-		this.nomTableFichierCourant = "fichier";
+
 		Set<String> alreadyAdded = new HashSet<>();
 
-		returned.append("\n DROP TABLE IF EXISTS " + nomTableFichierCourant + " CASCADE;");
-		returned.append(
-				"\n CREATE TEMPORARY TABLE " + nomTableFichierCourant + " " + FormatSQL.WITH_NO_VACUUM + " AS ");
+		returned.append("\n DROP TABLE IF EXISTS " + tableLienIdentifiants + " CASCADE;");
+		returned.append("\n CREATE UNLOGGED TABLE " + tableLienIdentifiants + " " + FormatSQL.WITH_NO_VACUUM + " AS ");
 
 		// bloc 1 : calcul de l'identifiant groupe et non groupe
 
@@ -820,22 +845,6 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 	}
 
 	/**
-	 * 
-	 * @param returned
-	 * @param table
-	 * @return
-	 */
-	private StringBuilder calculerRequeteFinale(StringBuilder returned, TableMapping table) {
-
-		returned.append(
-				"\n INSERT INTO " + table.getNomTableTemporaire() + " (" + sqlListeVariablesOrdonnee(table) + ")");
-		returned.append("\n SELECT " + sqlListeVariablesOrdonnee(table));
-		returned.append("\n FROM " + this.nomTableTemporaireFinale + " ");
-		returned.append(";\n");
-		return returned;
-	}
-
-	/**
 	 *
 	 * @param table
 	 * @return la liste des variables de la table, énumérées dans un ordre immuable
@@ -852,27 +861,19 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 		return returned;
 	}
 
-	private StringBuilder calculerRequeteArrayAggGroup(StringBuilder returned, TableMapping table,
-			Map<TableMapping, List<TableMapping>> tablesFilles) {
+	private StringBuilder calculerRequeteArrayAggGroup(String nomTableTemporaireFinale, StringBuilder returned, TableMapping table) {
 
-		StringBuilder select = new StringBuilder();
-		StringBuilder groupBy = new StringBuilder();
-		StringBuilder where = new StringBuilder();
-		StringBuilder whereAllNonClefNull = new StringBuilder();
-		StringBuilder allVar = new StringBuilder();
+		StringBuilder select = table.getSelect();
+		StringBuilder groupBy = table.getGroupBy();
+		StringBuilder where = table.getWhere();
+		StringBuilder allVar = table.getAllVar();
 
-		table.sqlListeVariablesArrayAgg(select, groupBy, where, whereAllNonClefNull, allVar,
-				this.nomTableTemporairePrepUnion);
-
-		returned.append("\n DROP TABLE IF EXISTS " + this.nomTableTemporaireFinale + " ; ");
-
-		returned.append(
-				"\n CREATE TEMPORARY TABLE " + this.nomTableTemporaireFinale + " " + FormatSQL.WITH_NO_VACUUM + " AS ");
-		returned.append("\n SELECT * from " + table.getNomTableTemporaire() + " where false; ");
-
+	
+		returned.append(table.requeteCreation());
+		
 		// insertion 1 : on groupe les tableaux
 		// en retirant les lignes dans lesquels les cases "tableau" sont toutes nulles
-		returned.append("\n INSERT INTO " + this.nomTableTemporaireFinale + " (" + allVar + ") ");
+		returned.append("\n INSERT INTO " + nomTableTemporaireFinale + " (" + allVar + ") ");
 		returned.append(
 				"\n SELECT " + apply(select, FUNCTION_BEFORE, "array_agg(", FUNCTION_AFTER, " order by a.ctid)") + " ");
 		returned.append("\n FROM " + this.nomTableTemporairePrepUnion + " a ");
@@ -882,25 +883,38 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 		// insertion 2 (s'il y a un tableau)
 		// on insère les lignes distinctes avec les cases tableau toutes nulles
 		if (where.length() > 0) {
-			returned.append("\n INSERT INTO " + this.nomTableTemporaireFinale + " (" + allVar + ") ");
+			returned.append("\n INSERT INTO " + nomTableTemporaireFinale + " (" + allVar + ") ");
 			returned.append("\n SELECT " + apply(select, FUNCTION_BEFORE, "ARRAY[", FUNCTION_AFTER, "]") + " ");
 			returned.append("\n FROM prep_union a ");
-			returned.append("\n where not exists (select 1 from " + this.nomTableTemporaireFinale + " b where row("
+			returned.append("\n where not exists (select 1 from " + nomTableTemporaireFinale + " b where row("
 					+ apply(groupBy, ALIAS_TABLE, "a") + ")::text=row(" + apply(groupBy, ALIAS_TABLE, "b")
 					+ ")::text) ");
 			returned.append("\n group by " + allVar + ";");
 		}
 
-		/*
-		 * On supprime les enregistrements tout vide (variable non cléf a null pour type
-		 * normal et à {NULL} pour les types tableaux) et elligible à la suppression
-		 * (pas de lien vers table fille dans le modèle)
-		 */
-		returned.append("\n DELETE FROM " + this.nomTableTemporaireFinale + " a ");
+		return returned;
+	}
+	
+	/**
+	 * On supprime les enregistrements tous vides (variable non cléf a null pour type normal et à {NULL} pour les types tableaux) 
+	 * et elligible à la suppression, c'est à dire aucun enregistrement n'est trouvé dans les tables fille en correspondance 
+	 * avec l'enregistrement à supprimer
+	 * 
+	 * @param nomTableTemporaireFinale
+	 * @param returned
+	 * @param table
+	 * @param tablesFilles
+	 * @return
+	 */
+	private StringBuilder deleteEmptyRecords(String nomTableTemporaireFinale, StringBuilder returned, TableMapping table, Map<TableMapping, List<TableMapping>> tablesFilles)
+	{
+		StringBuilder whereAllNonClefNull = table.getWhereAllNonClefNull();
+		
+		returned.append("\n DELETE FROM " + nomTableTemporaireFinale + " a ");
 		returned.append("\n " + whereAllNonClefNull + " ");
 		if (tablesFilles.get(table) != null) {
 			for (TableMapping fille : tablesFilles.get(table)) {
-				returned.append("\n AND NOT EXISTS (SELECT 1 FROM table_finale_" + fille.getNomTableCourt()
+				returned.append("\n AND NOT EXISTS (SELECT 1 FROM " + fille.getNomTableTemporaire()
 						+ " b WHERE a." + table.getPrimaryKey() + "=b." + table.getPrimaryKey() + ") ");
 			}
 		}
@@ -951,38 +965,23 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 	}
 
 	/**
-	 *
-	 * @return la requête de destruction puis création des tables de mapping
-	 *         temporaires
+	 * Transfer the data of the temporary model tables to real model tables
+	 * @return
 	 */
-	public ArcPreparedStatementBuilder requeteCreationTablesTemporaires() {
+	public ArcPreparedStatementBuilder requeteTransfertVersTablesMetierDefinitives() {
 		ArcPreparedStatementBuilder returned = new ArcPreparedStatementBuilder();
-		boolean isFirstTable = true;
 		for (TableMapping table : this.ensembleTableMapping) {
-			if (isFirstTable) {
-				isFirstTable = false;
-			} else {
-				returned.append("\n");
-			}
-			returned.append(table.requeteCreation());
+			returned.append(table.requeteTransfererVersTableFinale());
 		}
 		return returned;
 	}
 
-	public String requeteTransfertVersTablesMetierDefinitives() {
-		StringBuilder returned = new StringBuilder();
-		for (TableMapping table : this.ensembleTableMapping) {
-			returned.append(table.requeteTransfererVersTableFinale());
-		}
-		return returned.toString();
+	public void setTableLienIdentifiants(String nomTableFichierCourant) {
+		this.tableLienIdentifiants = nomTableFichierCourant;
 	}
 
-	public String[] tableauNomsTablesTemporaires() {
-		List<String> returned = new ArrayList<>();
-		for (TableMapping table : this.ensembleTableMapping) {
-			returned.add(table.getNomTableTemporaire());
-		}
-		return returned.toArray(new String[0]);
+	public Set<TableMapping> getEnsembleTableMapping() {
+		return ensembleTableMapping;
 	}
 
 }

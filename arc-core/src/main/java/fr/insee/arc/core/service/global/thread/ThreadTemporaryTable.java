@@ -28,5 +28,7 @@ public class ThreadTemporaryTable {
 	public static final String TABLE_CONTROLE_ROW_TOTAL_COUNT_TEMP = ViewEnum.TMP_CONTROLE_ROW_TOTAL_COUNT_TEMP.getFullName();
 	
 	public static final String TABLE_MAPPING_DATA_TEMP = ViewEnum.TMP_MAPPING_DATA_TEMP.getFullName();
+	public static final String TABLE_MAPPING_IDS_LINK_TEMP = ViewEnum.TMP_MAPPING_IDS_LINK_TEMP.getFullName();
+
 	
 }

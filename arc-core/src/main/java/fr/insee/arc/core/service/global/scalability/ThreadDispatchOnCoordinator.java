@@ -9,7 +9,7 @@ import fr.insee.arc.utils.database.ArcDatabase;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
 
-public class ThreadDispatchOnCoordinator extends ThreadDispatchOn {
+public class ThreadDispatchOnCoordinator extends ThreadWithException {
 
 	private ThrowingConsumer<Connection> actionOnCoordinator;
 	

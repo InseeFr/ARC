@@ -294,7 +294,7 @@ $BODY$
 REVOKE ALL ON SCHEMA public FROM public;
 REVOKE ALL ON SCHEMA arc FROM public; 
 
--- restricted role for service execution
+-- create a restricted user role for service execution
 commit;do $$ 
 begin
 if ('{{userRestricted}}'!='') then 
@@ -302,9 +302,11 @@ if ('{{userRestricted}}'!='') then
 end if;
 exception when others then end; $$;
 
+-- grant usage to restricted user
+-- grant select in arc schema (nomenclature tables use case)
 commit;do $$ begin
 if ('{{userRestricted}}'!='') then 
-	execute 'GRANT USAGE ON SCHEMA public TO {{userRestricted}}; GRANT USAGE ON SCHEMA arc TO {{userRestricted}}; GRANT EXECUTE ON FUNCTION arc.isdate to {{userRestricted}}; GRANT USAGE, SELECT, UPDATE ON SEQUENCE arc.number_generator to {{userRestricted}};';
+	execute 'GRANT USAGE ON SCHEMA public TO {{userRestricted}}; GRANT USAGE ON SCHEMA arc TO {{userRestricted}}; GRANT SELECT on ALL TABLES IN schema arc TO {{userRestricted}}; ALTER DEFAULT privileges IN SCHEMA arc GRANT SELECT ON TABLES to {{userRestricted}}; GRANT EXECUTE ON FUNCTION arc.isdate to {{userRestricted}}; GRANT USAGE, SELECT, UPDATE ON SEQUENCE arc.number_generator to {{userRestricted}};';
 end if; 
 exception when others then end;
 $$;

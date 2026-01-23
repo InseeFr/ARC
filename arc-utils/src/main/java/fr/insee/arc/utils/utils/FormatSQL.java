@@ -1,6 +1,5 @@
 package fr.insee.arc.utils.utils;
 
-import java.lang.reflect.Array;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;

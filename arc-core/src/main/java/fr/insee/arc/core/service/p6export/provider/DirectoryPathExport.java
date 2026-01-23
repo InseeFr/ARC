@@ -2,6 +2,7 @@ package fr.insee.arc.core.service.p6export.provider;
 
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.dao.FileSystemManagement;
+import fr.insee.arc.utils.database.Delimiters;
 
 public class DirectoryPathExport {
 
@@ -36,8 +37,7 @@ public class DirectoryPathExport {
 	}
 	
 	public static String directoryExportTemp(String rootDirectory, String env, String clientExport, String dateExport) {
-		return FileSystemManagement.directoryPhaseRootSubdirectories(rootDirectory, env, TraitementPhase.EXPORT, clientExport,
-				dateExport, DIR_TEMP);
+		return new StringBuilder(directoryExport(rootDirectory, env, clientExport, dateExport)).append(Delimiters.FILE_TOKEN_DELIMITER).append(DIR_TEMP).toString();
 	}
 	
 	public static String s3Export(String env, String clientExport, String dateExport) {

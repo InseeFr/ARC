@@ -159,6 +159,7 @@ public enum ViewEnum {
 	, TMP_CONTROLE_META_TEMP("tca", SchemaEnum.TEMPORARY), TMP_CONTROLE_ROW_TOTAL_COUNT_TEMP("tcc", SchemaEnum.TEMPORARY)
 	
 	, TMP_MAPPING_DATA_TEMP("tmd", SchemaEnum.TEMPORARY)
+	, TMP_MAPPING_IDS_LINK_TEMP("tmf", SchemaEnum.TEMPORARY)
 
 	
 	
