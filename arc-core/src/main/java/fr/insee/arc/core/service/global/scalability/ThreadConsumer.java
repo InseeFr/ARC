@@ -11,7 +11,7 @@ import org.postgresql.core.BaseConnection;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 
-public class ThreadConsumer extends ThreadDispatchOn {
+public class ThreadConsumer extends ThreadWithException {
 
 	private InputStream is;
 	private int connectionIndex;

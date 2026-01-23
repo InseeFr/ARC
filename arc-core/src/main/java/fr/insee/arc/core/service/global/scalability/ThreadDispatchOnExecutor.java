@@ -8,7 +8,7 @@ import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
 
-public class ThreadDispatchOnExecutor extends ThreadDispatchOn {
+public class ThreadDispatchOnExecutor extends ThreadWithException {
 			
 	private ThrowingConsumer<Connection> actionOnExecutor;
 	private int executorConnectionIndex;

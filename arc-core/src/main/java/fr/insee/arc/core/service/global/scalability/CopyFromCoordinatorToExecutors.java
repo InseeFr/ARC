@@ -16,7 +16,7 @@ public class CopyFromCoordinatorToExecutors {
 
 	private int numberOfExecutorNods = ArcDatabase.numberOfExecutorNods();
 	private List<ThreadConsumer> tcs;
-	private List<ThreadDispatchOn> threadsToExecute;
+	private List<ThreadWithException> threadsToExecute;
 	
 	// tee outputStream
 	// it copy data to several outputstreams
@@ -49,7 +49,7 @@ public class CopyFromCoordinatorToExecutors {
 	 */
 	private void streamData() throws ArcException {
 
-		ThreadDispatchOn.execute(threadsToExecute);
+		ThreadWithException.execute(threadsToExecute);
 		
 	}
 

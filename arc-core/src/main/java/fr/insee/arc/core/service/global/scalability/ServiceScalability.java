@@ -26,7 +26,7 @@ public class ServiceScalability {
 	public static int dispatchOnNods(Connection coordinatorConnexion, ThrowingConsumer<Connection> actionOnCoordinator, ThrowingConsumer<Connection> actionOnExecutor) throws ArcException
 	{
 		
-		List<ThreadDispatchOn> threadPool = new ArrayList<ThreadDispatchOn>();	
+		List<ThreadWithException> threadPool = new ArrayList<ThreadWithException>();	
 		threadPool.add(new ThreadDispatchOnCoordinator(coordinatorConnexion, actionOnCoordinator));
 
 		// dispatch when scaled
@@ -41,7 +41,7 @@ public class ServiceScalability {
 		}
 
 		// execute threads and report problems
-		ThreadDispatchOn.execute(threadPool);
+		ThreadWithException.execute(threadPool);
 
 		// return number of nods
 		return numberOfExecutorNods;

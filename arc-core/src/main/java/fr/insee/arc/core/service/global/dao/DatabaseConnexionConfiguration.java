@@ -35,4 +35,11 @@ public class DatabaseConnexionConfiguration {
 	}
 
 	
+	public static GenericPreparedStatementBuilder configAndRestrictConnexionQuery(String anEnvExecution, String restrictedUsername)
+	{
+		GenericPreparedStatementBuilder query = DatabaseConnexionConfiguration.configConnection(anEnvExecution);
+		query.append((restrictedUsername.equals("") ? new GenericPreparedStatementBuilder() : FormatSQL.changeRole(restrictedUsername)));
+		return query;
+	}
+	
 }

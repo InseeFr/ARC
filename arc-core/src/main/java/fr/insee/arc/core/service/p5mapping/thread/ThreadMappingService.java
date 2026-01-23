@@ -1,12 +1,17 @@
 package fr.insee.arc.core.service.p5mapping.thread;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
+import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.bo.JeuDeRegle;
@@ -19,17 +24,21 @@ import fr.insee.arc.core.service.global.dao.TableNaming;
 import fr.insee.arc.core.service.global.dao.TableOperations;
 import fr.insee.arc.core.service.global.dao.ThreadOperations;
 import fr.insee.arc.core.service.global.scalability.ScalableConnection;
+import fr.insee.arc.core.service.global.scalability.ThreadWithException;
 import fr.insee.arc.core.service.global.thread.ThreadConstant;
 import fr.insee.arc.core.service.global.thread.ThreadTemplate;
 import fr.insee.arc.core.service.global.thread.ThreadTemporaryTable;
 import fr.insee.arc.core.service.mutiphase.thread.ThreadMultiphaseService;
+import fr.insee.arc.core.service.p5mapping.bo.TableMapping;
 import fr.insee.arc.core.service.p5mapping.dao.MappingQueries;
 import fr.insee.arc.core.service.p5mapping.dao.MappingQueriesFactory;
+import fr.insee.arc.core.service.p5mapping.dao.ThreadExecuteMappingTable;
 import fr.insee.arc.core.service.p5mapping.dao.ThreadMappingQueries;
 import fr.insee.arc.core.service.p5mapping.operation.MappingOperation;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
+import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.utils.utils.Sleep;
 
 /**
@@ -47,10 +56,13 @@ public class ThreadMappingService extends ThreadTemplate {
 	private int indice;
 	private String tableTempControleOk;
 	private String tableMappingPilTemp;
-
+	private String tableLienIdentifiants;
+	
 	private ThreadOperations arcThreadGenericDao;
 
 	private GenericQueryDao genericExecutorDao;
+
+	private Map<TableMapping, StringBuilder> queriesThatInsertDataIntoTemporaryModelTables = new HashMap<>();
 	
 	
 	private TraitementPhase currentExecutedPhase = TraitementPhase.MAPPING;
@@ -67,9 +79,11 @@ public class ThreadMappingService extends ThreadTemplate {
 		this.tabIdSource = anApi.getTabIdSource();
 		this.paramBatch = anApi.getParamBatch();
 
-		this.tableTempControleOk = ThreadTemporaryTable.TABLE_MAPPING_DATA_TEMP;
+		this.tableTempControleOk = ViewEnum.getFullName(envExecution, FormatSQL.temporaryTableName(ThreadTemporaryTable.TABLE_MAPPING_DATA_TEMP));
 		this.tableMappingPilTemp = ThreadTemporaryTable.TABLE_PILOTAGE_THREAD;
 
+		this.tableLienIdentifiants = ViewEnum.getFullName(envExecution, FormatSQL.temporaryTableName(ThreadTemporaryTable.TABLE_MAPPING_IDS_LINK_TEMP));
+		
 		this.tablePil = anApi.getTablePil();
 		this.genericExecutorDao = new GenericQueryDao(this.connexion.getExecutorConnection());
 
@@ -90,8 +104,13 @@ public class ThreadMappingService extends ThreadTemplate {
 			StaticLoggerDispatcher.error(LOGGER, e);
 
 			try {
+				
+				// drop temporary tables
+				genericExecutorDao.initialize().addOperation(FormatSQL.dropTable(retrieveMappingTemporaryTables())).execute();
+				
 				PilotageOperations.traitementSurErreur(this.connexion.getCoordinatorConnection(),
 						this.currentExecutedPhase, this.tablePil, this.idSource, e);
+
 			} catch (ArcException e2) {
 				StaticLoggerDispatcher.error(LOGGER, e);
 
@@ -101,16 +120,28 @@ public class ThreadMappingService extends ThreadTemplate {
 	}
 
 	/**
+	 * Returns the list of temporary tables generated thrue the mapping process
+	 * @return
+	 */
+	private String[] retrieveMappingTemporaryTables() {
+		Set<String> temporaryTablesToRemove = new HashSet<>();
+		temporaryTablesToRemove.add(this.tableTempControleOk);
+		temporaryTablesToRemove.add(this.tableLienIdentifiants);
+		this.queriesThatInsertDataIntoTemporaryModelTables.keySet().stream().forEach(t-> temporaryTablesToRemove.add(t.getNomTableTemporaire()));
+		return temporaryTablesToRemove.toArray(new String[0]);
+	}
+
+	/**
 	 * @throws ArcException
 	 */
 	private void preparerExecution() throws ArcException {
-		genericExecutorDao.initialize();
-		genericExecutorDao.addOperation(this.arcThreadGenericDao.preparationDefaultDao());
-		genericExecutorDao.addOperation(RulesOperations.marqueJeuDeRegleApplique(this.currentExecutedPhase,
-				this.envExecution, this.tableMappingPilTemp));
-		genericExecutorDao.addOperation(TableOperations.createTableTravailIdSource(this.previousExecutedPhaseTable,
-				this.tableTempControleOk, this.idSource));
-		genericExecutorDao.executeAsTransaction();
+		genericExecutorDao.initialize()
+			.addOperation(this.arcThreadGenericDao.preparationDefaultDao())
+			.addOperation(RulesOperations.marqueJeuDeRegleApplique(this.currentExecutedPhase, 
+				this.envExecution, this.tableMappingPilTemp))
+			.addOperation(TableOperations.createTableTravailIdSource(this.previousExecutedPhaseTable,
+				this.tableTempControleOk, this.idSource))
+			.executeAsTransaction();
 	}
 
 	private void execute() throws ArcException {
@@ -132,17 +163,38 @@ public class ThreadMappingService extends ThreadTemplate {
 		MappingQueries requeteMapping = new MappingQueries(this.connexion.getExecutorConnection(),
 				regleMappingFactory, idFamille, jdr, this.getEnvExecution(), this.tableTempControleOk,
 				this.indice);
+
 		/*
-		 * Construire la requête de mapping (dérivation des règles)
+		 * Build and execute the query that computes and links all identifiers between each others
 		 */
+		requeteMapping.setTableLienIdentifiants(this.tableLienIdentifiants);
 		requeteMapping.construire();
+		genericExecutorDao.initialize().addOperation(requeteMapping.construireTableLienIdentifiants()).execute();
+		
+		/*
+		 * For each model table, compute a query that inserts the data into a temporary model table.
+		 */
+		this.queriesThatInsertDataIntoTemporaryModelTables = requeteMapping.getQueriesThatInsertDataIntoTemporaryModelTable(idSource);
 
+		/*
+		 * Execute the data insertion into the temporary model tables through parallel threads
+		 */
+		
+		List<ThreadWithException> threadList = queriesThatInsertDataIntoTemporaryModelTables.values().stream()
+				.map(query -> new ThreadExecuteMappingTable(connexion, this.getEnvExecution(),query))
+				.map(thread -> (ThreadWithException) thread)
+				.toList();
+		ThreadWithException.execute(threadList);
+			
+		/*
+		 * Delete empty records if there is not link in children tables
+		 */
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
-		// Créer les tables temporaires métier
-		query.append(requeteMapping.requeteCreationTablesTemporaires());
-		// calculer la requete du fichier
-		query.append(requeteMapping.getRequete(idSource));
+		query.append(requeteMapping.deleteEmptyRecords(idSource));
 
+		// clean the input temporary data table
+		query.append(FormatSQL.dropTable(this.tableTempControleOk));
+		
 		// promote the application user account to full right
 		query.append(DatabaseConnexionConfiguration.switchToFullRightRole());
 		

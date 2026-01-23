@@ -2,7 +2,7 @@ package fr.insee.arc.core.service.global.dao;
 
 import java.sql.Connection;
 
-import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
+import fr.insee.arc.utils.dao.GenericPreparedStatementBuilder;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 
@@ -14,15 +14,15 @@ public class GenericQueryDao {
 	}
 
 	private Connection connection;
-	private ArcPreparedStatementBuilder query;
+	private GenericPreparedStatementBuilder query;
 	
 	public GenericQueryDao initialize()
 	{
-		query = new ArcPreparedStatementBuilder();
+		query = new GenericPreparedStatementBuilder();
 		return this;
 	}
 	
-	public GenericQueryDao addOperation(ArcPreparedStatementBuilder newQuery)
+	public GenericQueryDao addOperation(GenericPreparedStatementBuilder newQuery)
 	{
 		query.append(newQuery);
 		return this;
@@ -40,20 +40,20 @@ public class GenericQueryDao {
 		return this;
 	}
 	
-	public void executeWithParameters() throws ArcException {
+	public void execute() throws ArcException {
 		UtilitaireDao.get(0).executeRequest(connection, query);
 	}	
 	
 	public void executeAsTransaction() throws ArcException
 	{
-        UtilitaireDao.get(0).executeRequest(this.connection, query.asTransaction().getQueryWithParameters());
+        UtilitaireDao.get(0).executeRequest(this.connection, query.asTransaction());
 	}
 
-	public ArcPreparedStatementBuilder getQuery() {
+	public GenericPreparedStatementBuilder getQuery() {
 		return query;
 	}
 
-	public void setQuery(ArcPreparedStatementBuilder query) {
+	public void setQuery(GenericPreparedStatementBuilder query) {
 		this.query = query;
 	}
 	

@@ -321,7 +321,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 
 		if (LOGGER.isEnabled(Level.TRACE)) {
 			LoggerHelper.traceAsComment(LOGGER, "START executeImmediate");
-			LoggerHelper.trace(LOGGER, "\n" + requete.getQueryWithParameters());
+			LoggerHelper.trace(LOGGER, "\n" + ModeRequete.configureQuery(requete, modes).getQueryWithParameters());
 		}
 
 		ConnectionWrapper connexionWrapper = initConnection(connexion);
@@ -835,8 +835,8 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		}
 		// construction de la requete
 		StringBuilder requete = new StringBuilder();
-		String tableFastUpdate = FormatSQL.temporaryTableName(tableName, "F");
-		String tableImage = FormatSQL.temporaryTableName(tableName, "I");
+		String tableFastUpdate = UtilitaireDaoTemporaryTable.TABLE_FAST_UPDATE_CONTAINER;
+		String tableImage = UtilitaireDaoTemporaryTable.TABLE_FAST_UPDATE_IMAGE;
 		requete.append(" drop table if exists " + tableFastUpdate + ";");
 
 		requete.append("\n create  ");

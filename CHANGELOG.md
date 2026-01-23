@@ -5,6 +5,9 @@
 - All notable changes to this project will be documented in this file.
 - jacoco aggregate
 
+## version-94.2.30b
+- performance. Vertical scaling for the operation that maps data to model table. For each model data table, one data insertion thread is created to lower the issue of having many model data tables.
+
 ## version-94.2.29b
 - ephemeral pvc for temporary tablespace
 
