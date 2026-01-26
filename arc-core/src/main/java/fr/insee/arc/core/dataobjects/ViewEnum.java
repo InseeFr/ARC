@@ -2,10 +2,7 @@ package fr.insee.arc.core.dataobjects;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.database.Delimiters;
 import fr.insee.arc.utils.dataobjects.PgColumnEnum;
 import fr.insee.arc.utils.dataobjects.PgViewEnum;

@@ -13,6 +13,8 @@ import org.apache.logging.log4j.Logger;
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.dataobjects.ViewEnum;
+import fr.insee.arc.core.model.ExportOption;
+import fr.insee.arc.core.model.TraitementEtape;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.dao.TableNaming;
@@ -223,7 +225,6 @@ public class ClientDao {
 	 * @throws ArcException
 	 */
 	public void createTableOfIdSource() throws ArcException {
-
 		String validiteInf = arcClientIdentifier.getValidityInf();
 		String validiteSup = arcClientIdentifier.getValiditySup();
 		boolean reprise = arcClientIdentifier.getReprise();
@@ -249,6 +250,15 @@ public class ClientDao {
 		query.append("AND EXISTS (SELECT 1 FROM " + ViewEnum.NORME.getFullName(this.environnement)
 				+ " T2 WHERE T2.id_famille='" + this.famille + "' AND T1.id_norme=T2.id_norme) ");
 
+		
+		// if data is calculated on executor and exported to master nod by the arc process
+		if (isDataIsComputedOnExecutorAndExportedToMasterNod())
+		{
+			// the file can only be selected by the data retrieval webservice if and only if the file is marked with EXPORT client
+			// meaning that the data had been effectively transfered from executor nods to the master nod
+			query.append("AND '" + TraitementPhase.EXPORT + "' = ANY(coalesce(T1.client, ARRAY[]::text[])) ");
+		}
+		
 		// if reprise is true, we want to retrieve all files, even the one which had
 		// been already retrieved
 		if (!reprise) {
@@ -264,6 +274,18 @@ public class ClientDao {
 		UtilitaireDao.get(0).executeBlock(connection, query);
 
 		registerTableToBeRetrieved(ExportTrackingType.ID_SOURCE, ArcDatabase.EXECUTOR, tableOfIdSource);
+
+	}
+
+	/**
+	 * return true if any data table is declared to be sent to coordinator
+	 * @return
+	 */
+	protected boolean isDataIsComputedOnExecutorAndExportedToMasterNod() {
+		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
+		query.build(SQL.SELECT, "count(*)", SQL.FROM, ViewEnum.EXPORT_OPTION.getFullName(this.environnement));
+		query.build(SQL.WHERE, ColumnEnum.EXPORT_COORDINATOR_OPTION, "=", query.quoteText(ExportOption.ACTIVE.getStatus()));
+		return UtilitaireDao.get(0).getInt(connection, query) > 0 ;
 
 	}
 
@@ -685,6 +707,8 @@ public class ClientDao {
 			}
 		}
 	}
+	
+	
 	
 
 }

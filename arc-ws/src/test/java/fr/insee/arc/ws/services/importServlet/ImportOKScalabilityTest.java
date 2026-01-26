@@ -32,7 +32,9 @@ public class ImportOKScalabilityTest {
 
 	@Test
 	public void testExecute() throws ArcException, IOException {
-		RunImport.testExecute();
+		RunImport.testExecute(
+				"file1_not_to_retrieve_when_reprise_false.xml:{ARTEMIS},file1_to_retrieve.xml:{ARTEMIS},file2_not_to_retrieve_when_reprise_false.xml:{ARTEMIS},file2_to_retrieve.xml:{DSNFLASH,ARTEMIS}"
+				);
 	}
 
 }

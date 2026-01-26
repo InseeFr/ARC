@@ -12,7 +12,7 @@ public class GenericPreparedStatementBuilderTest extends InitializeQueryTest {
 	public void copyFromGenericBean() throws ArcException {
 
 		// create the test table
-		createSimpleTableTest(c);
+		createSimpleTableTest(c,"test");
 		
 		// the content will grab the first 10 lines of test table
 		GenericBean gb=	new GenericBean(UtilitaireDao.get(0).executeRequest(c, new GenericPreparedStatementBuilder("SELECT * FROM test.table_test where id<=10")));
@@ -26,7 +26,7 @@ public class GenericPreparedStatementBuilderTest extends InitializeQueryTest {
 		testMetadataAndNumberOfRecords("test.table_test_copy", 10, new String[] {"id", "val", "arr", "dd"});
 
 		// drop test table
-		dropSimpleTableTest(c);
+		dropTestSchema(c);
 		
 	}
 

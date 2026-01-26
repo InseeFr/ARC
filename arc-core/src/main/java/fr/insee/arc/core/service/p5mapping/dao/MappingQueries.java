@@ -844,17 +844,6 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 		return new StringBuilder(nomVariable + Delimiters.SQL_TOKEN_DELIMITER + groupe).toString();
 	}
 
-	/**
-	 *
-	 * @param table
-	 * @return la liste des variables de la table, énumérées dans un ordre immuable
-	 */
-	private static final StringBuilder sqlListeVariablesOrdonnee(TableMapping table) {
-		return new StringBuilder(Format.untokenize(table.getEnsembleVariableClef(), ", "))//
-				.append(table.getEnsembleVariableClef().isEmpty() ? empty : ", ")//
-				.append(Format.untokenize(table.getEnsembleVariableNonClef(), ", "));
-	}
-
 	private static StringBuilder listeVariablesTypesPrepUnion(StringBuilder returned, TableMapping table,
 			String separateur, boolean removeArrayTypeForGroupe) {
 		table.sqlListeVariablesTypes(returned, separateur, removeArrayTypeForGroupe);

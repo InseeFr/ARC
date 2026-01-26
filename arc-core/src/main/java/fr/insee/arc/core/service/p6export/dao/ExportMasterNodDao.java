@@ -7,6 +7,7 @@ import java.util.Set;
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.dataobjects.ViewEnum;
+import fr.insee.arc.core.model.ExportOption;
 import fr.insee.arc.core.service.global.bo.Sandbox;
 import fr.insee.arc.utils.consumer.ThrowingConsumer;
 import fr.insee.arc.utils.dao.DuckdbDao;
@@ -69,7 +70,7 @@ public class ExportMasterNodDao {
 				, SQL.ON
 				, ColumnEnum.NOM_TABLE_METIER.alias(SQL.ALIAS_A), "=",ColumnEnum.NOM_TABLE_METIER.alias(SQL.ALIAS_B)
 				, SQL.WHERE
-				, ColumnEnum.EXPORT_COORDINATOR_OPTION.alias(SQL.ALIAS_B), "='1'"
+				, ColumnEnum.EXPORT_COORDINATOR_OPTION.alias(SQL.ALIAS_B), "=", query.quoteText(ExportOption.ACTIVE.getStatus())
 				);
 
 		for (int connectionIndex = startNodConnectionIndex; connectionIndex < endNodConnectionIndex; connectionIndex++) {

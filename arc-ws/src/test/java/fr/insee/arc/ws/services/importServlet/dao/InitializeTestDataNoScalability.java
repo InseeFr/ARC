@@ -3,6 +3,7 @@ package fr.insee.arc.ws.services.importServlet.dao;
 import java.sql.SQLException;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
+import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
@@ -26,16 +27,25 @@ public class InitializeTestDataNoScalability {
 		query.append("CREATE TABLE arc.ext_etat_jeuderegle as select 'arc_bas1' as id, true as isenv;");
 		query.append("CREATE TABLE arc_bas1.ext_etat_jeuderegle as select * from arc.ext_etat_jeuderegle;");
 
+		// create export option table
+		query.build(SQL.CREATE, SQL.TABLE, ViewEnum.EXPORT_OPTION.getFullName("arc_bas1"));
+		query.build("(", query.sqlDDLOfColumnsFromModel(ViewEnum.EXPORT_OPTION), ")");
+		query.build(SQL.END_QUERY);
+		
 		// family and client tables
 		query.append("CREATE TABLE arc.ihm_client AS ");
 		query.append("SELECT 'DSN' as id_famille,'ARTEMIS' as id_application");
 		query.append(SQL.UNION_ALL);
 		query.append("SELECT 'DSN' as id_famille,'DSNFLASH' as id_application");
+		query.append(SQL.UNION_ALL);
+		query.append("SELECT 'DSN' as id_famille,'EXPORT' as id_application");
 		query.append(SQL.END_QUERY);
 		
+		// register family
 		query.append("CREATE TABLE arc.ihm_famille AS SELECT 'DSN' as id_famille");
 		query.append(SQL.END_QUERY);
 
+		// add mapping table to models
 		query.append("CREATE TABLE arc_bas1.mod_table_metier AS ");
 		query.append("SELECT 'DSN' as id_famille,'mapping_dsn_test1_ok' as nom_table_metier");
 		query.append(SQL.UNION_ALL);
@@ -57,7 +67,12 @@ public class InitializeTestDataNoScalability {
 		query.append(SQL.UNION_ALL);
 		query.append("SELECT 'file2_to_retrieve.xml' as id_source, 'PHASE3V1' as id_norme, '2023-10-01' as validite,'M' as periodicite");
 		query.append(", 'MAPPING' as phase_traitement, '{OK}'::text[] as etat_traitement, '2023-11-30 10:29:47.000'::timestamp as date_traitement");
-		query.append(", null::text[] as client, null::timestamp[] as date_client");
+		query.append(", '{DSNFLASH}'::text[] as client, '{2023-11-30 10:29:47.000}'::timestamp[] as date_client");
+		query.append(SQL.UNION_ALL);
+		// only this file will be retrieved if export option declare that data from mapping tables must be export to coordinator database first
+		query.append("SELECT 'file3_to_retrieve.xml' as id_source, 'PHASE3V1' as id_norme, '2023-10-01' as validite,'M' as periodicite");
+		query.append(", 'MAPPING' as phase_traitement, '{OK}'::text[] as etat_traitement, '2023-11-30 10:29:47.000'::timestamp as date_traitement");
+		query.append(", '{EXPORT}'::text[] as client, '{2023-11-30 10:29:47.000}'::timestamp[] as date_client");
 		query.append(SQL.UNION_ALL);
 		// file that mustn't be retrieved when reprise is false and family is DSN
 		query.append("SELECT 'file_not_to_retrieve_when_reprise_false.xml' as id_source, 'PHASE3V1' as id_norme, '2023-10-01' as validite,'M' as periodicite");
@@ -78,6 +93,8 @@ public class InitializeTestDataNoScalability {
 		query.append(SQL.UNION_ALL);
 		query.append("SELECT 'file2_to_retrieve.xml' as id_source, 'data2_of_file_to_retrieve' as data");
 		query.append(SQL.UNION_ALL);
+		query.append("SELECT 'file3_to_retrieve.xml' as id_source, 'data3_of_file_to_retrieve' as data");
+		query.append(SQL.UNION_ALL);
 		query.append("SELECT 'file_not_to_retrieve_when_reprise_false.xml' as id_source, 'data_of_file_not_to_retrieve_when_reprise_false' as data");
 		query.append(SQL.END_QUERY);
 		
@@ -94,6 +111,18 @@ public class InitializeTestDataNoScalability {
 		UtilitaireDao.get(0).executeRequest(InitializeQueryTest.c, query);
 	}
 
+	
+	/**
+	 * 
+	 * @throws ArcException
+	 */
+	public static void mappingTablesDataIsSentToMasterNod() throws ArcException
+	{
+		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
+		query.build("INSERT INTO arc_bas1.export_option (nom_table_metier,export_parquet_option,export_coordinator_option) values ('mapping_dsn_test1_ok','0','1')");
+		UtilitaireDao.get(0).executeRequest(InitializeQueryTest.c, query);
+		
+	}
 	
 
 	/**

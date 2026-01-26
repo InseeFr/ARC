@@ -25,7 +25,7 @@ public class CopyObjectsToDatabaseTest extends InitializeQueryTest {
 		buildPropertiesWithOneExecutor(".");
 		
 		// create the test table that will be copied
-		String testTable = createSimpleTableTest(c).get(0);
+		String testTable = createSimpleTableTest(c,"test").get(0);
 		
 		// create the container of the copy
 		String copyContainerTable = "tmp";
@@ -55,7 +55,7 @@ public class CopyObjectsToDatabaseTest extends InitializeQueryTest {
 		UtilitaireDao.get(0).executeRequest(e1, "DISCARD TEMP");
 		
 		// drop schema
-		dropSimpleTableTest(c);		
+		dropTestSchema(c);		
 	}
 
 }

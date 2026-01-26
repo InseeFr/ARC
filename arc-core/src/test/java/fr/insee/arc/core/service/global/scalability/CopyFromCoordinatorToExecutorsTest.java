@@ -23,9 +23,9 @@ public class CopyFromCoordinatorToExecutorsTest extends InitializeQueryTest {
 		buildPropertiesWithTwoExecutors(".");
 		
 		// create the test table in databases
-		createSimpleTableTest(c);
-		createSimpleTableTest(e1);
-		createSimpleTableTest(e2);
+		createSimpleTableTest(c,"test");
+		createSimpleTableTest(e1,"test");
+		createSimpleTableTest(e2,"test");
 		
 		CopyFromCoordinatorToExecutors copy = new CopyFromCoordinatorToExecutors();
 		copy.copyWithTee("test.table_test", "test.table_test_copy");
@@ -39,9 +39,9 @@ public class CopyFromCoordinatorToExecutorsTest extends InitializeQueryTest {
 		assertEquals(numberOfRecordInInputTable, numberOfRecordInCopyNod2);
 		
 		// drop test objects
-		dropSimpleTableTest(c);		
-		dropSimpleTableTest(e1);		
-		dropSimpleTableTest(e2);		
+		dropTestSchema(c);		
+		dropTestSchema(e1);		
+		dropTestSchema(e2);		
 
 	}
 	
