@@ -150,7 +150,7 @@ public class UtilitaireDaoTest extends InitializeQueryTest {
 
 	@Test
 	public void executeRequestNoCommitTest() throws ArcException {
-		List<String> testTables = createSimpleTableTest(c, "t1", "t2");
+		List<String> testTables = createSimpleTableTest(c, "test", "t1", "t2");
 
 		String testTable1 = testTables.get(0);
 		String testTable2 = testTables.get(1);
