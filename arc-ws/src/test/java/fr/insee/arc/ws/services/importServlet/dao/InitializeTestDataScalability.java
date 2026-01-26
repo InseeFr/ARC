@@ -3,6 +3,7 @@ package fr.insee.arc.ws.services.importServlet.dao;
 import java.sql.SQLException;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
+import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
@@ -44,6 +45,10 @@ public class InitializeTestDataScalability {
 		query.append("SELECT 'PASRAU' as id_famille,'mapping_pasrau_test_ok' as nom_table_metier");
 		query.append(SQL.END_QUERY);
 		
+		// create export option table
+		query.build(SQL.CREATE, SQL.TABLE, ViewEnum.EXPORT_OPTION.getFullName("arc_bas1"));
+		query.build("(", query.sqlDDLOfColumnsFromModel(ViewEnum.EXPORT_OPTION), ")");
+		query.build(SQL.END_QUERY);
 		
 		if (dataSampleOk)
 		{
@@ -69,7 +74,7 @@ public class InitializeTestDataScalability {
 		// files on nod 2
 		query.append("SELECT 'file2_to_retrieve.xml' as id_source, 'PHASE3V1' as id_norme, '2023-10-01' as validite,'M' as periodicite");
 		query.append(", 'MAPPING' as phase_traitement, '{OK}'::text[] as etat_traitement, '2023-11-30 10:29:47.000'::timestamp as date_traitement");
-		query.append(", null::text[] as client, null::timestamp[] as date_client");
+		query.append(", '{DSNFLASH}'::text[] as client, null::timestamp[] as date_client");
 		query.append(SQL.UNION_ALL);
 		// file that mustn't be retrieved when reprise is false and family is DSN
 		query.append("SELECT 'file2_not_to_retrieve_when_reprise_false.xml' as id_source, 'PHASE3V1' as id_norme, '2023-10-01' as validite,'M' as periodicite");

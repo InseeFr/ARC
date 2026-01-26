@@ -6,6 +6,7 @@ import java.util.Map;
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.dataobjects.ViewEnum;
+import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.model.TraitementPhase.ConditionExecution;
 import fr.insee.arc.core.service.global.bo.Sandbox;
 import fr.insee.arc.utils.dao.SQL;
@@ -58,7 +59,7 @@ public class ExportDao {
 		query.build(SQL.SET, ColumnEnum.DATE_CLIENT, "=",
 				"array_append( date_client, " + query.quoteText(exportTimeStamp) + "::timestamp )");
 		query.build(",", ColumnEnum.CLIENT, "=",
-				"array_append( client, " + query.quoteText(EXPORT_CLIENT_NAME) + "::text)");
+				"array_append( client, " + query.quoteText(TraitementPhase.EXPORT.toString()) + "::text)");
 		query.build(SQL.WHERE, ConditionExecution.PIPELINE_TERMINE_DONNEES_NON_EXPORTEES.getSqlFilter());
 
 		UtilitaireDao.get(0).executeRequestNoCommit(this.coordinatorSandbox.getConnection(), query);

@@ -5,6 +5,9 @@
 - All notable changes to this project will be documented in this file.
 - jacoco aggregate
 
+
+- if the ARC process must export the files to the master nod, the data retrieval webservice will only select the files marked as EXPORTED
+
 ## version-94.2.30b
 - performance. Vertical scaling for the operation that maps data to model table. For each model data table, one data insertion thread is created to lower the issue of having many model data tables.
 

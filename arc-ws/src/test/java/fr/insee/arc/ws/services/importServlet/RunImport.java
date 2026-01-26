@@ -25,16 +25,16 @@ public class RunImport {
 
 	public static void testExecuteFamilyNotValid() throws UnsupportedEncodingException, ArcException {
 		JSONObject clientJsonInput = new JSONObject(
-				"{\"familleNorme\":\"RESIL\",\"periodicite\":\"M\",\"service\":\"arcClient\",\"validiteSup\":\"2032-03-01\",\"format\":\"csv_gzip\",\"reprise\":false,\"client\":\"ARTEMIS\",\"environnement\":\"arc_bas1\"}");
+				"{\"familleNorme\":\"RESIL\",\"periodicite\":\"M\",\"service\":\"arcClient\",\"validiteSup\":\"2500-03-01\",\"format\":\"csv_gzip\",\"reprise\":false,\"client\":\"ARTEMIS\",\"environnement\":\"arc_bas1\"}");
 		ExecuteStep.executeImportStep1(clientJsonInput);
 	}
 	
 	
-	public static void testExecute() throws ArcException, IOException {
+	public static void testExecute(String exceptedFilesToBeMarked) throws ArcException, IOException {
 
 		// parameters sent by client for step 1
 		JSONObject clientJsonInputStep1 = new JSONObject(
-				"{\"familleNorme\":\"DSN\",\"periodicite\":\"M\",\"service\":\"arcClient\",\"validiteSup\":\"2032-03-01\",\"format\":\"csv_gzip\",\"reprise\":false,\"client\":\"ARTEMIS\",\"environnement\":\"arc_bas1\"}");
+				"{\"familleNorme\":\"DSN\",\"periodicite\":\"M\",\"service\":\"arcClient\",\"validiteSup\":\"2500-03-01\",\"format\":\"csv_gzip\",\"reprise\":false,\"client\":\"ARTEMIS\",\"environnement\":\"arc_bas1\"}");
 
 		// response token will be used by client to invoke step2
 		String arcResponseStep1 = ExecuteStep.executeImportStep1(clientJsonInputStep1);
@@ -50,19 +50,21 @@ public class RunImport {
 		testWsIteration(arcResponseStep1);
 
 		// test that client had been marked in pilotage
-		testClientMarkedInPilotage();
+		testClientMarkedInPilotage(exceptedFilesToBeMarked);
 
 	}
 
-	private static void testClientMarkedInPilotage() throws ArcException {
-		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
-
+	private static void testClientMarkedInPilotage(String exceptedFilesToBeMarked) throws ArcException {
+		
+		ArcPreparedStatementBuilder query;
+		String clientMarkedInPilotage;
+		
+		query = new ArcPreparedStatementBuilder();
 		query.append(
-				"SELECT distinct client[1] as client from arc_bas1.pilotage_fichier where id_source in ('file1_to_retrieve.xml','file2_to_retrieve.xml');");
+				"SELECT string_agg(id_source||':'||client::text,',' order by id_source)  from arc_bas1.pilotage_fichier;");
+		clientMarkedInPilotage = UtilitaireDao.get(0).getString(null, query);
+		assertEquals(exceptedFilesToBeMarked,clientMarkedInPilotage);
 
-		String clientMarkedInPilotage = UtilitaireDao.get(0).getString(null, query);
-
-		assertEquals("ARTEMIS", clientMarkedInPilotage);
 	}
 
 	/**
@@ -113,7 +115,7 @@ public class RunImport {
 	private static ByteArrayOutputStream invokeStep3(String tableResponseStep2)
 			throws UnsupportedEncodingException, ArcException {
 		JSONObject clientJsonInputStep3 = new JSONObject(
-				"{\"familleNorme\":\"DSN\",\"periodicite\":\"M\",\"service\":\"tableName\",\"validiteSup\":\"2032-03-01\",\"format\":\"csv_gzip\",\"reprise\":false,\"client\":\""
+				"{\"familleNorme\":\"DSN\",\"periodicite\":\"M\",\"service\":\"tableName\",\"validiteSup\":\"2500-03-01\",\"format\":\"csv_gzip\",\"reprise\":false,\"client\":\""
 						+ tableResponseStep2 + "\",\"environnement\":\"arc_bas1\",\"type\":\"jsonwsp/request\"}");
 		return ExecuteStep.executeImportStep3(clientJsonInputStep3);
 	}
@@ -122,7 +124,7 @@ public class RunImport {
 		// parameters sent by client for step 2
 		// it use response token provided as response of step1
 		JSONObject clientJsonInputStep2 = new JSONObject(
-				"{\"familleNorme\":\"DSN\",\"periodicite\":\"M\",\"service\":\"tableName\",\"validiteSup\":\"2032-03-01\",\"format\":\"csv_gzip\",\"reprise\":false,\"client\":\""
+				"{\"familleNorme\":\"DSN\",\"periodicite\":\"M\",\"service\":\"tableName\",\"validiteSup\":\"2500-03-01\",\"format\":\"csv_gzip\",\"reprise\":false,\"client\":\""
 						+ arcResponseStep1 + "\",\"environnement\":\"arc_bas1\",\"type\":\"jsonwsp/request\"}");
 
 		return ExecuteStep.executeImportStep2(clientJsonInputStep2);

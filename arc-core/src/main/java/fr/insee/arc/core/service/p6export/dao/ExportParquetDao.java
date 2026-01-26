@@ -13,6 +13,7 @@ import org.apache.logging.log4j.Logger;
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.dataobjects.ViewEnum;
+import fr.insee.arc.core.model.ExportOption;
 import fr.insee.arc.core.service.global.bo.Sandbox;
 import fr.insee.arc.core.service.p6export.parquet.ParquetDao;
 import fr.insee.arc.core.service.p6export.parquet.ParquetEncryptionKey;
@@ -88,7 +89,8 @@ public class ExportParquetDao {
 				, SQL.ON
 				, ColumnEnum.NOM_TABLE_METIER.alias(SQL.ALIAS_A), "=",ColumnEnum.NOM_TABLE_METIER.alias(SQL.ALIAS_B)
 				, SQL.WHERE
-				, "COALESCE(", ColumnEnum.EXPORT_PARQUET_OPTION.alias(SQL.ALIAS_B), ",'1')='1'"
+				, "COALESCE(", ColumnEnum.EXPORT_PARQUET_OPTION.alias(SQL.ALIAS_B), ",", query.quoteText(ExportOption.ACTIVE.getStatus()) ,")"
+				, "=", query.quoteText(ExportOption.ACTIVE.getStatus())
 				);
 
 

@@ -32,6 +32,8 @@ public class InitializeQueryTest {
     public static Connection e1;
 
     public static Connection e2;
+    
+    private String testSchema;
 
 
     @Test
@@ -149,6 +151,13 @@ public class InitializeQueryTest {
 
 	}
 	
+	public void createTestSchema(Connection c, String schema) throws ArcException
+	{
+		this.testSchema = schema;
+		UtilitaireDao.get(0).executeRequest(c, "DROP SCHEMA IF EXISTS "+testSchema+" CASCADE;");
+		UtilitaireDao.get(0).executeRequest(c, "CREATE SCHEMA "+testSchema+";");
+		
+	}
 
     /**
      * Create a test table in the schema "test".
@@ -159,10 +168,9 @@ public class InitializeQueryTest {
      * @return
      * @throws ArcException
      */
-	public static List<String> createSimpleTableTest(Connection c, String...tableNames) throws ArcException
+	public List<String> createSimpleTableTest(Connection c, String schema, String...tableNames) throws ArcException
 	{
-		UtilitaireDao.get(0).executeRequest(c, "DROP SCHEMA IF EXISTS test CASCADE;");
-		UtilitaireDao.get(0).executeRequest(c, "CREATE SCHEMA test;");
+		createTestSchema(c, schema);
 		
 		List<String> tablesCreated = new ArrayList<String>();
 		
@@ -170,23 +178,23 @@ public class InitializeQueryTest {
 		
 		if (tableNames.length==0)
 		{
-			UtilitaireDao.get(0).executeRequest(c, "CREATE TABLE test.table_test as select i as id, chr(i+64)::text as val, array[i,i+1] as arr, current_date as dd from generate_series(1,26) i;");
-			tablesCreated.add("test.table_test");
+			UtilitaireDao.get(0).executeRequest(c, "CREATE TABLE "+this.testSchema+".table_test as select i as id, chr(i+64)::text as val, array[i,i+1] as arr, current_date as dd from generate_series(1,26) i;");
+			tablesCreated.add(this.testSchema+".table_test");
 		} else
 		{
 			for (String tableName : tableNames)
 			{
-				UtilitaireDao.get(0).executeRequest(c, "CREATE TABLE test."+tableName+" as select i as id, chr(i+64)::text as val, array[i,i+1] as arr, current_date as dd from generate_series(1,26) i;");
-				tablesCreated.add("test."+tableName);
+				UtilitaireDao.get(0).executeRequest(c, "CREATE TABLE "+this.testSchema+"."+tableName+" as select i as id, chr(i+64)::text as val, array[i,i+1] as arr, current_date as dd from generate_series(1,26) i;");
+				tablesCreated.add(this.testSchema+"."+tableName);
 			}
 		}
 		return tablesCreated;
 		
 	}
 	
-	public static void dropSimpleTableTest(Connection c) throws ArcException
+	public void dropTestSchema(Connection c) throws ArcException
 	{
-		UtilitaireDao.get(0).executeRequest(c, "DROP SCHEMA IF EXISTS test CASCADE;");
+		UtilitaireDao.get(0).executeRequest(c, "DROP SCHEMA IF EXISTS "+this.testSchema+" CASCADE;");
 	}
     
 	public static int countNumberOfRows(Connection c, String table) throws ArcException

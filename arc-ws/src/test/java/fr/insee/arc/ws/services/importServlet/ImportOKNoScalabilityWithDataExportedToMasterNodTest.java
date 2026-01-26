@@ -12,12 +12,17 @@ import org.junit.jupiter.api.Test;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.ws.services.importServlet.dao.InitializeTestDataNoScalability;
 
-public class ImportOKNoScalabilityTest {
+
+/**
+ * In that case files must be retrieved if they had been marked with EXPORT
+ */
+public class ImportOKNoScalabilityWithDataExportedToMasterNodTest {
 
 	@BeforeAll
 	public static void setup() throws SQLException, ArcException {
 		InitializeTestDataNoScalability.destroyTestData();
 		InitializeTestDataNoScalability.initializeTestData(true);
+		InitializeTestDataNoScalability.mappingTablesDataIsSentToMasterNod();
 	}
 
 	@AfterAll
@@ -33,7 +38,7 @@ public class ImportOKNoScalabilityTest {
 	@Test
 	public void testExecute() throws ArcException, IOException {
 		RunImport.testExecute(
-				"file1_to_retrieve.xml:{ARTEMIS},file2_to_retrieve.xml:{DSNFLASH,ARTEMIS},file3_to_retrieve.xml:{EXPORT,ARTEMIS},file_not_to_retrieve_when_reprise_false.xml:{ARTEMIS}"
+				"file2_to_retrieve.xml:{DSNFLASH},file3_to_retrieve.xml:{EXPORT,ARTEMIS},file_not_to_retrieve_when_reprise_false.xml:{ARTEMIS}"
 				);
 	}
 

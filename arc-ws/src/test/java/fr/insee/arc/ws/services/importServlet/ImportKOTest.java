@@ -52,7 +52,7 @@ public class ImportKOTest extends ServletArc {
 	public void testExecute() throws ArcException {
 
 		JSONObject clientJsonInput = new JSONObject(
-				"{\"familleNorme\":\"DSN\",\"periodicite\":\"M\",\"service\":\"arcClient\",\"validiteSup\":\"2032-03-01\",\"format\":\"csv_gzip\",\"reprise\":false,\"client\":\"ARTEMIS\",\"environnement\":\"arc_bas1\"}");
+				"{\"familleNorme\":\"DSN\",\"periodicite\":\"M\",\"service\":\"arcClient\",\"validiteSup\":\"2500-03-01\",\"format\":\"csv_gzip\",\"reprise\":false,\"client\":\"ARTEMIS\",\"environnement\":\"arc_bas1\"}");
 
 		String arcResponse = executeImportStep1(clientJsonInput);
 

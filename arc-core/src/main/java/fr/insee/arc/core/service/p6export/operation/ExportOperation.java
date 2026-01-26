@@ -107,5 +107,11 @@ public class ExportOperation {
 	public void rollBack() throws ArcException {
 		exportParquetDao.rollback();
 	}
+
+	public String getParamBatch() {
+		return paramBatch;
+	}
+	
+	
 	
 }
