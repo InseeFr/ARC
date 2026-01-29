@@ -11,7 +11,6 @@ import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
-import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.bo.JeuDeRegle;
@@ -77,10 +76,10 @@ public class ThreadMappingService extends ThreadTemplate {
 		this.tabIdSource = anApi.getTabIdSource();
 		this.paramBatch = anApi.getParamBatch();
 
-		this.tableTempControleOk = ViewEnum.getFullName(envExecution, FormatSQL.temporaryTableName(ThreadTemporaryTable.TABLE_MAPPING_DATA_TEMP));
+		this.tableTempControleOk = FormatSQL.temporaryTableName(ThreadTemporaryTable.TABLE_MAPPING_DATA_TEMP);
 		this.tableMappingPilTemp = ThreadTemporaryTable.TABLE_PILOTAGE_THREAD;
 
-		this.tableLienIdentifiants = ViewEnum.getFullName(envExecution, FormatSQL.temporaryTableName(ThreadTemporaryTable.TABLE_MAPPING_IDS_LINK_TEMP));
+		this.tableLienIdentifiants = FormatSQL.temporaryTableName(ThreadTemporaryTable.TABLE_MAPPING_IDS_LINK_TEMP);
 		
 		this.tablePil = anApi.getTablePil();
 		this.genericExecutorDao = new GenericQueryDao(this.connexion.getExecutorConnection());
@@ -103,9 +102,7 @@ public class ThreadMappingService extends ThreadTemplate {
 
 			try {
 				
-				// drop temporary tables
-				genericExecutorDao.initialize().addOperation(FormatSQL.dropTable(retrieveMappingTemporaryTables())).execute();
-				
+				// drop temporary tables			
 				PilotageOperations.traitementSurErreur(this.connexion.getCoordinatorConnection(),
 						this.currentExecutedPhase, this.tablePil, this.idSource, e);
 
@@ -117,17 +114,6 @@ public class ThreadMappingService extends ThreadTemplate {
 		}
 	}
 
-	/**
-	 * Returns the list of temporary tables generated thrue the mapping process
-	 * @return
-	 */
-	private String[] retrieveMappingTemporaryTables() {
-		Set<String> temporaryTablesToRemove = new HashSet<>();
-		temporaryTablesToRemove.add(this.tableTempControleOk);
-		temporaryTablesToRemove.add(this.tableLienIdentifiants);
-		this.queriesThatInsertDataIntoTemporaryModelTables.keySet().stream().forEach(t-> temporaryTablesToRemove.add(t.getNomTableTemporaire()));
-		return temporaryTablesToRemove.toArray(new String[0]);
-	}
 
 	/**
 	 * @throws ArcException
