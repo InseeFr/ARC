@@ -156,13 +156,18 @@ public class JoinParser {
 		return null;
 	}
 
+	public static String toI(String rubrique) {
+		return "i_" + getCoreVariableName(rubrique);
+	}
+
 	public static String mToI(String rubrique) {
 		if (rubrique.startsWith("m_")) {
 			return "i_" + getCoreVariableName(rubrique);
 		}
 		return rubrique;
 	}
-
+	
+	
 	public static String iToM(String rubrique) {
 		if (rubrique.startsWith("i_")) {
 			return "m_" + getCoreVariableName(rubrique);

@@ -71,6 +71,8 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 	private static final String FOREIGN_KEY_PREFIX = "fk_";
 	// identifiant lien direct
 	private static final String ID_KEY_PREFIX = "id_";
+	
+	private static final String REGEXP_EXTRACT_RUBRIQUES_IN_EXPR = "\\{[^\\{\\} ]*\\}";
 
 	private Set<TableMapping> ensembleTableMapping;
 	private Set<VariableMapping> ensembleVariableMapping;
@@ -174,7 +176,7 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 				exprCol = "";
 			}
 
-			Matcher m = Pattern.compile("\\{[^\\{\\} ]*\\}").matcher(exprCol);
+			Matcher m = Pattern.compile(REGEXP_EXTRACT_RUBRIQUES_IN_EXPR).matcher(exprCol);
 
 			StringBuffer sb = new StringBuffer();
 			while (m.find()) {
