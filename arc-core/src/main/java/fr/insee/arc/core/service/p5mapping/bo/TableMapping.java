@@ -77,7 +77,7 @@ public class TableMapping implements IConstanteCaractere, IConstanteNumerique {
 		this.ensembleVariableMapping = new TreeSet<>();
 		this.environnement = anEnvironnement;
 		this.ensembleRegleMappingClefPrimaire = new HashSet<>();
-		this.nomTableTemporaire = ViewEnum.getFullName(anEnvironnement, FormatSQL.temporaryTableName(this.nomTableCourt));
+		this.nomTableTemporaire = FormatSQL.temporaryTableName(this.nomTableCourt);
 		this.ensembleIdentifiantsRubriques = new HashSet<>();
 		this.mapGroupeToEnsembleIdentifiantsRubriques = new TreeMap<>();
 		this.mapGroupeToEnsembleNomsRubriques = new TreeMap<>();
@@ -244,8 +244,6 @@ public class TableMapping implements IConstanteCaractere, IConstanteNumerique {
 
 	public ArcPreparedStatementBuilder requeteCreation() {
 		ArcPreparedStatementBuilder returned = new ArcPreparedStatementBuilder();
-		returned.append(FormatSQL.dropTable(this.nomTableTemporaire));
-		
 		returned.build(SQL.CREATE, this.nomTableTemporaire.contains(".")?SQL.UNLOGGED:SQL.TEMPORARY , SQL.TABLE, this.nomTableTemporaire, " (");
 		
 		boolean isFirst = true;
