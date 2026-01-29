@@ -13,9 +13,9 @@ import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.ManipString;
 
-public class EngineRulesQueryBuilder {
+public class UniciteRulesQueryBuilder {
 
-	private static final Logger LOGGER = LogManager.getLogger(EngineRulesQueryBuilder.class);
+	private static final Logger LOGGER = LogManager.getLogger(UniciteRulesQueryBuilder.class);
 
 	
 	/**
@@ -76,7 +76,7 @@ public class EngineRulesQueryBuilder {
 								lines[k] = ManipString.substringBeforeFirst(line, " (")
 										+ " (select * from    (select case when " + rubrique
 										+ " is null then 1 else row_number() over (partition by " + idBlock + ","
-										+ rubrique + ") end as rk_" + rubrique + " , * from    ("
+										+ rubrique + " order by " + JoinParser.toI(rubrique) + ") end as rk_" + rubrique + " , * from    ("
 										+ ManipString.substringAfterFirst(line.replace(";", ""), " (") + " t0_"
 										+ rubrique + " ) t1_" + rubrique + " where rk_" + rubrique + "=1);";
 							}

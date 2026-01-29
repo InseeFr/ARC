@@ -20,7 +20,7 @@ import fr.insee.arc.core.service.p3normage.bo.RegleNormage;
 import fr.insee.arc.core.service.p3normage.bo.TypeNormage;
 import fr.insee.arc.core.service.p3normage.dao.NormageDao;
 import fr.insee.arc.core.service.p3normage.querybuilder.DuplicationRulesRegleQueryBuilder;
-import fr.insee.arc.core.service.p3normage.querybuilder.EngineRulesQueryBuilder;
+import fr.insee.arc.core.service.p3normage.querybuilder.UniciteRulesQueryBuilder;
 import fr.insee.arc.core.service.p3normage.querybuilder.IndependanceRulesQueryBuilder;
 import fr.insee.arc.core.service.p3normage.querybuilder.RelationRulesQueryBuilder;
 import fr.insee.arc.core.service.p3normage.querybuilder.SuppressionRulesQueryBuilder;
@@ -189,7 +189,7 @@ public class NormageOperation {
 
 		this.fileIdCard.setJointure(IndependanceRulesQueryBuilder.appliquerRegleIndependance(fileIdCard));
 
-		this.fileIdCard.setJointure(EngineRulesQueryBuilder.appliquerRegleUnicite(fileIdCard));
+		this.fileIdCard.setJointure(UniciteRulesQueryBuilder.appliquerRegleUnicite(fileIdCard));
 
 		this.fileIdCard.setJointure(RelationRulesQueryBuilder.appliquerRegleRelation(fileIdCard));
 

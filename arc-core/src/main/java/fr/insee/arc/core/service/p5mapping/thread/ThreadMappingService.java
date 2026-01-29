@@ -24,7 +24,6 @@ import fr.insee.arc.core.service.global.dao.TableNaming;
 import fr.insee.arc.core.service.global.dao.TableOperations;
 import fr.insee.arc.core.service.global.dao.ThreadOperations;
 import fr.insee.arc.core.service.global.scalability.ScalableConnection;
-import fr.insee.arc.core.service.global.scalability.ThreadWithException;
 import fr.insee.arc.core.service.global.thread.ThreadConstant;
 import fr.insee.arc.core.service.global.thread.ThreadTemplate;
 import fr.insee.arc.core.service.global.thread.ThreadTemporaryTable;
@@ -32,7 +31,6 @@ import fr.insee.arc.core.service.mutiphase.thread.ThreadMultiphaseService;
 import fr.insee.arc.core.service.p5mapping.bo.TableMapping;
 import fr.insee.arc.core.service.p5mapping.dao.MappingQueries;
 import fr.insee.arc.core.service.p5mapping.dao.MappingQueriesFactory;
-import fr.insee.arc.core.service.p5mapping.dao.ThreadExecuteMappingTable;
 import fr.insee.arc.core.service.p5mapping.dao.ThreadMappingQueries;
 import fr.insee.arc.core.service.p5mapping.operation.MappingOperation;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
@@ -169,32 +167,30 @@ public class ThreadMappingService extends ThreadTemplate {
 		 */
 		requeteMapping.setTableLienIdentifiants(this.tableLienIdentifiants);
 		requeteMapping.construire();
-		genericExecutorDao.initialize().addOperation(requeteMapping.construireTableLienIdentifiants()).execute();
+		
+		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
+		
+		query.append(requeteMapping.construireTableLienIdentifiants());
 		
 		/*
 		 * For each model table, compute a query that inserts the data into a temporary model table.
 		 */
 		this.queriesThatInsertDataIntoTemporaryModelTables = requeteMapping.getQueriesThatInsertDataIntoTemporaryModelTable(idSource);
-
+		
 		/*
 		 * Execute the data insertion into the temporary model tables through parallel threads
 		 */
+		queriesThatInsertDataIntoTemporaryModelTables.values().stream().forEach(tableQuery -> query.append(tableQuery));
 		
-		List<ThreadWithException> threadList = queriesThatInsertDataIntoTemporaryModelTables.values().stream()
-				.map(query -> new ThreadExecuteMappingTable(connexion, this.getEnvExecution(),query))
-				.map(thread -> (ThreadWithException) thread)
-				.toList();
-		ThreadWithException.execute(threadList);
-			
 		/*
 		 * Delete empty records if there is not link in children tables
 		 */
-		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
+		
 		query.append(requeteMapping.deleteEmptyRecords(idSource));
 
 		// clean the input temporary data table
 		query.append(FormatSQL.dropTable(this.tableTempControleOk));
-		
+
 		// promote the application user account to full right
 		query.append(DatabaseConnexionConfiguration.switchToFullRightRole());
 		
