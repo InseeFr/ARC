@@ -5,7 +5,7 @@
 - All notable changes to this project will be documented in this file.
 - jacoco aggregate
 
-## version-94.2.32b
+## version-94.2.33b
 - if the ARC process must export the files to the master nod, the data retrieval webservice will only select the files marked as EXPORTED
 - revert vertical scaling on mapping phase
 - unicity on structurize phase now sort data if case of duplicate : first record is picked
