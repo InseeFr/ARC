@@ -22,6 +22,7 @@ import fr.insee.arc.core.service.p5mapping.bo.VariableMapping;
 import fr.insee.arc.core.service.p5mapping.bo.rules.RegleMappingClePrimaire;
 import fr.insee.arc.utils.dao.ModeRequete;
 import fr.insee.arc.utils.dao.ModeRequeteImpl;
+import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.database.Delimiters;
 import fr.insee.arc.utils.exception.ArcException;
@@ -745,9 +746,7 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 			Map<String, String> linkedIds) {
 
 		Set<String> alreadyAdded = new HashSet<>();
-
-		returned.append("\n DROP TABLE IF EXISTS " + tableLienIdentifiants + " CASCADE;");
-		returned.append("\n CREATE UNLOGGED TABLE " + tableLienIdentifiants + " " + FormatSQL.WITH_NO_VACUUM + " AS ");
+		returned.append("\n CREATE "+(this.tableLienIdentifiants.contains(".")?SQL.UNLOGGED:SQL.TEMPORARY)+ " TABLE " + tableLienIdentifiants + " " + FormatSQL.WITH_NO_VACUUM + " AS ");
 
 		// bloc 1 : calcul de l'identifiant groupe et non groupe
 
