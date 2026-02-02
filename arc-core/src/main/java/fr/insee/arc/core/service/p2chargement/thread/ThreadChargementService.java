@@ -139,7 +139,7 @@ public class ThreadChargementService extends ThreadTemplate {
 	private void preparation() throws ArcException {
 
 		ArcPreparedStatementBuilder query = arcThreadGenericDao.preparationDefaultDao();
-		UtilitaireDao.get(0).executeBlock(connexion.getExecutorConnection(), query);
+		UtilitaireDao.get(0).executeRequest(connexion.getExecutorConnection(), query);
 
 	}
 

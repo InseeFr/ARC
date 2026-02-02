@@ -65,7 +65,7 @@ public class SynchronizeDataByPilotageDao {
 		}
 		requete.append("end ; ");
 
-		UtilitaireDao.get(0).executeBlock(connection, requete);
+		UtilitaireDao.get(0).executeRequest(connection, requete);
 	}
 
 	/**
@@ -206,7 +206,7 @@ public class SynchronizeDataByPilotageDao {
 		if (!g.mapContent().isEmpty()) {
 			List<String> envTables = g.mapContent().get("table_name");
 			for (String nomTable : envTables) {
-				UtilitaireDao.get(0).executeBlock(targetConnexion, FormatSQL.dropTable(nomTable));
+				UtilitaireDao.get(0).executeRequest(targetConnexion, FormatSQL.dropTable(nomTable));
 			}
 		}
 	}

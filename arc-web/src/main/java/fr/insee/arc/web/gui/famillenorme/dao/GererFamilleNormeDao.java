@@ -16,6 +16,7 @@ import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
+import fr.insee.arc.utils.structure.GenericBean;
 import fr.insee.arc.utils.utils.FormatSQL;
 import fr.insee.arc.web.gui.all.util.ArcStringUtils;
 import fr.insee.arc.web.gui.all.util.VObject;
@@ -122,8 +123,9 @@ public class GererFamilleNormeDao extends VObjectHelperDao {
 
 	/**
 	 * dao call to list table metier
+	 * @throws ArcException 
 	 */
-	public List<String> getListeTableMetierFamille() {
+	public List<String> getListeTableMetierFamille() throws ArcException {
 		ViewEnum dataModelTableMetier = ViewEnum.IHM_MOD_TABLE_METIER;
 		// query
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
@@ -134,7 +136,9 @@ public class GererFamilleNormeDao extends VObjectHelperDao {
 		query.append(SQL.WHERE);
 		query.append(sqlEqualWithFirstSelectedRecord(ColumnEnum.ID_FAMILLE));
 		// return list
-		return UtilitaireDao.get(0).getList(null, query.toString(), new ArrayList<>());
+		
+		return new GenericBean(UtilitaireDao.get(0).executeRequest(null, query)).getColumnValues(ColumnEnum.NOM_TABLE_METIER.getColumnName());
+		
 	}
 
 	/**
@@ -230,7 +234,7 @@ public class GererFamilleNormeDao extends VObjectHelperDao {
 	
 		requete.append(GererFamilleNormeDao.querySynchronizeRegleWithVariableMetier(idFamilleSelected));
 	
-		UtilitaireDao.get(0).executeBlock(null, requete);
+		UtilitaireDao.get(0).executeRequest(null, requete);
 	
 	}
 
@@ -239,7 +243,7 @@ public class GererFamilleNormeDao extends VObjectHelperDao {
 		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 		requete.append(deleteVariableMetierWithoutSync(viewVariableMetier));
 		requete.append(GererFamilleNormeDao.querySynchronizeRegleWithVariableMetier(idFamilleSelected));
-		UtilitaireDao.get(0).executeBlock(null, requete);
+		UtilitaireDao.get(0).executeRequest(null, requete);
 		
 	}
 
@@ -441,9 +445,9 @@ public class GererFamilleNormeDao extends VObjectHelperDao {
 	private ArcPreparedStatementBuilder queryAlterColumnNameInModelTables(VObject viewVariableMetier, int tableIndexInView,
 			String nameBefore, String nameAfter) throws ArcException {
 
-		List<String> listeEnvironnement = UtilitaireDao.get(0).getList(null,
-				new ArcPreparedStatementBuilder("SELECT distinct replace(id,'.','_') FROM arc.ext_etat_jeuderegle where isenv").toString(),
-				new ArrayList<>());
+		List<String> listeEnvironnement = new GenericBean(UtilitaireDao.get(0).executeRequest(null,
+				new ArcPreparedStatementBuilder("SELECT distinct replace(id,'.','_') as id FROM arc.ext_etat_jeuderegle where isenv")))
+				.getColumnValues("id");
 
 		Map<String, List<String>> mBefore = viewVariableMetier.mapContentBeforeUpdate();
 		List<List<String>> lBefore = viewVariableMetier.listContentBeforeUpdate();

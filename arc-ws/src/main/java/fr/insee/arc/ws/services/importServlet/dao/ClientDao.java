@@ -158,7 +158,7 @@ public class ClientDao {
 		request.append("AND exists (SELECT 1 FROM " + tableOfIdSource + " T2 where T2."
 				+ ColumnEnum.ID_SOURCE.getColumnName() + "=T1." + ColumnEnum.ID_SOURCE.getColumnName() + "); ");
 		
-		UtilitaireDao.get(0).executeBlock(nodConnection, request);
+		UtilitaireDao.get(0).executeRequest(nodConnection, request);
 
 		registerTableToBeRetrieved(ExportTrackingType.DATA, ArcDatabase.EXECUTOR, nomTableImage);
 		
@@ -271,7 +271,7 @@ public class ClientDao {
 		query.append("GROUP BY " + ColumnEnum.ID_SOURCE.getColumnName()); // )
 		query.append(") as foo; ");
 
-		UtilitaireDao.get(0).executeBlock(connection, query);
+		UtilitaireDao.get(0).executeRequest(connection, query);
 
 		registerTableToBeRetrieved(ExportTrackingType.ID_SOURCE, ArcDatabase.EXECUTOR, tableOfIdSource);
 

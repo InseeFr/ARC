@@ -122,7 +122,7 @@ public class BatchArcDao {
 		query.append("\n set etape=1 ");
 		query.append("\n WHERE etape=3");
 		query.append(";");
-		UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).executeBlock(batchConnection, query);
+		UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).executeRequest(batchConnection, query);
 
 	}
 	

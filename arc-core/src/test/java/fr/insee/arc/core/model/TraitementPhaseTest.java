@@ -32,8 +32,6 @@ public class TraitementPhaseTest {
 	
 	@Test
 	public void nextPhases() {
-		
-		System.out.println(TraitementPhase.EXPORT.nextPhases());
 		assertTrue(TraitementPhase.EXPORT.nextPhases().isEmpty());
 		assertEquals(TraitementPhase.MAPPING.nextPhases(),  Stream.of(TraitementPhase.EXPORT).toList());
 		assertEquals(TraitementPhase.DUMMY.nextPhases().size(), 7 );

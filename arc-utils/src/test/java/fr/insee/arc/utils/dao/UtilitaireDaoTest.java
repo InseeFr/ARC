@@ -284,8 +284,6 @@ public class UtilitaireDaoTest extends InitializeQueryTest {
 	private GenericPreparedStatementBuilder add2RowsToTableWithError(String tableName) {
 		GenericPreparedStatementBuilder query = new GenericPreparedStatementBuilder();
 		query.append("NOT_A_QUERY");
-
-		System.out.println(query.getQueryWithParameters());
 		return query;
 	}
 

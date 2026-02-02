@@ -156,10 +156,9 @@ public class GererFamilleNormeDaoTest extends InitializeQueryTest {
 		
 		// select tables of dsn
 		ArcPreparedStatementBuilder queryTables = new ArcPreparedStatementBuilder();
-		queryTables.build(SQL.SELECT, "*", SQL.FROM, pdao.getDataObjectService().getView(ViewEnum.IHM_MOD_TABLE_METIER), SQL.WHERE, "id_famille='DSN'");
-		List<String> listeTableFamille = UtilitaireDao.get(0).getList(c, query.toString(), new ArrayList<String>());
+		queryTables.build(SQL.SELECT, ColumnEnum.NOM_TABLE_METIER, SQL.FROM, pdao.getDataObjectService().getView(ViewEnum.IHM_MOD_TABLE_METIER), SQL.WHERE, "id_famille='DSN'");
+		List<String> listeTableFamille = new GenericBean(UtilitaireDao.get(0).executeRequest(c, queryTables)).getColumnValues(ColumnEnum.NOM_TABLE_METIER.getColumnName());
 		
-
 		// execute query
 		pdao.initializeViewVariableMetier(viewVariableMetier, listeTableFamille);
 
