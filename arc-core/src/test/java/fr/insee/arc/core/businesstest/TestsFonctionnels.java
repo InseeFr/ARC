@@ -188,8 +188,6 @@ public class TestsFonctionnels extends InitializeQueryTest {
 		
 		File fileOfParquetDirectory = new File(DirectoryPathExport.directoryExport(repertoire,"ARC_BAS2", ExportDao.EXPORT_CLIENT_NAME, dateOfExport));
 
-		System.out.println(fileOfParquetDirectory.getAbsolutePath());
-		
 		// 4 tables should had been export to parquet
 		assertEquals(4,fileOfParquetDirectory.listFiles().length);	
 

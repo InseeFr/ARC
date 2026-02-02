@@ -106,7 +106,7 @@ public class SynchronizeRulesAndMetadataDao {
 						+ ManipString.substringAfterLast(parameterTable.getTablenameInSandbox().getTableName(), ".")
 						+ "; \n");
 			}
-			UtilitaireDao.get(0).executeBlock(coordinatorConnexion, requete);
+			UtilitaireDao.get(0).executeRequest(coordinatorConnexion, requete);
 
 			// Dernière étape : recopie des tables de nomenclature et des tables prefixées
 			// par ext_ du schéma arc vers schéma courant
@@ -148,7 +148,7 @@ public class SynchronizeRulesAndMetadataDao {
 			}
 
 			// 3.Execution du script Sql de suppression/création
-			UtilitaireDao.get(0).executeBlock(coordinatorConnexion, requete);
+			UtilitaireDao.get(0).executeRequest(coordinatorConnexion, requete);
 
 		} catch (ArcException e) {
 			LoggerHelper.trace(LOGGER,
@@ -181,7 +181,7 @@ public class SynchronizeRulesAndMetadataDao {
 				familleToTableToVariableToType);
 		deleteColumnsOfModelTable(requeteMAJSchema, familleToTableToVariableToTypeRef, familleToTableToVariableToType);
 
-		UtilitaireDao.get(0).executeBlock(coordinatorOrExecutorConnexion, requeteMAJSchema);
+		UtilitaireDao.get(0).executeRequest(coordinatorOrExecutorConnexion, requeteMAJSchema);
 	}
 
 	/**

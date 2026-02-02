@@ -110,7 +110,7 @@ public abstract class ApiService implements IConstanteNumerique {
 		// Vérifie si y'a des sources à traiter
 		if (this.todo) {
 			try {
-				UtilitaireDao.get(0).executeBlock(this.connexion.getCoordinatorConnection(),
+				UtilitaireDao.get(0).executeRequest(this.connexion.getCoordinatorConnection(),
 						DatabaseConnexionConfiguration.configConnection(this.getEnvExecution()));
 			} catch (ArcException ex) {
 				LoggerHelper.error(LOGGER_APISERVICE, ApiService.class, "initialiser()", ex);
@@ -208,7 +208,7 @@ public abstract class ApiService implements IConstanteNumerique {
 		try {
 			if (Boolean.TRUE.equals(this.todo)) {
 				try {
-					UtilitaireDao.get(0).executeBlock(this.connexion.getCoordinatorConnection(), FormatSQL.dropTable(this.tablePilTemp));
+					UtilitaireDao.get(0).executeRequest(this.connexion.getCoordinatorConnection(), FormatSQL.dropTable(this.tablePilTemp));
 				} catch (Exception ex) {
 					LoggerHelper.error(LOGGER_APISERVICE, ApiService.class, "finaliser()", ex);
 				}
@@ -377,7 +377,7 @@ public abstract class ApiService implements IConstanteNumerique {
 
 		requete.append(PilotageOperations.queryResetPreviousPhaseMark(tablePil, null, "t0"));
 
-		UtilitaireDao.get(0).executeBlock(connexion, requete);
+		UtilitaireDao.get(0).executeRequest(connexion, requete);
 	}
 
 	/**

@@ -90,7 +90,7 @@ public class ChargeurXMLDao {
 		ArcPreparedStatementBuilder requeteBilan = new ArcPreparedStatementBuilder();
 		requeteBilan.append(ApiService.pilotageMarkIdsource(tableChargementPilTemp, fileIdCard.getIdSource(),
 				currentPhase, TraitementEtat.OK, rapport, jointure));
-		UtilitaireDao.get(0).executeBlock(sandbox.getConnection(), requeteBilan);
+		UtilitaireDao.get(0).executeRequest(sandbox.getConnection(), requeteBilan);
 	}
 
 }

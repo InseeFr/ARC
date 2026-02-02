@@ -470,7 +470,7 @@ public class ChargeurCsvDao {
 		requeteBilan.append(ApiService.pilotageMarkIdsource(tableChargementPilTemp, fileIdCard.getIdSource(),
 				currentPhase, TraitementEtat.OK, null));
 
-		UtilitaireDao.get(0).executeBlock(sandbox.getConnection(), requeteBilan);
+		UtilitaireDao.get(0).executeRequest(sandbox.getConnection(), requeteBilan);
 	}
 
 }

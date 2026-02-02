@@ -150,15 +150,16 @@ public class InteractorFamilleNorme extends ArcWebGenericService<ModelGererFamil
 		Map<String, List<String>> selectionFamilleNorme = viewFamilleNorme.mapContentSelected();
 		// if norm family selected, trigger call to dao to render column
 		if (!selectionFamilleNorme.isEmpty()) {
-			dao.setSelectedRecords(selectionFamilleNorme);
-			List<String> listeTableFamille = dao.getListeTableMetierFamille();
-			// render column
-			Map<String, ColumnRendering> rendering = ViewVariableMetier
-					.getInitialRenderingViewVariableMetier(new HashMap<String, ColumnRendering>());
-			rendering.putAll(ViewVariableMetier.getInitialRendering(listeTableFamille));
-			// initialize column rendering
-			vObjectService.initialiserColumnRendering(viewVariableMetier, rendering);
 			try {
+				dao.setSelectedRecords(selectionFamilleNorme);
+				List<String> listeTableFamille = dao.getListeTableMetierFamille();
+				// render column
+				Map<String, ColumnRendering> rendering = ViewVariableMetier
+						.getInitialRenderingViewVariableMetier(new HashMap<String, ColumnRendering>());
+				rendering.putAll(ViewVariableMetier.getInitialRendering(listeTableFamille));
+				// initialize column rendering
+				vObjectService.initialiserColumnRendering(viewVariableMetier, rendering);
+
 				LoggerHelper.debug(LOGGER, "/* initializeVariableMetier */");
 				dao.initializeViewVariableMetier(viewVariableMetier, listeTableFamille);
 			} catch (Exception ex) {

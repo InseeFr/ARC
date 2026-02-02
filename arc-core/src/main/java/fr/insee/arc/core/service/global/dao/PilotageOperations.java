@@ -298,7 +298,7 @@ public class PilotageOperations {
 		requete.append("\n AND "+ColumnEnum.ID_SOURCE.getColumnName()+" = ").appendText(idSource);
 		requete.append("\n ;");
 		requete.append(PilotageOperations.queryResetPreviousPhaseMark(tablePil, idSource, null));
-		UtilitaireDao.get(0).executeBlock(connexion, requete);
+		UtilitaireDao.get(0).executeRequest(connexion, requete);
 	}
 
 }

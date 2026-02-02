@@ -155,7 +155,7 @@ public class ThreadNormageService extends ThreadTemplate {
 				this.idSource));
 
 		query.append(TableOperations.creationTableResultat(this.tableNormageDataTemp, this.tableNormageKOTemp));
-		UtilitaireDao.get(0).executeBlock(this.getConnexion().getExecutorConnection(), query);
+		UtilitaireDao.get(0).executeRequest(this.getConnexion().getExecutorConnection(), query);
 		
 		
 		this.fileIdCard = RulesOperations.fileIdCardFromPilotage(this.connexion.getExecutorConnection(),

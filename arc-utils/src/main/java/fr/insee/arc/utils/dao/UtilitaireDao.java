@@ -694,23 +694,6 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 		LoggerHelper.debugFinMethodeAsComment(getClass(), "copieFichiers()", LOGGER);
 	}
 
-
-	/**
-	 * exécute un bloque transactionnel
-	 * @param connexion
-	 * @param listeRequete
-	 * @throws ArcException
-	 */
-	public void executeBlock(Connection connexion, GenericPreparedStatementBuilder... listeRequete)
-			throws ArcException {
-		GenericPreparedStatementBuilder bloc = new GenericPreparedStatementBuilder("BEGIN;\n");
-		for (int i = 0; i < listeRequete.length; i++) {
-			bloc.append(listeRequete[i]).append(semicolon);
-		}
-		bloc.append("END;\n");
-		executeRequest(connexion, bloc);
-	}
-
 	public List<String> getList(Connection connexion, StringBuilder requete, List<String> returned) {
 		return getList(connexion, requete.toString(), returned);
 	}

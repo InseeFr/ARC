@@ -23,10 +23,10 @@ public class ResetEnvironementDao {
 	private Sandbox sandbox;
 
 	public void executeQueryResetPilotage() throws ArcException {
-		UtilitaireDao.get(0).executeBlock(sandbox.getConnection(),
+		UtilitaireDao.get(0).executeRequest(sandbox.getConnection(),
 				FormatSQL.truncate(ViewEnum.PILOTAGE_FICHIER.getFullName(sandbox.getSchema())));
 
-		UtilitaireDao.get(0).executeBlock(sandbox.getConnection(),
+		UtilitaireDao.get(0).executeRequest(sandbox.getConnection(),
 				FormatSQL.truncate(ViewEnum.PILOTAGE_ARCHIVE.getFullName(sandbox.getSchema())));
 	}
 
