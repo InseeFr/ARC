@@ -1,9 +1,5 @@
 package fr.insee.arc.utils.dao;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.RegisterExtension;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -17,6 +13,9 @@ import java.util.concurrent.CyclicBarrier;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.query.InitializeQueryTest;
@@ -50,6 +49,7 @@ public class UtilitaireDaoTest extends InitializeQueryTest {
 			return instance;
 		}
 	};
+	
 
 	@RegisterExtension
 	public LogAppenderResource appender = new LogAppenderResource(LogManager.getLogger(UtilitaireDao.class));
@@ -148,6 +148,72 @@ public class UtilitaireDaoTest extends InitializeQueryTest {
 		u.executeRequest(c, "DISCARD TEMP;");
 	}
 
+	/**
+	 * Test that executeRequest execute a transactionnal block without the need of begin - end declaration
+	 * @throws ArcException
+	 */
+	@Test
+	public void executeRequestTestQueryIsTransactionnal() throws ArcException {
+		List<String> testTables = createSimpleTableTest(c, "test", "t1", "t2");
+
+		String testTable1 = testTables.get(0);
+
+		int initalNumberOfRows = countNumberOfRows(ce, testTable1);
+		int numberOfRows;
+
+		// test that query acts as a transaction : nothing should happen in case of error
+		GenericPreparedStatementBuilder gb = new GenericPreparedStatementBuilder();
+		// add 2 rows to table t1
+		gb.build(add2RowsToTable(testTable1), SQL.END_QUERY);
+		// this query will fail as table t3 doesn't exists
+		gb.build(add2RowsToTable("test.t3"), SQL.END_QUERY);
+		
+		try {
+			UtilitaireDao.get(0).executeRequest(c, gb);
+		}
+		catch (ArcException e) {
+			// nothing should have happened
+			numberOfRows = countNumberOfRows(ce, testTable1);
+			assertEquals(initalNumberOfRows, numberOfRows);	
+		}
+
+	}
+	
+	@Test
+	public void executeRequestTestCommitInQuery() throws ArcException {
+		List<String> testTables = createSimpleTableTest(c, "test", "t1", "t2");
+
+		String testTable1 = testTables.get(0);
+		String testTable2 = testTables.get(1);
+
+		int initalNumberOfRows = countNumberOfRows(ce, testTable1);
+		int numberOfRows;
+
+		// test commit inside query
+		GenericPreparedStatementBuilder gb = new GenericPreparedStatementBuilder();
+		// add 2 rows to table t1 and commit : it should be applied
+		gb.build(add2RowsToTable(testTable1), SQL.END_QUERY, SQL.COMMIT, SQL.END_QUERY);
+		// add 2 rows to table t2 : it won't be applied because next query will fail
+		gb.build(add2RowsToTable(testTable2), SQL.END_QUERY);	
+		// this query will fail as table t3 doesn't exists
+		gb.build(add2RowsToTable("test.t3"), SQL.END_QUERY);
+
+		
+		try {
+			UtilitaireDao.get(0).executeRequest(c, gb);
+		}
+		catch (ArcException e) {
+			// as first query had been commit, should find two more rows in testTable1
+			numberOfRows = countNumberOfRows(ce, testTable1);
+			assertEquals(initalNumberOfRows + 2, numberOfRows);
+			// nothing sould had change in t2 as query after commit had failed
+			numberOfRows = countNumberOfRows(ce, testTable2);
+			assertEquals(initalNumberOfRows, numberOfRows);
+		}
+
+
+	}
+	
 	@Test
 	public void executeRequestNoCommitTest() throws ArcException {
 		List<String> testTables = createSimpleTableTest(c, "test", "t1", "t2");
@@ -207,7 +273,6 @@ public class UtilitaireDaoTest extends InitializeQueryTest {
 		UtilitaireDao.get(0).executeRequest(c, add2RowsToTable(testTable2));
 		numberOfRows = countNumberOfRows(ce, testTable2);
 		assertEquals(initalNumberOfRows + 4, numberOfRows);
-
 	}
 
 	private GenericPreparedStatementBuilder add2RowsToTable(String tableName) {

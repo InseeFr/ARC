@@ -143,7 +143,7 @@ public class ThreadOperations {
 		if (paramBatch != null && !paramBatch.equals(BatchMode.KEEP_INTERMEDIATE_DATA)) {
 			query.append("DROP TABLE IF EXISTS "+HashFileNameConversion.tableOfIdSource(this.tablePrevious,idSource)+";");
 		}
-		UtilitaireDao.get(0).executeBlock(connexion.getExecutorConnection(), query);
+		UtilitaireDao.get(0).executeRequest(connexion.getExecutorConnection(), query);
 
 		query = new ArcPreparedStatementBuilder();
 		if (connexion.isScaled()) {
@@ -154,7 +154,7 @@ public class ThreadOperations {
 
 			query.append(marquageFinal(tablePilotageGlobale, tablePilotageThread, idSource));
 
-			UtilitaireDao.get(0).executeBlock(connexion.getCoordinatorConnection(), query);
+			UtilitaireDao.get(0).executeRequest(connexion.getCoordinatorConnection(), query);
 		}
 	}
 	
