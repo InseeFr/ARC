@@ -9,9 +9,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -132,12 +134,19 @@ public class TestsFonctionnels extends InitializeQueryTest {
 		ApiServiceFactory.getService(TraitementPhase.MAPPING, sandbox, 10000000, batchMode).invokeApi();
 		assertEquals(1, nbFileInPhase(sandbox, TraitementPhase.MAPPING, TraitementEtat.OK));
 
-		// test on data
-		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
+		// TEST ON DATA
+		ArcPreparedStatementBuilder query;
+		List<String> queryRecords;
+		List<String> expectedRecords;
+		
+		// test on data : remuneration
+		query= new ArcPreparedStatementBuilder();
 		query.build(SQL.SELECT, "typrem", SQL.FROM, sandbox, ".mapping_dsn_remuneration_ok");
-		Map<String, List<String>> dsnRemunerationRecords = new GenericBean(
-				UtilitaireDao.get(0).executeRequest(c, query)).mapContent();
-		List<String> expectedRecords = new ArrayList<String>();
+		queryRecords = new GenericBean(
+				UtilitaireDao.get(0).executeRequest(c, query)).getColumnValues("typrem");
+		Collections.sort(queryRecords);
+		
+		expectedRecords = new ArrayList<String>();
 		expectedRecords.add("{REM001,REM002,REM003,REM022,PRI027,PRI028,VFV,VPE,BAS02,BAS03,BAS03,BAS48}");
 		expectedRecords.add("{REM001,REM003,REM010,PRI027,PRI028,VFV,VPE,BAS02,BAS03,BAS03,BAS48}");
 		expectedRecords.add("{REM010,REM012,REM013,REM014,ARV04,ARV06,VFV,VPE,BAS02,BAS03,BAS04,BAS14}");
@@ -152,10 +161,19 @@ public class TestsFonctionnels extends InitializeQueryTest {
 		expectedRecords.add("{REM020,REM025,REM026,ARV04,ARV17,VFV,VPE,BAS02,BAS03,BAS14}");
 		Collections.sort(expectedRecords);
 
-		List<String> queryResults = dsnRemunerationRecords.get("typrem");
-		Collections.sort(queryResults);
+		assertArrayEquals(expectedRecords.toArray(), queryRecords.toArray());
+		
+		// test on data : poste
+		query = new ArcPreparedStatementBuilder();
+		query.build(SQL.SELECT, "coalesce(cpost_lieu_trav,'') as cpost_lieu_trav", SQL.FROM, sandbox, ".mapping_dsn_poste_ok");
+		queryRecords = new GenericBean(
+				UtilitaireDao.get(0).executeRequest(c, query)).getColumnValues("cpost_lieu_trav");
+		Collections.sort(queryRecords);
 
-		assertArrayEquals(expectedRecords.toArray(), queryResults.toArray());
+		expectedRecords = Arrays.asList("","" , "", "", "", "", "51100", "78200");
+		Collections.sort(expectedRecords);
+		assertArrayEquals(expectedRecords.toArray(), queryRecords.toArray());
+
 		
 		// start export phase
 		ApiServiceFactory.getService(TraitementPhase.EXPORT, sandbox, 10000000, batchMode).invokeApi();
