@@ -5,9 +5,9 @@
 - All notable changes to this project will be documented in this file.
 - jacoco aggregate
 
-## version-94.2.35b
+## version-94.2.36b
 - mapping optimization
-- removed deprecated method in UtilitaireDao
+- removed deprecated methods in UtilitaireDao
 
 ## version-94.2.33b
 - if the ARC process must export the files to the master nod, the data retrieval webservice will only select the files marked as EXPORTED
