@@ -132,7 +132,7 @@ public class BuildJsonConfigurationTest {
               },
               {
                 "name": "POSTGRES_INITDB_ARGS",
-                "value": "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
+                "value": "--encoding=UTF-8 --lc-collate=C --lc-ctype=C --wal-segsize=1024"
               }
             ],
             "image": "postgres:17.5.0",
