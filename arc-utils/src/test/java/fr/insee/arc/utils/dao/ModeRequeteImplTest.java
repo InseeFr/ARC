@@ -24,8 +24,8 @@ public class ModeRequeteImplTest {
 
 		StringBuilder query = new StringBuilder();
 
-		query.append("set enable_nestloop=on;").append("set enable_mergejoin=off;").append("set enable_hashjoin=on;")
-				.append("set enable_material=off;").append("set enable_seqscan=off;").append("set enable_hashagg=on;")
+		query.append("set enable_mergejoin=off;")
+				.append("set enable_material=off;").append("set enable_seqscan=off;")
 				.append("set work_mem='" + PARALLEL_WORK_MEM + "';")
 				.append("set maintenance_work_mem='" + PARALLEL_WORK_MEM + "';")
 				.append("set temp_buffers='" + PARALLEL_WORK_MEM + "';")
