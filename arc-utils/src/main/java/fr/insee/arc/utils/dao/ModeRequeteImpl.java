@@ -33,12 +33,9 @@ public class ModeRequeteImpl {
     {
     	GenericPreparedStatementBuilder query=new GenericPreparedStatementBuilder();
     	query
-    	.append(ModeRequete.NESTLOOP_ON.expr())
     	.append(ModeRequete.MERGE_JOIN_OFF.expr())
-    	.append(ModeRequete.HASH_JOIN_ON.expr())
     	.append(ModeRequete.MATERIAL_OFF.expr())
     	.append(ModeRequete.SEQSCAN_OFF.expr())
-    	.append(ModeRequete.HASHAGG_ON.expr())
     	.append("set work_mem='" + PARALLEL_WORK_MEM + "';")
     	.append("set maintenance_work_mem='" + PARALLEL_WORK_MEM+"';")
     	.append("set temp_buffers='" + PARALLEL_WORK_MEM + "';")

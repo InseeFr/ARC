@@ -2,19 +2,6 @@ CREATE SCHEMA IF NOT EXISTS arc;
 
 -- optimization parameters at database level
 -- dont forget to change parameters set at server nod level
-/*
-postgresql::server::config_entry:
-  wal_compression:
-    value: "on"
-  force_parallel_mode:
-    value: "off"
-  log_statement:
-    value: "none"
-  max_locks_per_transaction:
-    value: "1000"
-  max_connections:
-    value: "1000"
-*/
 commit;do $$
 declare
 c record;

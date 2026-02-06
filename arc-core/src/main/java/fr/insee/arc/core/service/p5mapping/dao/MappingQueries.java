@@ -592,10 +592,21 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 	}
 
 	/**
-	 *
-	 * @param returned                   la requête
-	 * @param table                      la table
-	 * @param groupe
+	 * Dans le cas ou la table a des colonnes avec une expression du type {{1}{expr1}{2}{expr2}{3}{expr3}}
+	 * Cela signifie que les colonnes de ce type sont des tableaux
+	 * On appele cela un calcul de groupe et il y a dans notre cas 3 groupes
+	 * Pour faire le calcul de ces tableaux
+	 * On evalue les expr1 des colonnes tableaux sur toutes les lignes de la table pour lequels au moins une variable source invoquée dans les expr1 est non null
+	 * Dans la table TMP_ID, on marque les lignes pour lesquelles au moins une variable source invoquée dans les expr1 est non null
+	 * On fait pareil avec expr2 puis expr3
+	 * On mémorise ainsi quelles sont les lignes de la table qui ont fait l'objet d'un calcul de groupe
+	 * On doit enfin évaluer les lignes pour lequels les variables etaient null pour toutes les expressions
+	 * C'est le mode non groupe
+	 * Si une table n'a pas de colonne tableau, on est en mode non groupe et la requete est simple ca on cacule sur toutes les colonnes de la table
+	 * Si la table a des colonnes tableaux du type {{1}{expr1}{2}{expr2}{3}{expr3}}, la table tmp_id nous permet de faire ce calcul non groupe sur le reliquat des lignes qui n'ont pas fait l'object d'un calcul de groupe
+	 * @param returned
+	 * @param table
+	 * @param groupe le numéro du groupe
 	 * @param nomsVariablesIdentifiantes
 	 * @param reglesIdentifiantes
 	 * @return la requête passée en paramètre, augmentée de la requête d'insertion
@@ -620,57 +631,66 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 			return returned;
 		}
 		
+		// Si on est en mode non groupe et que la table n'a pas de calcul de groupe, c'est une requete simple
+		// Dans ce cas, pas besoin de considérer tmp_id et le calcul de reliquat
+		boolean complexQuery = true;
+		if (!modeIdentifiantGroupe && tableGroups.get(idTableGroupe(table,TableMapping.GROUPE_UN))==null) {
+			complexQuery = false;
+		}
+	
+		
 		StringBuilder blocCreate = new StringBuilder();
 		
 		/*
 		 * selectionner les identifiants à garder
 		 */
-		returned.append("\n DROP TABLE IF EXISTS TMP_ID CASCADE; ");
-		returned.append("\n CREATE TEMPORARY TABLE TMP_ID " + FormatSQL.WITH_NO_VACUUM + " AS ( ");
-		returned.append("\n SELECT * ");
-
-		/*
-		 * Dans le cas des groupes on garde tout; sinon on garde les identifiants qui
-		 * n'ont pas déjà été traités avant La table nomTableTemporaireIdTable stocke
-		 * ces identifiants
-		 */
-
-		returned.append("\n FROM ");
-		if (modeIdentifiantGroupe) {
-			returned.append(this.tableLienIdentifiants + " d ");
-
-		} else {
-			// table des lien non déjà trouvés
-			blocCreate.append("DROP TABLE IF EXISTS tmp_lndt;").append(ModeRequete.NESTLOOP_ON).append("CREATE TEMPORARY TABLE tmp_lndt as SELECT * FROM " + this.tableLienIdentifiants + " a where not exists (select 1 from "
-					+ this.nomTableTemporaireIdTable + " b where a.id_table=b.id_table); ").append(ModeRequete.NESTLOOP_OFF);
-			returned.insert(0, blocCreate);
-			returned.append("tmp_lndt d ");
+		if (complexQuery)
+		{
+			returned.append("\n DROP TABLE IF EXISTS TMP_ID CASCADE; ");
+			returned.append("\n CREATE TEMPORARY TABLE TMP_ID " + FormatSQL.WITH_NO_VACUUM + " AS ( ");
+			returned.append("\n SELECT * ");
+	
+			/*
+			 * Dans le cas des groupes on garde tout; sinon on garde les identifiants qui
+			 * n'ont pas déjà été traités avant La table nomTableTemporaireIdTable stocke
+			 * ces identifiants
+			 */
+	
+			returned.append("\n FROM ");
+			if (modeIdentifiantGroupe) {
+				returned.append(this.tableLienIdentifiants + " d ");
+	
+			} else {
+				// table des lien non déjà trouvés
+				blocCreate.append("DROP TABLE IF EXISTS tmp_lndt;").append(ModeRequete.NESTLOOP_ON).append("CREATE TEMPORARY TABLE tmp_lndt as SELECT * FROM " + this.tableLienIdentifiants + " a where not exists (select 1 from "
+						+ this.nomTableTemporaireIdTable + " b where a.id_table=b.id_table); ").append(ModeRequete.NESTLOOP_OFF);
+				returned.insert(0, blocCreate);
+				returned.append("tmp_lndt d ");
+			}
+	
+			returned.append("\n WHERE ");
+	
+			if (modeIdentifiantGroupe) {
+				returned.append(idTableGroupe(table,groupe));
+			} else {
+				returned.append(idTableNGroupe(table));
+			}
+			returned.append("\n ); ");
+	
+			/*
+			 * On ajoute les identifiants traités à la table nomTableTemporaireIdTable qui
+			 * stocke les identifiants traités
+			 */
+			returned.append("\n ").append(ModeRequete.NESTLOOP_ON);
+			returned.append("INSERT INTO " + this.nomTableTemporaireIdTable
+					+ " SELECT id_table FROM TMP_ID a WHERE NOT EXISTS (SELECT 1 from " + this.nomTableTemporaireIdTable
+					+ " b where a.id_table=b.id_table); ");
+			returned.append(ModeRequete.NESTLOOP_OFF);
+			/*
+			 * Insert dans prep union : on fait notre calcul de mise au format
+			 */
 		}
 
-		returned.append("\n WHERE ");
-
-		if (modeIdentifiantGroupe) {
-			returned.append(idTableGroupe(table,groupe));
-		} else {
-			returned.append(idTableNGroupe(table));
-		}
-		returned.append("\n ); ");
-
-		/*
-		 * On ajoute les identifiants traités à la table nomTableTemporaireIdTable qui
-		 * stocke les identifiants traités
-		 */
-		returned.append("\n ").append(ModeRequete.NESTLOOP_ON);
-		returned.append("INSERT INTO " + this.nomTableTemporaireIdTable
-				+ " SELECT id_table FROM TMP_ID a WHERE NOT EXISTS (SELECT 1 from " + this.nomTableTemporaireIdTable
-				+ " b where a.id_table=b.id_table); ");
-		returned.append(ModeRequete.NESTLOOP_OFF);
-		/*
-		 * Insert dans prep union : on fait notre calcul de mise au format
-		 */
-
-		
-		
 		returned.append("\n set work_mem='" + ModeRequeteImpl.SORT_WORK_MEM + "';");
 		returned.append("\n INSERT INTO " + this.nomTableTemporairePrepUnion + " ");
 		returned.append("\n SELECT ");
@@ -681,8 +701,20 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 		// Finalement NON : Utilisation d'une variable de départage
 		returned.append("\n SELECT DISTINCT " + table.expressionSQLPrepUnion(groupe, reglesIdentifiantes));
 		returned.append("\n FROM ");
-		returned.append("\n TMP_ID d ," + this.nomTableSource + " e ");
-		returned.append("\n WHERE e.id=d.id_table ");
+		returned.append("\n ").append(this.nomTableSource).append(" e ");
+		
+		if (complexQuery)
+		{
+			// prise en compte de la table qui a calculé le reliquat des lignes à évaluer
+			returned.append(",").append("TMP_ID").append(" d ");
+			returned.append("\n WHERE e.id=d.id_table ");
+		} else
+		{
+			returned.append(",").append(this.tableLienIdentifiants).append(" d ");
+			returned.append("\n WHERE e.id=d.id_table ");
+			returned.append(" AND ").append(idTableNGroupe(table));
+		}
+		
 		returned.append("\n ) a; ");
 		returned.append("\n set work_mem='" + ModeRequeteImpl.PARALLEL_WORK_MEM + "';");
 
@@ -744,15 +776,16 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 		Set<String> ensembleIdentifiantsGroupesRetenus = new HashSet<>(table.getEnsembleIdentifiantsRubriques(groupe));
 		ensembleIdentifiantsGroupesRetenus.remove(ColumnEnum.ID_SOURCE.getColumnName());
 		
-		if (!ensembleIdentifiantsGroupesRetenus.isEmpty())
+		if (!ensembleIdentifiantsGroupesRetenus.isEmpty()) {
 			tableGroups.put(idTableGroupe(table,groupe), ensembleIdentifiantsGroupesRetenus);
+			}
+		
 		}
-
+		
 		Set<String> ensembleIdentifiantsNonGroupesRetenus = this.ensembleRubriqueIdentifianteTable.get(table);
 			if (!ensembleIdentifiantsNonGroupesRetenus.isEmpty())
 			{
 				tableNonGroup.put(idTableNGroupe(table), ensembleIdentifiantsNonGroupesRetenus);
-				
 			}
 		}
 	}
