@@ -5,6 +5,9 @@
 - All notable changes to this project will be documented in this file.
 - jacoco aggregate
 
+## version-94.2.40b
+- postgres optimization
+
 ## version-94.2.39b
 - mapping optimization
 - wal_segment_size to 1GB in postgres executor stateful kubernetes configuration

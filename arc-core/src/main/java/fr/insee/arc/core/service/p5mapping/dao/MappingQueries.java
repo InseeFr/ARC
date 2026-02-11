@@ -691,15 +691,10 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 			 */
 		}
 
-		returned.append("\n set work_mem='" + ModeRequeteImpl.SORT_WORK_MEM + "';");
 		returned.append("\n INSERT INTO " + this.nomTableTemporairePrepUnion + " ");
-		returned.append("\n SELECT ");
+		returned.append("\n SELECT DISTINCT ");
 		returned.append(" " + listeVariablesTypesPrepUnion(new StringBuilder(), table, "::", true) + " FROM (");
-
-		// Attention à ce distinct : faut bien garder les identifiant de rémunération
-		// intermédiaire du coup et pas le final
-		// Finalement NON : Utilisation d'une variable de départage
-		returned.append("\n SELECT DISTINCT " + table.expressionSQLPrepUnion(groupe, reglesIdentifiantes));
+		returned.append("\n SELECT " + table.expressionSQLPrepUnion(groupe, reglesIdentifiantes));
 		returned.append("\n FROM ");
 		returned.append("\n ").append(this.nomTableSource).append(" e ");
 		
@@ -716,7 +711,6 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 		}
 		
 		returned.append("\n ) a; ");
-		returned.append("\n set work_mem='" + ModeRequeteImpl.PARALLEL_WORK_MEM + "';");
 
 		returned.append("\n DROP TABLE IF EXISTS TMP_ID CASCADE; ");
 
@@ -1013,8 +1007,7 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 	 */
 	private static String checkIsNotNull(Set<String> ensembleIdentifiants) {
 		StringBuilder requete = new StringBuilder();
-		requete.append("ROW(" + Format.untokenize(ensembleIdentifiants, ",") + ")::text COLLATE \"C\" !='"
-				+ FormatSQL.toNullRow(ensembleIdentifiants) + "'");
+		requete.append("num_nonnulls(" + Format.untokenize(ensembleIdentifiants, ",") + ")>0");
 		return requete.toString();
 
 	}

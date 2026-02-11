@@ -199,9 +199,7 @@ public class GererFamilleNormeDao extends VObjectHelperDao {
 	public void execQueryDeleteTableMetier(VObject viewTableMetier, String idFamilleSelected) throws ArcException {
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		query.append(this.vObjectService.deleteQuery(viewTableMetier));
-		query.append(querySynchronizeRegleWithVariableMetier(idFamilleSelected));
-		query.asTransaction();
-	
+		query.append(querySynchronizeRegleWithVariableMetier(idFamilleSelected));	
 		UtilitaireDao.get(0).executeRequest(null, query);
 	}
 
@@ -210,7 +208,6 @@ public class GererFamilleNormeDao extends VObjectHelperDao {
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		query.append(this.vObjectService.deleteQuery(viewFamilleNorme));
 		query.append(GererFamilleNormeDao.querySynchronizeRegleWithVariableMetier(idFamilleSelected));
-		query.asTransaction();
 	
 		UtilitaireDao.get(0).executeRequest(null, query);
 	}

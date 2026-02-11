@@ -652,7 +652,7 @@ public class VObjectService {
 
 		try {
 			UtilitaireDao.get(this.connectionIndex).executeRequest(this.connection,
-					deleteQuery(currentData, tables).asTransaction());
+					deleteQuery(currentData, tables));
 		} catch (ArcException ex) {
 			LoggerHelper.error(LOGGER, ex);
 			currentData.setMessage("vObject.delete.error");
