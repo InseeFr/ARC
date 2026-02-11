@@ -43,11 +43,6 @@ public class GenericQueryDao {
 	public void execute() throws ArcException {
 		UtilitaireDao.get(0).executeRequest(connection, query);
 	}	
-	
-	public void executeAsTransaction() throws ArcException
-	{
-        UtilitaireDao.get(0).executeRequest(this.connection, query.asTransaction());
-	}
 
 	public GenericPreparedStatementBuilder getQuery() {
 		return query;

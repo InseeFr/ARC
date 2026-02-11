@@ -15,10 +15,10 @@ import fr.insee.arc.core.service.global.bo.JeuDeRegle;
 import fr.insee.arc.core.service.global.bo.JeuDeRegleDao;
 import fr.insee.arc.core.service.global.dao.DatabaseConnexionConfiguration;
 import fr.insee.arc.core.service.global.dao.GenericQueryDao;
+import fr.insee.arc.core.service.global.dao.HashFileNameConversion;
 import fr.insee.arc.core.service.global.dao.PilotageOperations;
 import fr.insee.arc.core.service.global.dao.RulesOperations;
 import fr.insee.arc.core.service.global.dao.TableNaming;
-import fr.insee.arc.core.service.global.dao.TableOperations;
 import fr.insee.arc.core.service.global.dao.ThreadOperations;
 import fr.insee.arc.core.service.global.scalability.ScalableConnection;
 import fr.insee.arc.core.service.global.thread.ThreadConstant;
@@ -74,7 +74,6 @@ public class ThreadMappingService extends ThreadTemplate {
 		this.tabIdSource = anApi.getTabIdSource();
 		this.paramBatch = anApi.getParamBatch();
 
-		this.tableTempControleOk = FormatSQL.temporaryTableName(ThreadTemporaryTable.TABLE_MAPPING_DATA_TEMP);
 		this.tableMappingPilTemp = ThreadTemporaryTable.TABLE_PILOTAGE_THREAD;
 
 		this.tableLienIdentifiants = FormatSQL.temporaryTableName(ThreadTemporaryTable.TABLE_MAPPING_IDS_LINK_TEMP);
@@ -117,13 +116,14 @@ public class ThreadMappingService extends ThreadTemplate {
 	 * @throws ArcException
 	 */
 	private void preparerExecution() throws ArcException {
+		
+		this.tableTempControleOk = HashFileNameConversion.tableOfIdSource(this.previousExecutedPhaseTable, idSource);
+		
 		genericExecutorDao.initialize()
 			.addOperation(this.arcThreadGenericDao.preparationDefaultDao())
 			.addOperation(RulesOperations.marqueJeuDeRegleApplique(this.currentExecutedPhase, 
 				this.envExecution, this.tableMappingPilTemp))
-			.addOperation(TableOperations.createTableTravailIdSource(this.previousExecutedPhaseTable,
-				this.tableTempControleOk, this.idSource))
-			.executeAsTransaction();
+			.execute();
 	}
 
 	private void execute() throws ArcException {
@@ -168,12 +168,8 @@ public class ThreadMappingService extends ThreadTemplate {
 		
 		/*
 		 * Delete empty records if there is not link in children tables
-		 */
-		
+		 */	
 		query.append(requeteMapping.deleteEmptyRecords(idSource));
-
-		// clean the input temporary data table
-		query.append(FormatSQL.dropTable(this.tableTempControleOk));
 
 		// promote the application user account to full right
 		query.append(DatabaseConnexionConfiguration.switchToFullRightRole());

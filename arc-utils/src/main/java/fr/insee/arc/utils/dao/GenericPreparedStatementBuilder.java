@@ -85,17 +85,6 @@ public class GenericPreparedStatementBuilder {
 		query.append(FormatSQL.quoteText(s));
 		return this;
 	}
-	
-	/**
-	 * Add transaction command to the prepared statement builder
-	 * 
-	 * @return
-	 */
-	public GenericPreparedStatementBuilder asTransaction() {
-		query.insert(0, SQL.BEGIN.toString());
-		query.append(SQL.END.toString());
-		return this;
-	}
 
 	@Override
 	public String toString() {

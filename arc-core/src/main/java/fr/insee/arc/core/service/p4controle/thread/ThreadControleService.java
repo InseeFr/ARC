@@ -140,7 +140,7 @@ public class ThreadControleService extends ThreadTemplate {
 		genericExecutorDao.addOperation(TableOperations.createTableTravailIdSource(this.previousExecutedPhaseTable, this.tableControleDataTemp, this.idSource,
 				ThreadControleQueryBuilder.extraColumnsAddedByControle()));
 
-		genericExecutorDao.executeAsTransaction();
+		genericExecutorDao.execute();
 
 	}
 
