@@ -341,7 +341,7 @@ public class TableMapping implements IConstanteCaractere, IConstanteNumerique {
 	 * @param returned
 	 * @return
 	 */
-	private void sqlListeVariables(StringBuilder returned) {
+	public void sqlListeVariables(StringBuilder returned) {
 		boolean isFirst = true;
 		for (VariableMapping variable : this.ensembleVariableClef) {
 			if (isFirst) {

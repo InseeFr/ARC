@@ -93,13 +93,13 @@ public class RegleMappingCorrespondanceFonctionnelle extends AbstractRegleMappin
             }
         }
         if (!triplet.get(ARRAY_FIRST_COLUMN_INDEX).equalsIgnoreCase(empty)) {
-            this.listeTokenRegle.add(this.regleMappingFactory.get(triplet.get(ARRAY_FIRST_COLUMN_INDEX), this.variableMapping));
+            this.listeTokenRegle.add(this.regleMappingFactory.getRegleMapping(triplet.get(ARRAY_FIRST_COLUMN_INDEX), this.variableMapping));
         }
         if (!triplet.get(ARRAY_SECOND_COLUMN_INDEX).equalsIgnoreCase(empty)) {
-            this.listeTokenRegle.add(this.regleMappingFactory.get(triplet.get(ARRAY_SECOND_COLUMN_INDEX), this.variableMapping));
+            this.listeTokenRegle.add(this.regleMappingFactory.getRegleMapping(triplet.get(ARRAY_SECOND_COLUMN_INDEX), this.variableMapping));
         }
         if (!triplet.get(ARRAY_THIRD_COLUMN_INDEX).equalsIgnoreCase(empty)) {
-            this.listeTokenRegle.add(this.regleMappingFactory.get(triplet.get(ARRAY_THIRD_COLUMN_INDEX), this.variableMapping));
+            this.listeTokenRegle.add(this.regleMappingFactory.getRegleMapping(triplet.get(ARRAY_THIRD_COLUMN_INDEX), this.variableMapping));
         }
     }
 

@@ -135,28 +135,40 @@ public class TestsFonctionnels extends InitializeQueryTest {
 		// TEST ON DATA
 		ArcPreparedStatementBuilder query;
 		List<String> queryRecords;
+		List<List<String>> expectedRawRecords;
 		List<String> expectedRecords;
 		
 		// test on data : remuneration
 		query= new ArcPreparedStatementBuilder();
-		query.build(SQL.SELECT, "typrem", SQL.FROM, sandbox, ".mapping_dsn_remuneration_ok");
+		
+		query.build("WITH ttt as(");
+		query.build("SELECT id_remuneration, unnest(typrem) as typrem from ",sandbox,".mapping_dsn_remuneration_ok order by typrem)");
+		query.build("SELECT id_remuneration, array_agg(typrem order by typrem) as typrem from ttt group by id_remuneration order by typrem");
 		queryRecords = new GenericBean(
 				UtilitaireDao.get(0).executeRequest(c, query)).getColumnValues("typrem");
-		Collections.sort(queryRecords);
+		Collections.sort(queryRecords);	
 		
-		expectedRecords = new ArrayList<String>();
-		expectedRecords.add("{REM001,REM002,REM003,REM022,PRI027,PRI028,VFV,VPE,BAS02,BAS03,BAS03,BAS48}");
-		expectedRecords.add("{REM001,REM003,REM010,PRI027,PRI028,VFV,VPE,BAS02,BAS03,BAS03,BAS48}");
-		expectedRecords.add("{REM010,REM012,REM013,REM014,ARV04,ARV06,VFV,VPE,BAS02,BAS03,BAS04,BAS14}");
-		expectedRecords.add("{REM001,REM002,ARV04,ARV06,VFV,VPE,BAS02,BAS03,BAS04,BAS14}");
-		expectedRecords.add("{REM001,REM002,ARV04,ARV06,VFV,VPE,BAS12,BAS13}");
-		expectedRecords.add("{REM002,REM003,REM010,REM012,REM001,ARV04,ARV06,VFV,VPE,BAS12,BAS13}");
-		expectedRecords.add("{REM001,REM002,REM003,REM010,VFV,VPE,BAS02,BAS23}");
-		expectedRecords.add("{VFV,VPE,BAS02,BAS23}");
-		expectedRecords.add("{REM001,REM002,ARV06,VFV,VPE,BAS17,BAS18}");
-		expectedRecords.add("{ARV06,VFV,VPE,BAS17,BAS18}");
-		expectedRecords.add("{ARV04,ARV17,VFV,VPE,BAS02,BAS03,BAS14}");
-		expectedRecords.add("{REM020,REM025,REM026,ARV04,ARV17,VFV,VPE,BAS02,BAS03,BAS14}");
+		expectedRecords = new ArrayList<>();
+		expectedRawRecords = new ArrayList<>();
+		
+		expectedRawRecords.add(Arrays.asList("ARV04","ARV17","VFV","VPE","BAS02","BAS03","BAS14"));
+		expectedRawRecords.add(Arrays.asList("ARV06","VFV","VPE","BAS17","BAS18"));
+		expectedRawRecords.add(Arrays.asList("REM001","REM002","ARV04","ARV06","VFV","VPE","BAS02","BAS03","BAS04","BAS14"));
+		expectedRawRecords.add(Arrays.asList("REM001","REM002","ARV04","ARV06","VFV","VPE","BAS12","BAS13"));
+		expectedRawRecords.add(Arrays.asList("REM001","REM002","ARV06","VFV","VPE","BAS17","BAS18"));
+		expectedRawRecords.add(Arrays.asList("REM001","REM002","REM003","REM010","VFV","VPE","BAS02","BAS23"));
+		expectedRawRecords.add(Arrays.asList("REM001","REM002","REM003","REM022","PRI027","PRI028","VFV","VPE","BAS02","BAS03","BAS03","BAS48"));
+		expectedRawRecords.add(Arrays.asList("REM001","REM003","REM010","PRI027","PRI028","VFV","VPE","BAS02","BAS03","BAS03","BAS48"));
+		expectedRawRecords.add(Arrays.asList("REM002","REM003","REM010","REM012","REM001","ARV04","ARV06","VFV","VPE","BAS12","BAS13"));
+		expectedRawRecords.add(Arrays.asList("REM010","REM012","REM013","REM014","ARV04","ARV06","VFV","VPE","BAS02","BAS03","BAS04","BAS14"));
+		expectedRawRecords.add(Arrays.asList("REM020","REM025","REM026","ARV04","ARV17","VFV","VPE","BAS02","BAS03","BAS14"));
+		expectedRawRecords.add(Arrays.asList("VFV","VPE","BAS02","BAS23"));
+
+		expectedRawRecords.stream().forEach(r -> {
+			List<String> values = r;
+			Collections.sort(values);
+			expectedRecords.add(values.toString().replace(" ","").replace("[", "{").replace("]", "}"));
+		});
 		Collections.sort(expectedRecords);
 
 		assertArrayEquals(expectedRecords.toArray(), queryRecords.toArray());
@@ -168,10 +180,14 @@ public class TestsFonctionnels extends InitializeQueryTest {
 				UtilitaireDao.get(0).executeRequest(c, query)).getColumnValues("cpost_lieu_trav");
 		Collections.sort(queryRecords);
 
-		expectedRecords = Arrays.asList("","" , "", "", "", "", "51100", "78200");
-		Collections.sort(expectedRecords);
-		assertArrayEquals(expectedRecords.toArray(), queryRecords.toArray());
-
+		List<String> expectedRecords2 = Arrays.asList("","" , "", "", "", "", "51100", "78200");
+		Collections.sort(expectedRecords2);
+		assertArrayEquals(expectedRecords2.toArray(), queryRecords.toArray());
+		
+		// test on data : employeur
+		query = new ArcPreparedStatementBuilder();
+		int nbEnrInEmployeur = UtilitaireDao.get(0).getInt(c, "SELECT count(*) FROM "+sandbox+".mapping_dsn_employeur_ok" );
+		assertEquals(1, nbEnrInEmployeur);
 		
 		// start export phase
 		ApiServiceFactory.getService(TraitementPhase.EXPORT, sandbox, 10000000, batchMode).invokeApi();

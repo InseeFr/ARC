@@ -12,16 +12,20 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import com.google.common.collect.Streams;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.service.global.bo.JeuDeRegle;
+import fr.insee.arc.core.service.global.dao.TableOperations;
+import fr.insee.arc.core.service.global.thread.ThreadTemporaryTable;
 import fr.insee.arc.core.service.p5mapping.bo.TableMapping;
 import fr.insee.arc.core.service.p5mapping.bo.VariableMapping;
 import fr.insee.arc.core.service.p5mapping.bo.rules.RegleMappingClePrimaire;
 import fr.insee.arc.utils.dao.ModeRequete;
-import fr.insee.arc.utils.dao.ModeRequeteImpl;
 import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.database.Delimiters;
@@ -31,7 +35,6 @@ import fr.insee.arc.utils.format.Format;
 import fr.insee.arc.utils.textUtils.IConstanteCaractere;
 import fr.insee.arc.utils.textUtils.IConstanteNumerique;
 import fr.insee.arc.utils.utils.FormatSQL;
-import fr.insee.arc.utils.utils.ManipString;
 
 /**
  *
@@ -78,6 +81,12 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 	private Set<TableMapping> ensembleTableMapping;
 	private Set<VariableMapping> ensembleVariableMapping;
 	private SortedSet<Integer> ensembleGroupes;
+	
+	private static final String IDENTIFIANT_TRIGGER = "id$tg";
+	private static final String PREP_UNION_TABLE = "pu";
+
+	
+	private Map <String, String> insertionTriggers = new HashMap<String, String>();
 
 	private Map<TableMapping, Set<String>> ensembleRubriqueIdentifianteTable;
 	/*
@@ -96,12 +105,9 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 	 */
 	private String nomTableModVariableMetier;
 	private String nomTableSource;
+	private String nomViewSource;
 	private String nomTableRegleMapping;
-	private String nomTableTemporairePrepUnion;
-	private String nomTableTemporaireIdTable;
 	private String tableLienIdentifiants;
-
-	private static final String ID_TABLE = "id_table";
 	
 	Map<String, String> reglesIdentifiantes;
 	
@@ -273,6 +279,32 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 		}
 	}
 
+	private void initializeTrigger(StringBuilder returned) throws ArcException {
+		returned.append("\n CREATE OR REPLACE FUNCTION pg_temp.pu() RETURNS trigger AS $$ BEGIN ");
+	}
+	
+	private void finalizeTrigger(StringBuilder returned) throws ArcException {
+
+		// important to return NULL not to fill memory with pointer
+		returned.append("\n RETURN NULL; END; $$ LANGUAGE plpgsql;");
+		
+		// create a view on a empty image of the controle phase output table
+		// it could avoid some nasty bugs if the instead of clause fails
+		// as in postgres, insert into view triggers an insert on the master table
+		// and we do not want to modify the data from the controle phase output table
+		String tableTrigger = FormatSQL.temporaryTableName(ThreadTemporaryTable.TABLE_MAPPING_DATA_TEMP);
+		this.nomViewSource = FormatSQL.temporaryTableName(ThreadTemporaryTable.VIEW_MAPPING_DATA_TEMP);
+		
+		returned.append(TableOperations.createTableTravail(nomTableSource, tableTrigger, null, true));
+		returned.append(TableOperations.createViewImage(tableTrigger, this.nomViewSource));
+		
+		// apply trigger to view
+		returned.append("\n CREATE TRIGGER pu");
+		returned.append("\n INSTEAD OF INSERT ON "+this.nomViewSource);
+		returned.append("\n FOR EACH ROW EXECUTE FUNCTION pg_temp.pu();");
+	}
+	
+	
 	/**
 	 * Construit les objets de type {@link TableMapping} et {@link VariableMapping}
 	 * en respectant les contraintes suivantes :<br/>
@@ -355,6 +387,7 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 		return requeteGlobale.toString();
 		
 	}
+
 	
 	/**
 	 *
@@ -362,36 +395,62 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 	 * @return a map with the model table as key and the query that inserts data as value
 	 * @throws ArcException
 	 */
-	public Map<TableMapping,StringBuilder> getQueriesThatInsertDataIntoTemporaryModelTable(String aNomFichier) throws ArcException {
-
-			Map<TableMapping,StringBuilder> queryByTable = new HashMap<>();
+	public void getQueriesThatInsertDataIntoTemporaryModelTable(String aNomFichier, StringBuilder requete) throws ArcException {
 
 			for (TableMapping table : this.ensembleTableMapping) {
 				
-				StringBuilder requeteGlobale = new StringBuilder();
-				requeteGlobale.append(ModeRequete.NESTLOOP_OFF);
-				
-				this.nomTableTemporairePrepUnion = "prep_union";
-				this.nomTableTemporaireIdTable = "table_id";
+				requete.append(ModeRequete.NESTLOOP_OFF);
 
-				creerTablePrepUnion(requeteGlobale, table);
-				insererTablePrepUnion(requeteGlobale, table, reglesIdentifiantes);
+				creerTablePrepUnion(requete, table);
+				insererTablePrepUnionNew(requete, table, reglesIdentifiantes);
 				
 				// compute sql expression
 				table.prepareSQLVariablesArrayAgg();
 				
-				calculerRequeteArrayAggGroup(table.getNomTableTemporaire(), requeteGlobale, table);
-				requeteGlobale.append(FormatSQL.dropTable(this.nomTableTemporairePrepUnion, this.nomTableTemporaireIdTable));
-				requeteGlobale.append(ModeRequete.NESTLOOP_ON);
+				calculerRequeteArrayAggGroup(table.getNomTableTemporaire(), requete, table);
+				requete.append(FormatSQL.dropTable(PREP_UNION_TABLE));
+				requete.append(ModeRequete.NESTLOOP_ON);
 
-				queryByTable.put(table, requeteGlobale);
 			}
-
-
-			return queryByTable;
+			
+			
+			// the view trigger is made to split the main table from controle phase in several little tables that contains only the useful columns
+			// it is a huge optimization on large file as the full scan is only made once
+			StringBuilder requeteTrigger = new StringBuilder();
+			createTriggerTables(requeteTrigger);
+			initializeTrigger(requeteTrigger);
+			defineInsertionTrigger(requeteTrigger);
+			finalizeTrigger(requeteTrigger);
+			useTrigger(requeteTrigger);
+			
+			requete.insert(0, requeteTrigger);
 			
 	}
 
+	private void useTrigger(StringBuilder returned) {
+		returned.append("\n INSERT INTO ").append(this.nomViewSource).append(" SELECT * FROM ").append(this.nomTableSource).append(";");
+	}
+
+	private void defineInsertionTrigger(StringBuilder returned) {
+		insertionTriggers.entrySet().stream().forEach(t -> 
+		{
+			returned.append("\n INSERT INTO ").append(t.getKey());
+			returned.append("\n SELECT ").append(t.getValue()).append("\n FROM ").append("(SELECT NEW.*) e;");
+		}
+		);		
+	}
+
+	private void createTriggerTables(StringBuilder returned) {
+		
+		insertionTriggers.entrySet().stream().forEach(t -> 
+		{
+			returned.append("\n CREATE TEMPORARY TABLE ").append(t.getKey()).append(FormatSQL.WITH_NO_VACUUM);
+			returned.append("\n AS SELECT ").append(t.getValue()).append("\n FROM ").append(this.nomTableSource);
+			returned.append("\n LIMIT 0;");
+		}
+		);
+	}
+	
 	/**
 	 * Delete empty records from model tables
 	 * @param aNomFichier
@@ -416,57 +475,75 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 		
 	}
 	
-	
 	/**
-	 *
-	 * @param returned
-	 * @param table
-	 * @param nomsVariablesIdentifiantes
-	 * @param reglesIdentifiantes
-	 * @return La requête {@code returned}, augmentée de la requête d'insertion dans
-	 *         la table {@code prep_union}.
-	 * @throws ArcException
+	 * Parse expression to identify what source column are used in
+	 * @param expressionSQLCalculMapping
+	 * @return
 	 */
-	private StringBuilder insererTablePrepUnion(StringBuilder returned, TableMapping table,
+	private String computeSourceColumnsUsedInExpression (String expressionSQLCalculMapping)
+	{
+		return Streams.concat(regleMappingFactory.getEnsembleNomRubriqueExistante().stream()
+				, regleMappingFactory.getEnsembleIdentifiantRubriqueExistante().stream())
+		.filter(t-> expressionSQLCalculMapping.toLowerCase().contains(t)).collect(Collectors.joining(","));
+	}
+	
+	private StringBuilder insererTablePrepUnionNew(StringBuilder returned, TableMapping table,
 			Map<String, String> reglesIdentifiantes) throws ArcException {
+		
+		StringBuilder groupsExclusionCondition = new StringBuilder();
+		for (Integer groupe : table.getEnsembleGroupes()) {
+			if (tableGroups.get(idTableGroupe(table,groupe))!=null)		
+			{
+				
+			groupsExclusionCondition.append(" AND NOT ").append(idTableGroupe(table, groupe));
+			String expressionSQLCalculMapping = table.expressionSQLPrepUnion(groupe, reglesIdentifiantes);
+		
+			returned.append("\n INSERT INTO ").append(PREP_UNION_TABLE);
+			returned.append("\n SELECT ");
+			returned.append(listeVariablesTypesPrepUnion(new StringBuilder(), table, "::", true));
+			returned.append("\n FROM (");
+			returned.append("\n SELECT ").append(expressionSQLCalculMapping);
+			returned.append("\n FROM ").append(this.tableLienIdentifiants).append(" d ");
+			returned.append("\n ,").append(idTableGroupe(table,groupe)).append(" e ");
+			returned.append("\n WHERE e.id=d.id_table ");
+			returned.append("\n AND ").append(idTableGroupe(table,groupe));
+			returned.append("\n ) a ");
+			returned.append("\n GROUP BY ");
+			table.sqlListeVariables(returned);
+			returned.append(";");
+			
+			insertionTriggers.put(idTableGroupe(table,groupe),computeSourceColumnsUsedInExpression(expressionSQLCalculMapping));
 
-		String requete = "";
-		String requeteSav = "";
-
-		/*
-		 * Lorsqu'aucun groupe n'est défini pour aucune table, on attribue par défaut le
-		 * groupe 1 à toute variable de toute table.
-		 */
-		if (this.ensembleGroupes.isEmpty()) {
-			this.ensembleGroupes.add(TableMapping.GROUPE_UN);
-		}
-
-		for (Integer groupe : this.ensembleGroupes) {
-
-			StringBuilder req = new StringBuilder();
-			insererTablePrepUnionAvecGroupe(req, table, groupe, reglesIdentifiantes);
-			requete = req.toString();
-
-			if (!requete.equals(requeteSav)) {
-				requeteSav = requete;
-				returned.append(requete);
 			}
 		}
 
+		
+		if (tableNonGroup.get(idTableNGroupe(table))!=null)		
+		{
+			String expressionSQLCalculMapping = table.expressionSQLPrepUnion(null, reglesIdentifiantes);
+			
+			returned.append("\n INSERT INTO ").append(PREP_UNION_TABLE);
+			returned.append("\n SELECT ");
+			returned.append(listeVariablesTypesPrepUnion(new StringBuilder(), table, "::", true));
+			returned.append("\n FROM (");
+			returned.append("\n SELECT ").append(expressionSQLCalculMapping);
+			returned.append("\n FROM ").append(this.tableLienIdentifiants).append(" d ");
+			returned.append("\n ,").append(idTableNGroupe(table)).append(" e ");
+			returned.append("\n WHERE e.id=d.id_table ");
+			returned.append("\n AND ").append(idTableNGroupe(table));
+			// if table has group, records selected by group must be excluded
+			returned.append(groupsExclusionCondition);
+			returned.append("\n ) a ");
+			returned.append("\n GROUP BY ");
+			table.sqlListeVariables(returned);
+			returned.append(";");
+			
+			insertionTriggers.put(idTableNGroupe(table),computeSourceColumnsUsedInExpression(expressionSQLCalculMapping));
 
-		StringBuilder req = new StringBuilder();
-		insererTablePrepUnionAvecGroupe(req, table, null, reglesIdentifiantes);
-		requete = req.toString();
-
-		if (!requete.equals(requeteSav)) {
-			requeteSav = requete;
-			returned.append(requete);
 		}
-
-
 		return returned;
 	}
-
+	
 	private int computeTableNumber(Map<TableMapping, Integer> order,
 			Map<TableMapping, List<TableMapping>> tableTree, TableMapping table) {
 
@@ -591,149 +668,14 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 		return r;
 	}
 
-	/**
-	 * Dans le cas ou la table a des colonnes avec une expression du type {{1}{expr1}{2}{expr2}{3}{expr3}}
-	 * Cela signifie que les colonnes de ce type sont des tableaux
-	 * On appele cela un calcul de groupe et il y a dans notre cas 3 groupes
-	 * Pour faire le calcul de ces tableaux
-	 * On evalue les expr1 des colonnes tableaux sur toutes les lignes de la table pour lequels au moins une variable source invoquée dans les expr1 est non null
-	 * Dans la table TMP_ID, on marque les lignes pour lesquelles au moins une variable source invoquée dans les expr1 est non null
-	 * On fait pareil avec expr2 puis expr3
-	 * On mémorise ainsi quelles sont les lignes de la table qui ont fait l'objet d'un calcul de groupe
-	 * On doit enfin évaluer les lignes pour lequels les variables etaient null pour toutes les expressions
-	 * C'est le mode non groupe
-	 * Si une table n'a pas de colonne tableau, on est en mode non groupe et la requete est simple ca on cacule sur toutes les colonnes de la table
-	 * Si la table a des colonnes tableaux du type {{1}{expr1}{2}{expr2}{3}{expr3}}, la table tmp_id nous permet de faire ce calcul non groupe sur le reliquat des lignes qui n'ont pas fait l'object d'un calcul de groupe
-	 * @param returned
-	 * @param table
-	 * @param groupe le numéro du groupe
-	 * @param nomsVariablesIdentifiantes
-	 * @param reglesIdentifiantes
-	 * @return la requête passée en paramètre, augmentée de la requête d'insertion
-	 *         dans la table {@code prep_union}
-	 *
-	 * @param modeIdentifiantGroupe : true : identifiant group, false : identifiant
-	 *                              non groupe
-	 * @throws ArcException
-	 */
-	private StringBuilder insererTablePrepUnionAvecGroupe(StringBuilder returned, TableMapping table, Integer groupe,
-			Map<String, String> reglesIdentifiantes) throws ArcException {
-
-		boolean modeIdentifiantGroupe = (groupe!=null); 
-		
-		// mode groupe : l'identifiant n'est pas vide ?
-		if (modeIdentifiantGroupe && tableGroups.get(idTableGroupe(table,groupe))==null) {
-			return returned;
-		}
-		
-		// mode non groupe : l'identifiant n'est pas vide ?
-		if (!modeIdentifiantGroupe && tableNonGroup.get(idTableNGroupe(table))==null) {
-			return returned;
-		}
-		
-		// Si on est en mode non groupe et que la table n'a pas de calcul de groupe, c'est une requete simple
-		// Dans ce cas, pas besoin de considérer tmp_id et le calcul de reliquat
-		boolean complexQuery = true;
-		if (!modeIdentifiantGroupe && tableGroups.get(idTableGroupe(table,TableMapping.GROUPE_UN))==null) {
-			complexQuery = false;
-		}
-	
-		
-		StringBuilder blocCreate = new StringBuilder();
-		
-		/*
-		 * selectionner les identifiants à garder
-		 */
-		if (complexQuery)
-		{
-			returned.append("\n DROP TABLE IF EXISTS TMP_ID CASCADE; ");
-			returned.append("\n CREATE TEMPORARY TABLE TMP_ID " + FormatSQL.WITH_NO_VACUUM + " AS ( ");
-			returned.append("\n SELECT * ");
-	
-			/*
-			 * Dans le cas des groupes on garde tout; sinon on garde les identifiants qui
-			 * n'ont pas déjà été traités avant La table nomTableTemporaireIdTable stocke
-			 * ces identifiants
-			 */
-	
-			returned.append("\n FROM ");
-			if (modeIdentifiantGroupe) {
-				returned.append(this.tableLienIdentifiants + " d ");
-	
-			} else {
-				// table des lien non déjà trouvés
-				blocCreate.append("DROP TABLE IF EXISTS tmp_lndt;").append(ModeRequete.NESTLOOP_ON).append("CREATE TEMPORARY TABLE tmp_lndt as SELECT * FROM " + this.tableLienIdentifiants + " a where not exists (select 1 from "
-						+ this.nomTableTemporaireIdTable + " b where a.id_table=b.id_table); ").append(ModeRequete.NESTLOOP_OFF);
-				returned.insert(0, blocCreate);
-				returned.append("tmp_lndt d ");
-			}
-	
-			returned.append("\n WHERE ");
-	
-			if (modeIdentifiantGroupe) {
-				returned.append(idTableGroupe(table,groupe));
-			} else {
-				returned.append(idTableNGroupe(table));
-			}
-			returned.append("\n ); ");
-	
-			/*
-			 * On ajoute les identifiants traités à la table nomTableTemporaireIdTable qui
-			 * stocke les identifiants traités
-			 */
-			returned.append("\n ").append(ModeRequete.NESTLOOP_ON);
-			returned.append("INSERT INTO " + this.nomTableTemporaireIdTable
-					+ " SELECT id_table FROM TMP_ID a WHERE NOT EXISTS (SELECT 1 from " + this.nomTableTemporaireIdTable
-					+ " b where a.id_table=b.id_table); ");
-			returned.append(ModeRequete.NESTLOOP_OFF);
-			/*
-			 * Insert dans prep union : on fait notre calcul de mise au format
-			 */
-		}
-
-		returned.append("\n INSERT INTO " + this.nomTableTemporairePrepUnion + " ");
-		returned.append("\n SELECT DISTINCT ");
-		returned.append(" " + listeVariablesTypesPrepUnion(new StringBuilder(), table, "::", true) + " FROM (");
-		returned.append("\n SELECT " + table.expressionSQLPrepUnion(groupe, reglesIdentifiantes));
-		returned.append("\n FROM ");
-		returned.append("\n ").append(this.nomTableSource).append(" e ");
-		
-		if (complexQuery)
-		{
-			// prise en compte de la table qui a calculé le reliquat des lignes à évaluer
-			returned.append(",").append("TMP_ID").append(" d ");
-			returned.append("\n WHERE e.id=d.id_table ");
-		} else
-		{
-			returned.append(",").append(this.tableLienIdentifiants).append(" d ");
-			returned.append("\n WHERE e.id=d.id_table ");
-			returned.append(" AND ").append(idTableNGroupe(table));
-		}
-		
-		returned.append("\n ) a; ");
-
-		returned.append("\n DROP TABLE IF EXISTS TMP_ID CASCADE; ");
-
-		return returned;
-	}
-
 	private StringBuilder creerTablePrepUnion(StringBuilder returned, TableMapping aTable) {
 		returned.append(newline);
 
-		returned.append("\n DROP TABLE IF EXISTS " + this.nomTableTemporairePrepUnion + "  CASCADE; ");
-		returned.append("\n CREATE TEMPORARY TABLE " + this.nomTableTemporairePrepUnion + " (");
+		returned.append("\n DROP TABLE IF EXISTS ").append(PREP_UNION_TABLE).append("  CASCADE; ");
+		returned.append("\n CREATE TEMPORARY TABLE ").append(PREP_UNION_TABLE).append(" (");
 
 		listeVariablesTypesPrepUnion(returned, aTable, space, true);
 		returned.append(") " + FormatSQL.WITH_NO_VACUUM + ";");
-
-		returned.append("\n DROP TABLE IF EXISTS " + this.nomTableTemporaireIdTable + "  CASCADE; ");
-		returned.append("\n CREATE TEMPORARY TABLE " + this.nomTableTemporaireIdTable + " (");
-		returned.append(ID_TABLE + " bigint ");
-		returned.append(") " + FormatSQL.WITH_NO_VACUUM + ";");
-
-		returned.append(
-				"\n create unique index idx_" + ManipString.substringAfterFirst(this.nomTableTemporaireIdTable, ".")
-						+ " on " + this.nomTableTemporaireIdTable + "(id_table);");
 		return returned;
 	}
 	
@@ -745,7 +687,12 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 	
 	private String idTableNGroupe(TableMapping table)
 	{
-		return table.getNomTableCourt()+"_ng"+" ";
+		return idTableNGroupe(table.getNomTableCourt());
+	}
+
+	private String idTableNGroupe(String table)
+	{
+		return table+"_ng"+" ";
 	}
 
 	
@@ -805,13 +752,13 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 		// bloc 1 : calcul de l'identifiant groupe et non groupe
 		
 		StringBuilder blocSelect = new StringBuilder();
-		blocSelect.append("\n SELECT id_table ");
+		blocSelect.append("\n SELECT id as id_table ");
 		for (String nomVariable : reglesIdentifiantes.keySet()) {
 
 			if (nomsVariablesGroupe.get(nomVariable) == null) {
-				blocSelect.append(",\n  min(id_table) over (partition by " + nomVariable + ") AS " + nomVariable);
+				blocSelect.append(",\n  min(id) over (partition by " + nomVariable + ") AS " + nomVariable);
 			} else if (!alreadyAdded.contains(nomsVariablesGroupe.get(nomVariable))) {
-				blocSelect.append(",\n  min(id_table) over (partition by "
+				blocSelect.append(",\n  min(id) over (partition by "
 						+ linkedIds.get(nomsVariablesGroupe.get(nomVariable)).substring(1) + ") AS "
 						+ nomsVariablesGroupe.get(nomVariable));
 				alreadyAdded.add(nomsVariablesGroupe.get(nomVariable));
@@ -823,37 +770,48 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 		tableGroups.keySet().stream().forEach(k -> 	blocSelect.append(",\n ").append(k));
 		tableNonGroup.keySet().stream().forEach(k -> blocSelect.append(",\n ").append(k));
 		
-		blocSelect.append("\n FROM ttt;");
+		blocSelect.append("\n FROM ").append(idTableNGroupe(IDENTIFIANT_TRIGGER)).append(";");
+		//blocSelect.append("\n FROM ttt;");
 
 		// bloc 2 : on met les variables non groupe et les variables subalternes
 		// identifiantes de groupes
 		alreadyAdded = new HashSet<>();
-		StringBuilder blocWith=new StringBuilder(); 
-		blocWith.append("\n WITH ttt as materialized ( SELECT id AS id_table");
+		StringBuilder blocTrigger=new StringBuilder(); 
+		
+		blocTrigger.append(ColumnEnum.ID);
+		
 		for (String nomVariable : reglesIdentifiantes.keySet()) {
 			String expressionVariable = reglesIdentifiantes.get(nomVariable);
 			if (nomsVariablesGroupe.get(nomVariable) == null) {
-				blocWith.append("\n ," + expressionVariable + " AS " + nomVariable);
-			} else if (!alreadyAdded
-					.contains(linkedIds.get(nomsVariablesGroupe.get(nomVariable)).replaceAll(",id\\_[^,]+", ""))) {
-				blocWith.append("\n "
-						+ linkedIds.get(nomsVariablesGroupe.get(nomVariable)).replaceAll(",id\\_[^,]+", "") + " ");
-				alreadyAdded.add(linkedIds.get(nomsVariablesGroupe.get(nomVariable)).replaceAll(",id\\_[^,]+", ""));
+				blocTrigger.append("\n,").append(expressionVariable).append(" AS ").append(nomVariable);
+			} else
+			{
+				String nomVariableReworked = linkedIds.get(nomsVariablesGroupe.get(nomVariable)).replaceAll(",id\\_[^,]+", "");
+				if (!alreadyAdded
+					.contains(nomVariableReworked)) {
+				blocTrigger.append("\n ").append(nomVariableReworked);
+				alreadyAdded.add(nomVariableReworked);
+				}
 			}
 		}
-		
-		tableGroups.keySet().stream().forEach(k -> 	blocWith.append("\n , ")
+				
+		tableGroups.keySet().stream().forEach(k -> 	{
+				blocTrigger.append("\n , ")
 				.append(checkIsNotNull(tableGroups.get(k)))
-				.append(" as ").append(k)
+				.append(" as ").append(k);
+				}
 				);
-		tableNonGroup.keySet().stream().forEach(k -> 	blocWith.append("\n ,")
+		tableNonGroup.keySet().stream().forEach(k -> 
+				blocTrigger.append("\n ,")
 				.append(checkIsNotNull(tableNonGroup.get(k)))
 				.append(" as ").append(k)
 				);
 		
-		blocWith.append("\n FROM " + this.nomTableSource + " ) ");
-
-		returned.append(blocWith).append(blocSelect);
+		insertionTriggers.put(idTableNGroupe(IDENTIFIANT_TRIGGER),blocTrigger.toString());
+		
+		returned
+		//.append(blocWith)
+		.append(blocSelect);
 		
 		return returned;
 	}
@@ -932,29 +890,33 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 		StringBuilder allVar = table.getAllVar();
 
 	
-		returned.append(table.requeteCreation());
+		returned.append("\n ").append(table.requeteCreation());
 		
 		// insertion 1 : on groupe les tableaux
 		// en retirant les lignes dans lesquels les cases "tableau" sont toutes nulles
 		returned.append("\n INSERT INTO " + nomTableTemporaireFinale + " (" + allVar + ") ");
 		returned.append(
 				"\n SELECT " + apply(select, FUNCTION_BEFORE, "array_agg(", FUNCTION_AFTER, " order by a.ctid)") + " ");
-		returned.append("\n FROM " + this.nomTableTemporairePrepUnion + " a ");
-		returned.append("\n " + where + " ");
-		returned.append("\n GROUP BY " + apply(groupBy, ALIAS_TABLE, "a") + ";");
-
-		// insertion 2 (s'il y a un tableau)
-		// on insère les lignes distinctes avec les cases tableau toutes nulles
+		returned.append("\n FROM ").append(PREP_UNION_TABLE).append(" a ");
+		
+		// s'il y a un tableau : 
+		// 1- on groupe sur les cases du tableau
+		// 2- on insère les lignes distinctes dont les cases tableau sont toutes nulles (ce n'est pas parcequ'il y a rien dans le tableau qu'on peut ignorer la ligne)
 		if (where.length() > 0) {
+			returned.append("\n " + where + " ");
+			returned.append("\n GROUP BY " + apply(groupBy, ALIAS_TABLE, "a") + ";");
+
 			returned.append("\n INSERT INTO " + nomTableTemporaireFinale + " (" + allVar + ") ");
 			returned.append("\n SELECT " + apply(select, FUNCTION_BEFORE, "ARRAY[", FUNCTION_AFTER, "]") + " ");
-			returned.append("\n FROM prep_union a ");
-			returned.append("\n where not exists (select 1 from " + nomTableTemporaireFinale + " b where row("
+			returned.append("\n FROM ").append(PREP_UNION_TABLE).append(" a ");
+			returned.append("\n WHERE NOT EXISTS (select 1 from " + nomTableTemporaireFinale + " b where row("
 					+ apply(groupBy, ALIAS_TABLE, "a") + ")::text=row(" + apply(groupBy, ALIAS_TABLE, "b")
 					+ ")::text) ");
-			returned.append("\n group by " + allVar + ";");
+			returned.append("\n GROUP BY ").append(allVar);
 		}
+		returned.append(";");
 
+		
 		return returned;
 	}
 	
