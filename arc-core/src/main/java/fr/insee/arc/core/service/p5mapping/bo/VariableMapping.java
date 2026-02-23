@@ -128,7 +128,7 @@ public class VariableMapping implements Comparable<VariableMapping> {
      *            the expressionRegle to set
      */
     public void setExpressionRegle(String anExpressionRegle) {
-        this.expressionRegle = this.regleMappingFactory.get(anExpressionRegle, this);
+        this.expressionRegle = this.regleMappingFactory.getRegleMapping(anExpressionRegle, this);
     }
 
     /**

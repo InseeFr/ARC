@@ -109,7 +109,7 @@ public class RegleMappingGroupe extends AbstractRegleMapping {
             /*
              * Je renvoie la liste des groupes pour cette règle et cette règle
              */
-            return new Pair<>(listeGroupe, this.regleMappingFactory.get(expressionGroupeReturned,
+            return new Pair<>(listeGroupe, this.regleMappingFactory.getRegleMapping(expressionGroupeReturned,
                     this.variableMapping));
         }
         throw new ArcException(ArcExceptionMessage.MAPPING_EXPRESSION_GROUP_INVALID, anExpressionGroupe, this.getExpression());

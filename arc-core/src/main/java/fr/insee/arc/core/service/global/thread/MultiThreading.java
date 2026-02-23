@@ -143,21 +143,25 @@ public class MultiThreading {
 			// exit condition
 			exit = true;
 			for (ScalableConnection connection : connexionList) {
+				
+				// check if thread is alive
 				if (threadByConnection.get(connection) != null && threadByConnection.get(connection).getT().isAlive()) {
 					exit = false;
 				}
+				else 
+				{
+					// if thread is not alive, check if there are still some file to be proceeded in the connection queue
+					if (!filesByNods.get(connection.getNodIdentifier()).isEmpty())
+					{
+						// if so, start a new processing thread with the first file from the queue
+						currentIndice = filesByNods.get(connection.getNodIdentifier()).remove(0);
+						ThreadMultiphaseService r = getInstance();
+						r.configThread(connection, currentIndice, threadModel);
+						r.start();
 
-				// check if no thread registered for connection or if thread is dead
-				if ((threadByConnection.get(connection) == null || !threadByConnection.get(connection).getT().isAlive())
-						&& !filesByNods.get(connection.getNodIdentifier()).isEmpty()) {
-					currentIndice = filesByNods.get(connection.getNodIdentifier()).remove(0);
-
-					ThreadMultiphaseService r = getInstance();
-					r.configThread(connection, currentIndice, threadModel);
-					r.start();
-
-					threadByConnection.put(connection, r);
-					exit = false;
+						threadByConnection.put(connection, r);
+						exit = false;
+					}
 				}
 
 			}

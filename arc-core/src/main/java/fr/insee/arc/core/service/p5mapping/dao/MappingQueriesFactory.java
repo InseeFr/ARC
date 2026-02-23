@@ -45,7 +45,7 @@ public class MappingQueriesFactory {
         this.connexion = aConnexion;
     }
 
-    public AbstractRegleMapping get(String anExpression, VariableMapping aVariableMapping) {
+    public AbstractRegleMapping getRegleMapping(String anExpression, VariableMapping aVariableMapping) {
         /*
          * Est-ce que c'est une règle de clef primaire ?
          */
@@ -94,5 +94,14 @@ public class MappingQueriesFactory {
     public void setIdFamille(String idFamille) {
         this.idFamille = idFamille;
     }
+
+	public Set<String> getEnsembleNomRubriqueExistante() {
+		return ensembleNomRubriqueExistante;
+	}
+
+	public Set<String> getEnsembleIdentifiantRubriqueExistante() {
+		return ensembleIdentifiantRubriqueExistante;
+	}
+
 
 }

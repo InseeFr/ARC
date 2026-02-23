@@ -232,8 +232,7 @@ public class ThreadOperations {
 		requete.append("\n id_norme = b.id_norme, ");
 		requete.append("\n validite = b.validite, ");
 		requete.append("\n periodicite = b.periodicite, ");
-		requete.append("\n date_traitement = to_timestamp('" + new SimpleDateFormat(ArcDateFormat.TIMESTAMP_FORMAT_CONVERSION.getApplicationFormat()).format(new Date()) + "','" + ArcDateFormat.TIMESTAMP_FORMAT_CONVERSION.getDatastoreFormat()
-				+ "'), ");
+		requete.append("\n date_traitement = clock_timestamp(), ");
 		requete.append("\n nb_enr = b.nb_enr, ");
 		requete.append("\n rapport = b.rapport, ");
 		requete.append("\n validite_inf = b.validite_inf, ");

@@ -44,7 +44,21 @@ public class TableOperations {
 		return FormatSQL.executeIf(FormatSQL.hasRecord(tableIn), creationTableResultat(tableIn, tableIdSource, true).toString());
 	}
 
-
+	
+	
+	/**
+	 * This query created a work table containing the copy of a data of an input table for a given file identifier 
+	 * @param tableIn
+	 * @param tableOut
+	 * @param idSource
+	 * @return
+	 * @throws ArcException
+	 */
+	public static String createTableTravailIdSource(String tableIn, String tableOut, String idSource) throws ArcException {
+		return createTableTravailIdSource(tableIn, tableOut, idSource, null);
+	}
+	
+	
 	/**
 	 * This query created a work table containing the copy of a data of an input table for a given file identifier
 	 * @param tableIn
@@ -70,7 +84,7 @@ public class TableOperations {
 	 * @return
 	 * @throws ArcException
 	 */
-	public static String createTableTravail(String tableIn, String tableOut, String extraCols) {
+	public static String createTableTravail(String tableIn, String tableOut, String extraCols, boolean...imageOnly) {
 		StringBuilder requete = new StringBuilder();
 		requete.append("\n CREATE ");
 		if (!tableOut.contains(".")) {
@@ -87,23 +101,36 @@ public class TableOperations {
 			requete.append(", " + extraCols);
 		}
 
-		requete.append("\n FROM " + tableIn + "; ");
+		requete.append("\n FROM ").append(tableIn);
+		
+		requete.append((imageOnly.length>0 && imageOnly[0])?"\n LIMIT 0":"");
+		requete.append(";");
 		
 		return requete.toString();
 	}
+
 	
 	
 	/**
-	 * This query created a work table containing the copy of a data of an input table for a given file identifier 
+	 * Create a view AS 
 	 * @param tableIn
-	 * @param tableOut
-	 * @param idSource
+	 * @param viewOut
 	 * @return
-	 * @throws ArcException
 	 */
-	public static String createTableTravailIdSource(String tableIn, String tableOut, String idSource) throws ArcException {
-		return createTableTravailIdSource(tableIn, tableOut, idSource, null);
+	public static GenericPreparedStatementBuilder createViewImage(String tableIn, String viewOut) {
+		GenericPreparedStatementBuilder requete = new GenericPreparedStatementBuilder();
+		requete.append("\n CREATE ");
+		if (!viewOut.contains(".")) {
+			requete.append("TEMPORARY ");
+		}
+		
+		requete.append(
+				"VIEW " + viewOut + " AS ");
+
+		requete.append("\n SELECT * ");
+		requete.append("\n FROM " + tableIn + "; ");
+		return requete;
+		
 	}
-	
 	
 }

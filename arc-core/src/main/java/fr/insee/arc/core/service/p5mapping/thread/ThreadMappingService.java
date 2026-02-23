@@ -1,8 +1,6 @@
 package fr.insee.arc.core.service.p5mapping.thread;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -19,13 +17,13 @@ import fr.insee.arc.core.service.global.dao.HashFileNameConversion;
 import fr.insee.arc.core.service.global.dao.PilotageOperations;
 import fr.insee.arc.core.service.global.dao.RulesOperations;
 import fr.insee.arc.core.service.global.dao.TableNaming;
+import fr.insee.arc.core.service.global.dao.TableOperations;
 import fr.insee.arc.core.service.global.dao.ThreadOperations;
 import fr.insee.arc.core.service.global.scalability.ScalableConnection;
 import fr.insee.arc.core.service.global.thread.ThreadConstant;
 import fr.insee.arc.core.service.global.thread.ThreadTemplate;
 import fr.insee.arc.core.service.global.thread.ThreadTemporaryTable;
 import fr.insee.arc.core.service.mutiphase.thread.ThreadMultiphaseService;
-import fr.insee.arc.core.service.p5mapping.bo.TableMapping;
 import fr.insee.arc.core.service.p5mapping.dao.MappingQueries;
 import fr.insee.arc.core.service.p5mapping.dao.MappingQueriesFactory;
 import fr.insee.arc.core.service.p5mapping.dao.ThreadMappingQueries;
@@ -49,15 +47,15 @@ public class ThreadMappingService extends ThreadTemplate {
 	private String idSource;
 
 	private int indice;
-	private String tableTempControleOk;
-	private String tableMappingPilTemp;
+	
 	private String tableLienIdentifiants;
+	private String tableTempControleOk;
+	
+	private String tableMappingPilTemp;
 	
 	private ThreadOperations arcThreadGenericDao;
 
 	private GenericQueryDao genericExecutorDao;
-
-	private Map<TableMapping, StringBuilder> queriesThatInsertDataIntoTemporaryModelTables = new HashMap<>();
 	
 	
 	private TraitementPhase currentExecutedPhase = TraitementPhase.MAPPING;
@@ -143,8 +141,7 @@ public class ThreadMappingService extends ThreadTemplate {
 		 * Instancier une requête de mapping générique pour ce jeu de règles.
 		 */
 		MappingQueries requeteMapping = new MappingQueries(this.connexion.getExecutorConnection(),
-				regleMappingFactory, idFamille, jdr, this.getEnvExecution(), this.tableTempControleOk,
-				this.indice);
+				regleMappingFactory, idFamille, jdr, this.getEnvExecution(), this.tableTempControleOk, this.indice);
 
 		/*
 		 * Build and execute the query that computes and links all identifiers between each others
@@ -153,24 +150,21 @@ public class ThreadMappingService extends ThreadTemplate {
 		requeteMapping.construire();
 		
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
+		StringBuilder subQuery = new StringBuilder();
 		
-		query.append(requeteMapping.construireTableLienIdentifiants());
+		subQuery.append(requeteMapping.construireTableLienIdentifiants());
 		
 		/*
 		 * For each model table, compute a query that inserts the data into a temporary model table.
 		 */
-		this.queriesThatInsertDataIntoTemporaryModelTables = requeteMapping.getQueriesThatInsertDataIntoTemporaryModelTable(idSource);
-		
-		/*
-		 * Execute the data insertion into the temporary model tables through parallel threads
-		 */
-		queriesThatInsertDataIntoTemporaryModelTables.values().stream().forEach(tableQuery -> query.append(tableQuery));
+		requeteMapping.getQueriesThatInsertDataIntoTemporaryModelTable(idSource, subQuery);
+		query.append(subQuery);
 		
 		/*
 		 * Delete empty records if there is not link in children tables
 		 */	
 		query.append(requeteMapping.deleteEmptyRecords(idSource));
-
+		
 		// promote the application user account to full right
 		query.append(DatabaseConnexionConfiguration.switchToFullRightRole());
 		
