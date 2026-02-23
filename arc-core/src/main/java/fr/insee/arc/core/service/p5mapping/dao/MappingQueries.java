@@ -12,16 +12,11 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
-import com.google.common.collect.Streams;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.service.global.bo.JeuDeRegle;
-import fr.insee.arc.core.service.global.dao.TableOperations;
-import fr.insee.arc.core.service.global.thread.ThreadTemporaryTable;
 import fr.insee.arc.core.service.p5mapping.bo.TableMapping;
 import fr.insee.arc.core.service.p5mapping.bo.VariableMapping;
 import fr.insee.arc.core.service.p5mapping.bo.rules.RegleMappingClePrimaire;
@@ -82,11 +77,8 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 	private Set<VariableMapping> ensembleVariableMapping;
 	private SortedSet<Integer> ensembleGroupes;
 	
-	private static final String IDENTIFIANT_TRIGGER = "id$tg";
 	private static final String PREP_UNION_TABLE = "pu";
 
-	
-	private Map <String, String> insertionTriggers = new HashMap<String, String>();
 
 	private Map<TableMapping, Set<String>> ensembleRubriqueIdentifianteTable;
 	/*
@@ -105,7 +97,6 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 	 */
 	private String nomTableModVariableMetier;
 	private String nomTableSource;
-	private String nomViewSource;
 	private String nomTableRegleMapping;
 	private String tableLienIdentifiants;
 	
@@ -278,32 +269,6 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 			this.ensembleRubriqueIdentifianteTable.put(table, s);
 		}
 	}
-
-	private void initializeTrigger(StringBuilder returned) throws ArcException {
-		returned.append("\n CREATE OR REPLACE FUNCTION pg_temp.pu() RETURNS trigger AS $$ BEGIN ");
-	}
-	
-	private void finalizeTrigger(StringBuilder returned) throws ArcException {
-
-		// important to return NULL not to fill memory with pointer
-		returned.append("\n RETURN NULL; END; $$ LANGUAGE plpgsql;");
-		
-		// create a view on a empty image of the controle phase output table
-		// it could avoid some nasty bugs if the instead of clause fails
-		// as in postgres, insert into view triggers an insert on the master table
-		// and we do not want to modify the data from the controle phase output table
-		String tableTrigger = FormatSQL.temporaryTableName(ThreadTemporaryTable.TABLE_MAPPING_DATA_TEMP);
-		this.nomViewSource = FormatSQL.temporaryTableName(ThreadTemporaryTable.VIEW_MAPPING_DATA_TEMP);
-		
-		returned.append(TableOperations.createTableTravail(nomTableSource, tableTrigger, null, true));
-		returned.append(TableOperations.createViewImage(tableTrigger, this.nomViewSource));
-		
-		// apply trigger to view
-		returned.append("\n CREATE TRIGGER pu");
-		returned.append("\n INSTEAD OF INSERT ON "+this.nomViewSource);
-		returned.append("\n FOR EACH ROW EXECUTE FUNCTION pg_temp.pu();");
-	}
-	
 	
 	/**
 	 * Construit les objets de type {@link TableMapping} et {@link VariableMapping}
@@ -395,8 +360,9 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 	 * @return a map with the model table as key and the query that inserts data as value
 	 * @throws ArcException
 	 */
-	public void getQueriesThatInsertDataIntoTemporaryModelTable(String aNomFichier, StringBuilder requete) throws ArcException {
+	public StringBuilder getQueriesThatInsertDataIntoTemporaryModelTable(String aNomFichier) throws ArcException {
 
+		StringBuilder requete = new StringBuilder();
 			for (TableMapping table : this.ensembleTableMapping) {
 				
 				requete.append(ModeRequete.NESTLOOP_OFF);
@@ -412,45 +378,9 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 				requete.append(ModeRequete.NESTLOOP_ON);
 
 			}
-			
-			
-			// the view trigger is made to split the main table from controle phase in several little tables that contains only the useful columns
-			// it is a huge optimization on large file as the full scan is only made once
-			StringBuilder requeteTrigger = new StringBuilder();
-			createTriggerTables(requeteTrigger);
-			initializeTrigger(requeteTrigger);
-			defineInsertionTrigger(requeteTrigger);
-			finalizeTrigger(requeteTrigger);
-			useTrigger(requeteTrigger);
-			
-			requete.insert(0, requeteTrigger);
-			
+		return requete;
 	}
 
-	private void useTrigger(StringBuilder returned) {
-		returned.append("\n INSERT INTO ").append(this.nomViewSource).append(" SELECT * FROM ").append(this.nomTableSource).append(";");
-	}
-
-	private void defineInsertionTrigger(StringBuilder returned) {
-		insertionTriggers.entrySet().stream().forEach(t -> 
-		{
-			returned.append("\n INSERT INTO ").append(t.getKey());
-			returned.append("\n SELECT ").append(t.getValue()).append("\n FROM ").append("(SELECT NEW.*) e;");
-		}
-		);		
-	}
-
-	private void createTriggerTables(StringBuilder returned) {
-		
-		insertionTriggers.entrySet().stream().forEach(t -> 
-		{
-			returned.append("\n CREATE TEMPORARY TABLE ").append(t.getKey()).append(FormatSQL.WITH_NO_VACUUM);
-			returned.append("\n AS SELECT ").append(t.getValue()).append("\n FROM ").append(this.nomTableSource);
-			returned.append("\n LIMIT 0;");
-		}
-		);
-	}
-	
 	/**
 	 * Delete empty records from model tables
 	 * @param aNomFichier
@@ -474,18 +404,7 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 		return requeteGlobale.toString().replace(TOKEN_ID_SOURCE, aNomFichier);
 		
 	}
-	
-	/**
-	 * Parse expression to identify what source column are used in
-	 * @param expressionSQLCalculMapping
-	 * @return
-	 */
-	private String computeSourceColumnsUsedInExpression (String expressionSQLCalculMapping)
-	{
-		return Streams.concat(regleMappingFactory.getEnsembleNomRubriqueExistante().stream()
-				, regleMappingFactory.getEnsembleIdentifiantRubriqueExistante().stream())
-		.filter(t-> expressionSQLCalculMapping.toLowerCase().contains(t)).collect(Collectors.joining(","));
-	}
+
 	
 	private StringBuilder insererTablePrepUnionNew(StringBuilder returned, TableMapping table,
 			Map<String, String> reglesIdentifiantes) throws ArcException {
@@ -504,7 +423,7 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 			returned.append("\n FROM (");
 			returned.append("\n SELECT ").append(expressionSQLCalculMapping);
 			returned.append("\n FROM ").append(this.tableLienIdentifiants).append(" d ");
-			returned.append("\n ,").append(idTableGroupe(table,groupe)).append(" e ");
+			returned.append("\n ,").append(this.nomTableSource).append(" e ");
 			returned.append("\n WHERE e.id=d.id_table ");
 			returned.append("\n AND ").append(idTableGroupe(table,groupe));
 			returned.append("\n ) a ");
@@ -512,8 +431,6 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 			table.sqlListeVariables(returned);
 			returned.append(";");
 			
-			insertionTriggers.put(idTableGroupe(table,groupe),computeSourceColumnsUsedInExpression(expressionSQLCalculMapping));
-
 			}
 		}
 
@@ -528,7 +445,7 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 			returned.append("\n FROM (");
 			returned.append("\n SELECT ").append(expressionSQLCalculMapping);
 			returned.append("\n FROM ").append(this.tableLienIdentifiants).append(" d ");
-			returned.append("\n ,").append(idTableNGroupe(table)).append(" e ");
+			returned.append("\n ,").append(this.nomTableSource).append(" e ");
 			returned.append("\n WHERE e.id=d.id_table ");
 			returned.append("\n AND ").append(idTableNGroupe(table));
 			// if table has group, records selected by group must be excluded
@@ -537,9 +454,6 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 			returned.append("\n GROUP BY ");
 			table.sqlListeVariables(returned);
 			returned.append(";");
-			
-			insertionTriggers.put(idTableNGroupe(table),computeSourceColumnsUsedInExpression(expressionSQLCalculMapping));
-
 		}
 		return returned;
 	}
@@ -770,48 +684,37 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 		tableGroups.keySet().stream().forEach(k -> 	blocSelect.append(",\n ").append(k));
 		tableNonGroup.keySet().stream().forEach(k -> blocSelect.append(",\n ").append(k));
 		
-		blocSelect.append("\n FROM ").append(idTableNGroupe(IDENTIFIANT_TRIGGER)).append(";");
-		//blocSelect.append("\n FROM ttt;");
+		blocSelect.append("\n FROM ttt;");
 
 		// bloc 2 : on met les variables non groupe et les variables subalternes
 		// identifiantes de groupes
 		alreadyAdded = new HashSet<>();
-		StringBuilder blocTrigger=new StringBuilder(); 
-		
-		blocTrigger.append(ColumnEnum.ID);
-		
+		StringBuilder blocWith=new StringBuilder(); 
+		blocWith.append("\n WITH ttt as materialized ( SELECT id");
 		for (String nomVariable : reglesIdentifiantes.keySet()) {
 			String expressionVariable = reglesIdentifiantes.get(nomVariable);
 			if (nomsVariablesGroupe.get(nomVariable) == null) {
-				blocTrigger.append("\n,").append(expressionVariable).append(" AS ").append(nomVariable);
-			} else
-			{
-				String nomVariableReworked = linkedIds.get(nomsVariablesGroupe.get(nomVariable)).replaceAll(",id\\_[^,]+", "");
-				if (!alreadyAdded
-					.contains(nomVariableReworked)) {
-				blocTrigger.append("\n ").append(nomVariableReworked);
-				alreadyAdded.add(nomVariableReworked);
-				}
+				blocWith.append("\n ," + expressionVariable + " AS " + nomVariable);
+			} else if (!alreadyAdded
+					.contains(linkedIds.get(nomsVariablesGroupe.get(nomVariable)).replaceAll(",id\\_[^,]+", ""))) {
+				blocWith.append("\n "
+						+ linkedIds.get(nomsVariablesGroupe.get(nomVariable)).replaceAll(",id\\_[^,]+", "") + " ");
+				alreadyAdded.add(linkedIds.get(nomsVariablesGroupe.get(nomVariable)).replaceAll(",id\\_[^,]+", ""));
 			}
 		}
-				
-		tableGroups.keySet().stream().forEach(k -> 	{
-				blocTrigger.append("\n , ")
+		
+		tableGroups.keySet().stream().forEach(k -> 	blocWith.append("\n , ")
 				.append(checkIsNotNull(tableGroups.get(k)))
-				.append(" as ").append(k);
-				}
+				.append(" as ").append(k)
 				);
-		tableNonGroup.keySet().stream().forEach(k -> 
-				blocTrigger.append("\n ,")
+		tableNonGroup.keySet().stream().forEach(k -> 	blocWith.append("\n ,")
 				.append(checkIsNotNull(tableNonGroup.get(k)))
 				.append(" as ").append(k)
 				);
 		
-		insertionTriggers.put(idTableNGroupe(IDENTIFIANT_TRIGGER),blocTrigger.toString());
-		
-		returned
-		//.append(blocWith)
-		.append(blocSelect);
+		blocWith.append("\n FROM " + this.nomTableSource + " ) ");
+
+		returned.append(blocWith).append(blocSelect);
 		
 		return returned;
 	}
