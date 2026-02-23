@@ -150,15 +150,13 @@ public class ThreadMappingService extends ThreadTemplate {
 		requeteMapping.construire();
 		
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
-		StringBuilder subQuery = new StringBuilder();
 		
-		subQuery.append(requeteMapping.construireTableLienIdentifiants());
+		query.append(requeteMapping.construireTableLienIdentifiants());
 		
 		/*
 		 * For each model table, compute a query that inserts the data into a temporary model table.
 		 */
-		requeteMapping.getQueriesThatInsertDataIntoTemporaryModelTable(idSource, subQuery);
-		query.append(subQuery);
+		query.append(requeteMapping.getQueriesThatInsertDataIntoTemporaryModelTable(idSource));
 		
 		/*
 		 * Delete empty records if there is not link in children tables

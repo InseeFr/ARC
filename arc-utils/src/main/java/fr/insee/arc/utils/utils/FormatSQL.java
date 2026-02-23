@@ -66,18 +66,6 @@ public class FormatSQL implements IConstanteCaractere, IConstanteNumerique {
 		}
 		return query;
 	}
-	
-	/**
-	 * query to drop a view in database
-	 * 
-	 * @param tableName
-	 * @return
-	 */
-	public static GenericPreparedStatementBuilder dropView(String someView) {
-		GenericPreparedStatementBuilder query = new GenericPreparedStatementBuilder();
-			query.build(SQL.DROP, SQL.VIEW, SQL.IF_EXISTS, someView, SQL.CASCADE, SQL.END_QUERY, SQL.BR);
-		return query;
-	}
 
 	/**
 	 * query to retrieve

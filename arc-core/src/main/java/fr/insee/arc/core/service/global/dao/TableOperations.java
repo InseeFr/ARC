@@ -109,28 +109,4 @@ public class TableOperations {
 		return requete.toString();
 	}
 
-	
-	
-	/**
-	 * Create a view AS 
-	 * @param tableIn
-	 * @param viewOut
-	 * @return
-	 */
-	public static GenericPreparedStatementBuilder createViewImage(String tableIn, String viewOut) {
-		GenericPreparedStatementBuilder requete = new GenericPreparedStatementBuilder();
-		requete.append("\n CREATE ");
-		if (!viewOut.contains(".")) {
-			requete.append("TEMPORARY ");
-		}
-		
-		requete.append(
-				"VIEW " + viewOut + " AS ");
-
-		requete.append("\n SELECT * ");
-		requete.append("\n FROM " + tableIn + "; ");
-		return requete;
-		
-	}
-	
 }
