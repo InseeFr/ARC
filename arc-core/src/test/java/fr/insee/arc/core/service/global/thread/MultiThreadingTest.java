@@ -44,28 +44,23 @@ public class MultiThreadingTest {
 	/**
 	 * files must be allocate to a target nod with consistency according to their name
 	 */
-	public void dispatchFilesByNod_2ExecutorNods_consistencyTest()
+	public void dispatchFilesByNod_2ExecutorNods_fifoTest()
 	{
-		List<String> listIdSource1 = Arrays.asList("file1", "file2", "file3", "file4", "file5");
-		List<String> listIdSource2 = Arrays.asList("file2", "file4", "file3", "file5", "file1");
+		List<String> listIdSource = Arrays.asList("file1", "file2", "file3", "file4", "file5");
 		
 		int startIndexOfExecutorNods=1;
 		int numberOfExecutorNods=2;
 				
-		Map<Integer, List<Integer>> filesByNods1 = MultiThreading.dispatchFilesByNodId(listIdSource1, startIndexOfExecutorNods,
-				numberOfExecutorNods);
-		Map<Integer, List<Integer>> filesByNods2 = MultiThreading.dispatchFilesByNodId(listIdSource2, startIndexOfExecutorNods,
+		Map<Integer, List<Integer>> filesByNods1 = MultiThreading.dispatchFilesByNodId(listIdSource, startIndexOfExecutorNods,
 				numberOfExecutorNods);
 		
 		// test if both of file list has been allocated to same executor nod when the number of total executor nods is the same
 		
-		List<String> filesInNods1OrderedByName = filesByNods1.get(1).stream().map(x->listIdSource1.get(x)).collect(Collectors.toList());
-		List<String> filesInNods2OrderedByName= filesByNods2.get(1).stream().map(x->listIdSource2.get(x)).collect(Collectors.toList());
-		
-		Collections.sort(filesInNods1OrderedByName);
-		Collections.sort(filesInNods2OrderedByName);
-		
-		assertEquals(filesInNods1OrderedByName,filesInNods2OrderedByName);
+		List<String> filesInNods1OrderedByName = filesByNods1.get(1).stream().map(x->listIdSource.get(x)).collect(Collectors.toList());
+		List<String> filesInNods2OrderedByName= filesByNods1.get(2).stream().map(x->listIdSource.get(x)).collect(Collectors.toList());
+
+		assertEquals(filesInNods1OrderedByName,Arrays.asList("file1","file3","file5"));
+		assertEquals(filesInNods2OrderedByName,Arrays.asList("file2","file4"));
 	}
 
 }
