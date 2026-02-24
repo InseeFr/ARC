@@ -12,6 +12,9 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import com.google.common.collect.Streams;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
@@ -21,7 +24,6 @@ import fr.insee.arc.core.service.p5mapping.bo.TableMapping;
 import fr.insee.arc.core.service.p5mapping.bo.VariableMapping;
 import fr.insee.arc.core.service.p5mapping.bo.rules.RegleMappingClePrimaire;
 import fr.insee.arc.utils.dao.ModeRequete;
-import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.database.Delimiters;
 import fr.insee.arc.utils.exception.ArcException;
@@ -77,6 +79,7 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 	private Set<VariableMapping> ensembleVariableMapping;
 	private SortedSet<Integer> ensembleGroupes;
 	
+	private static final String TEMPORARY_UNION_TABLE = "tu";
 	private static final String PREP_UNION_TABLE = "pu";
 
 
@@ -363,9 +366,11 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 	public StringBuilder getQueriesThatInsertDataIntoTemporaryModelTable(String aNomFichier) throws ArcException {
 
 		StringBuilder requete = new StringBuilder();
+		
+		requete.append(ModeRequete.NESTLOOP_OFF);
+
 			for (TableMapping table : this.ensembleTableMapping) {
 				
-				requete.append(ModeRequete.NESTLOOP_OFF);
 
 				creerTablePrepUnion(requete, table);
 				insererTablePrepUnionNew(requete, table, reglesIdentifiantes);
@@ -375,9 +380,11 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 				
 				calculerRequeteArrayAggGroup(table.getNomTableTemporaire(), requete, table);
 				requete.append(FormatSQL.dropTable(PREP_UNION_TABLE));
-				requete.append(ModeRequete.NESTLOOP_ON);
 
 			}
+			
+			requete.append(ModeRequete.NESTLOOP_ON);
+
 		return requete;
 	}
 
@@ -405,6 +412,17 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 		
 	}
 
+	/**
+	 * Parse expression to identify what source column are used in
+	 * @param expressionSQLCalculMapping
+	 * @return
+	 */
+	private String computeSourceColumnsUsedInExpression (String expressionSQLCalculMapping)
+	{
+		return Streams.concat(regleMappingFactory.getEnsembleNomRubriqueExistante().stream()
+				, regleMappingFactory.getEnsembleIdentifiantRubriqueExistante().stream())
+		.filter(t-> expressionSQLCalculMapping.toLowerCase().contains(t)).collect(Collectors.joining(","));
+	}
 	
 	private StringBuilder insererTablePrepUnionNew(StringBuilder returned, TableMapping table,
 			Map<String, String> reglesIdentifiantes) throws ArcException {
@@ -413,9 +431,15 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 		for (Integer groupe : table.getEnsembleGroupes()) {
 			if (tableGroups.get(idTableGroupe(table,groupe))!=null)		
 			{
-				
+
 			groupsExclusionCondition.append(" AND NOT ").append(idTableGroupe(table, groupe));
 			String expressionSQLCalculMapping = table.expressionSQLPrepUnion(groupe, reglesIdentifiantes);
+			
+			returned.append("\n DROP TABLE IF EXISTS ").append(TEMPORARY_UNION_TABLE).append(";");
+			returned.append("\n CREATE TEMPORARY TABLE ").append(TEMPORARY_UNION_TABLE).append(FormatSQL.WITH_NO_VACUUM);
+			returned.append("\n AS SELECT ").append(computeSourceColumnsUsedInExpression(expressionSQLCalculMapping));
+			returned.append("\n FROM ").append(this.nomTableSource).append(";");
+			
 		
 			returned.append("\n INSERT INTO ").append(PREP_UNION_TABLE);
 			returned.append("\n SELECT ");
@@ -423,7 +447,7 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 			returned.append("\n FROM (");
 			returned.append("\n SELECT ").append(expressionSQLCalculMapping);
 			returned.append("\n FROM ").append(this.tableLienIdentifiants).append(" d ");
-			returned.append("\n ,").append(this.nomTableSource).append(" e ");
+			returned.append("\n ,").append(TEMPORARY_UNION_TABLE).append(" e ");
 			returned.append("\n WHERE e.id=d.id_table ");
 			returned.append("\n AND ").append(idTableGroupe(table,groupe));
 			returned.append("\n ) a ");
@@ -431,6 +455,8 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 			table.sqlListeVariables(returned);
 			returned.append(";");
 			
+			returned.append("\n DROP TABLE IF EXISTS ").append(TEMPORARY_UNION_TABLE).append(";");
+
 			}
 		}
 
@@ -439,13 +465,18 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 		{
 			String expressionSQLCalculMapping = table.expressionSQLPrepUnion(null, reglesIdentifiantes);
 			
+			returned.append("\n DROP TABLE IF EXISTS ").append(TEMPORARY_UNION_TABLE).append(";");
+			returned.append("\n CREATE TEMPORARY TABLE ").append(TEMPORARY_UNION_TABLE).append(FormatSQL.WITH_NO_VACUUM);
+			returned.append("\n AS SELECT ").append(computeSourceColumnsUsedInExpression(expressionSQLCalculMapping));
+			returned.append("\n FROM ").append(this.nomTableSource).append(";");
+			
 			returned.append("\n INSERT INTO ").append(PREP_UNION_TABLE);
 			returned.append("\n SELECT ");
 			returned.append(listeVariablesTypesPrepUnion(new StringBuilder(), table, "::", true));
 			returned.append("\n FROM (");
 			returned.append("\n SELECT ").append(expressionSQLCalculMapping);
 			returned.append("\n FROM ").append(this.tableLienIdentifiants).append(" d ");
-			returned.append("\n ,").append(this.nomTableSource).append(" e ");
+			returned.append("\n ,").append(TEMPORARY_UNION_TABLE).append(" e ");
 			returned.append("\n WHERE e.id=d.id_table ");
 			returned.append("\n AND ").append(idTableNGroupe(table));
 			// if table has group, records selected by group must be excluded
@@ -454,6 +485,9 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 			returned.append("\n GROUP BY ");
 			table.sqlListeVariables(returned);
 			returned.append(";");
+			
+			returned.append("\n DROP TABLE IF EXISTS ").append(TEMPORARY_UNION_TABLE).append(";");
+
 		}
 		return returned;
 	}
@@ -659,13 +693,13 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 			Map<String, String> reglesIdentifiantes, Map<String, String> nomsVariablesGroupe,
 			Map<String, String> linkedIds) {
 
-		
 		Set<String> alreadyAdded = new HashSet<>();
-		returned.append("\n CREATE "+ (this.tableLienIdentifiants.contains(".")?SQL.UNLOGGED:SQL.TEMPORARY)+" TABLE " + tableLienIdentifiants + " " + FormatSQL.WITH_NO_VACUUM + " AS ");
+
+		StringBuilder blocSelect = new StringBuilder();
+		blocSelect.append("\n CREATE TEMPORARY TABLE ").append(tableLienIdentifiants).append(FormatSQL.WITH_NO_VACUUM).append(" AS ");
 
 		// bloc 1 : calcul de l'identifiant groupe et non groupe
 		
-		StringBuilder blocSelect = new StringBuilder();
 		blocSelect.append("\n SELECT id as id_table ");
 		for (String nomVariable : reglesIdentifiantes.keySet()) {
 
@@ -684,13 +718,17 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 		tableGroups.keySet().stream().forEach(k -> 	blocSelect.append(",\n ").append(k));
 		tableNonGroup.keySet().stream().forEach(k -> blocSelect.append(",\n ").append(k));
 		
-		blocSelect.append("\n FROM ttt;");
+		blocSelect.append("\n FROM ").append(TEMPORARY_UNION_TABLE).append(";");
+		blocSelect.append("\n DROP TABLE IF EXISTS ").append(TEMPORARY_UNION_TABLE).append(";");
 
 		// bloc 2 : on met les variables non groupe et les variables subalternes
 		// identifiantes de groupes
 		alreadyAdded = new HashSet<>();
-		StringBuilder blocWith=new StringBuilder(); 
-		blocWith.append("\n WITH ttt as materialized ( SELECT id");
+		StringBuilder blocWith=new StringBuilder();
+		blocWith.append("\n DROP TABLE IF EXISTS ").append(TEMPORARY_UNION_TABLE).append(";");
+		blocWith.append("\n CREATE TEMPORARY TABLE ").append(TEMPORARY_UNION_TABLE).append(FormatSQL.WITH_NO_VACUUM);
+		
+		blocWith.append("\n AS SELECT id");
 		for (String nomVariable : reglesIdentifiantes.keySet()) {
 			String expressionVariable = reglesIdentifiantes.get(nomVariable);
 			if (nomsVariablesGroupe.get(nomVariable) == null) {
@@ -712,7 +750,7 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 				.append(" as ").append(k)
 				);
 		
-		blocWith.append("\n FROM " + this.nomTableSource + " ) ");
+		blocWith.append("\n FROM " + this.nomTableSource + " ; ");
 
 		returned.append(blocWith).append(blocSelect);
 		
@@ -909,6 +947,12 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 
 	public Set<TableMapping> getEnsembleTableMapping() {
 		return ensembleTableMapping;
+	}
+
+	public StringBuilder kickParallelModeForLargeTable() {
+		StringBuilder returned = new StringBuilder();
+		returned.append("SET local max_parallel_workers_per_gather=1; SET local parallel_setup_cost = 0; SET local parallel_tuple_cost = 0; SET local min_parallel_table_scan_size = '1GB';");
+		return returned;
 	}
 
 }
