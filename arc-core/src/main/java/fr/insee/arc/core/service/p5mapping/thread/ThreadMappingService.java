@@ -150,7 +150,11 @@ public class ThreadMappingService extends ThreadTemplate {
 		requeteMapping.construire();
 		
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
+
+		// add some light vertical parallel read for large mapping table
+		query.append(requeteMapping.kickParallelModeForLargeTable());
 		
+		// build the table that calculate the table primary / foreign keys of model tables
 		query.append(requeteMapping.construireTableLienIdentifiants());
 		
 		/*
