@@ -52,6 +52,7 @@ public class TestsFonctionnels extends InitializeQueryTest {
 		executeTestAnimal("arc_bas8", repertoire);
 
 		BddPatcherTest.insertTestDataSiera();
+		BddPatcherTest.insertTestDataSieraExtraRules_bas3();
 		
 		executeTestSiera("arc_bas2", repertoire, true);
 		
