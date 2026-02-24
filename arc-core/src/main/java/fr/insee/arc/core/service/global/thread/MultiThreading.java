@@ -163,7 +163,6 @@ public class MultiThreading {
 						exit = false;
 					}
 				}
-
 			}
 		} while (!exit);
 	}
@@ -186,13 +185,12 @@ public class MultiThreading {
 			filesByNodId.put(i, new ArrayList<>());
 		}
 
+		
 		for (int fileIndex = 0; fileIndex < listIdSource.size(); fileIndex++) {
 			if (numberOfExecutorNods == 0) {
 				filesByNodId.get(0).add(fileIndex);
 			} else {
-				int hashCode = listIdSource.get(fileIndex).hashCode();
-				hashCode = (hashCode == Integer.MIN_VALUE) ? (Integer.MIN_VALUE + 1) : hashCode;
-				int targetNodId = 1 + Math.abs(hashCode) % numberOfExecutorNods;
+				int targetNodId = 1 + fileIndex % numberOfExecutorNods;
 				filesByNodId.get(targetNodId).add(fileIndex);
 			}
 		}

@@ -181,13 +181,14 @@ public class RulesOperations {
 		requete.append("	INNER JOIN " + ViewEnum.JEUDEREGLE.getFullName(envExecution)
 				+ " b ON a.id_norme=b.id_norme AND a.periodicite=b.periodicite AND b.validite_inf <=a.validite::date AND b.validite_sup>=a.validite::date ");
 		requete.append("	WHERE phase_traitement='" + currentPhase + "') ");
-		requete.append("UPDATE " + pilTemp + " AS a ");
+		requete.append(", up AS (UPDATE " + pilTemp + " AS a ");
 		requete.append("SET validite_inf=prep.validite_inf, validite_sup=prep.validite_sup, version=prep.version ");
 		if (defaultEtatTraitement != null) {
 			requete.append(", etat_traitement='{" + defaultEtatTraitement + "}'");
 		}
 		requete.append("FROM prep ");
-		requete.append("WHERE a.phase_traitement='" + currentPhase + "'; ");
+		requete.append("WHERE a.phase_traitement='" + currentPhase + "' RETURNING nb_enr) ");
+		requete.append("SELECT nb_enr FROM up;");
 		return requete.toString();
 	}
 
