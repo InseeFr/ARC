@@ -355,6 +355,14 @@ public class BddPatcherTest extends InitializeQueryTest {
 	public static void insertTestDataSiera() throws ArcException {
 		insertTestData("BdDTest/script_test_fonctionnel_siera.sql");
 	}
+
+	/**
+	 * insert extra rules for functional tests siera on bas3
+	 * @throws ArcException
+	 */
+	public static void insertTestDataSieraExtraRules_bas3() throws ArcException {
+		insertTestData("BdDTest/script_test_fonctionnel_siera_extra_rules_bas3.sql");
+	}
 	
 	/**
 	 * insert data for functional tests siera
