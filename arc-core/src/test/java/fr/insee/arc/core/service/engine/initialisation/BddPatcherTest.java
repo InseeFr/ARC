@@ -299,7 +299,7 @@ public class BddPatcherTest extends InitializeQueryTest {
 		// metadata schema creation
 		patcher.bddScript(c);
 		// sandbox schema creation
-		patcher.bddScript(c, testSandbox1, testSandbox2, testSandbox8);
+		patcher.bddScript(c, testSandbox1, testSandbox2, testSandbox3, testSandbox8);
 		
 	}
 

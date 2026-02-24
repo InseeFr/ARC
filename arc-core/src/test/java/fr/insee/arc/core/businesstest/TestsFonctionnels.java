@@ -49,10 +49,13 @@ public class TestsFonctionnels extends InitializeQueryTest {
 
 		executeTestSirene("arc_bas1", repertoire);
 
-		executeTestSiera("arc_bas2", repertoire);
-
 		executeTestAnimal("arc_bas8", repertoire);
 
+		BddPatcherTest.insertTestDataSiera();
+		
+		executeTestSiera("arc_bas2", repertoire, true);
+		
+		executeTestSiera("arc_bas3", repertoire, false);
 	}
 
 	/**
@@ -102,8 +105,7 @@ public class TestsFonctionnels extends InitializeQueryTest {
 	 * @throws ArcException
 	 * @throws SQLException
 	 */
-	private void executeTestSiera(String sandbox, String repertoire) throws IOException, ArcException, SQLException {
-		BddPatcherTest.insertTestDataSiera();
+	private void executeTestSiera(String sandbox, String repertoire, boolean largeFile) throws IOException, ArcException, SQLException {
 
 		// to test batch mode
 		String batchMode="1";
@@ -129,6 +131,14 @@ public class TestsFonctionnels extends InitializeQueryTest {
 		ApiServiceFactory.getService(TraitementPhase.CONTROLE, sandbox, 10000000, batchMode).invokeApi();
 		assertEquals(1, nbFileInPhase(sandbox, TraitementPhase.CONTROLE, TraitementEtat.OK));
 
+		// test to see if large file queries work
+		if (largeFile)
+		{
+			ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
+			query.build("UPDATE "+sandbox+".pilotage_fichier set nb_enr=1000000 where phase_traitement='"+TraitementPhase.CONTROLE+"'");
+			UtilitaireDao.get(0).executeRequest(c, query);
+		}
+		
 		ApiServiceFactory.getService(TraitementPhase.MAPPING, sandbox, 10000000, batchMode).invokeApi();
 		assertEquals(1, nbFileInPhase(sandbox, TraitementPhase.MAPPING, TraitementEtat.OK));
 

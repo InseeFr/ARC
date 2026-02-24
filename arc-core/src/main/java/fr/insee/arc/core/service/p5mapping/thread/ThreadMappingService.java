@@ -12,12 +12,10 @@ import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.global.bo.JeuDeRegle;
 import fr.insee.arc.core.service.global.bo.JeuDeRegleDao;
 import fr.insee.arc.core.service.global.dao.DatabaseConnexionConfiguration;
-import fr.insee.arc.core.service.global.dao.GenericQueryDao;
 import fr.insee.arc.core.service.global.dao.HashFileNameConversion;
 import fr.insee.arc.core.service.global.dao.PilotageOperations;
 import fr.insee.arc.core.service.global.dao.RulesOperations;
 import fr.insee.arc.core.service.global.dao.TableNaming;
-import fr.insee.arc.core.service.global.dao.TableOperations;
 import fr.insee.arc.core.service.global.dao.ThreadOperations;
 import fr.insee.arc.core.service.global.scalability.ScalableConnection;
 import fr.insee.arc.core.service.global.thread.ThreadConstant;
@@ -29,6 +27,7 @@ import fr.insee.arc.core.service.p5mapping.dao.MappingQueriesFactory;
 import fr.insee.arc.core.service.p5mapping.dao.ThreadMappingQueries;
 import fr.insee.arc.core.service.p5mapping.operation.MappingOperation;
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
+import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.utils.utils.FormatSQL;
@@ -55,7 +54,7 @@ public class ThreadMappingService extends ThreadTemplate {
 	
 	private ThreadOperations arcThreadGenericDao;
 
-	private GenericQueryDao genericExecutorDao;
+	private int numberOfRecordInControleOkTable;
 	
 	
 	private TraitementPhase currentExecutedPhase = TraitementPhase.MAPPING;
@@ -77,7 +76,6 @@ public class ThreadMappingService extends ThreadTemplate {
 		this.tableLienIdentifiants = FormatSQL.temporaryTableName(ThreadTemporaryTable.TABLE_MAPPING_IDS_LINK_TEMP);
 		
 		this.tablePil = anApi.getTablePil();
-		this.genericExecutorDao = new GenericQueryDao(this.connexion.getExecutorConnection());
 
 		this.previousExecutedPhaseTable = TableNaming.phaseDataTableName(this.envExecution, this.previousExecutedPhase, TraitementEtat.OK);
 		
@@ -117,11 +115,13 @@ public class ThreadMappingService extends ThreadTemplate {
 		
 		this.tableTempControleOk = HashFileNameConversion.tableOfIdSource(this.previousExecutedPhaseTable, idSource);
 		
-		genericExecutorDao.initialize()
-			.addOperation(this.arcThreadGenericDao.preparationDefaultDao())
-			.addOperation(RulesOperations.marqueJeuDeRegleApplique(this.currentExecutedPhase, 
-				this.envExecution, this.tableMappingPilTemp))
-			.execute();
+		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
+		query.append(this.arcThreadGenericDao.preparationDefaultDao());
+		query.append(RulesOperations.marqueJeuDeRegleApplique(this.currentExecutedPhase, 
+				this.envExecution, this.tableMappingPilTemp));
+		
+		this.numberOfRecordInControleOkTable = UtilitaireDao.get(0).getInt(this.connexion.getExecutorConnection(), query);
+
 	}
 
 	private void execute() throws ArcException {
@@ -141,8 +141,8 @@ public class ThreadMappingService extends ThreadTemplate {
 		 * Instancier une requête de mapping générique pour ce jeu de règles.
 		 */
 		MappingQueries requeteMapping = new MappingQueries(this.connexion.getExecutorConnection(),
-				regleMappingFactory, idFamille, jdr, this.getEnvExecution(), this.tableTempControleOk, this.indice);
-
+				regleMappingFactory, idFamille, jdr, this.getEnvExecution(), this.tableTempControleOk, this.numberOfRecordInControleOkTable);
+		
 		/*
 		 * Build and execute the query that computes and links all identifiers between each others
 		 */
@@ -160,7 +160,7 @@ public class ThreadMappingService extends ThreadTemplate {
 		/*
 		 * For each model table, compute a query that inserts the data into a temporary model table.
 		 */
-		query.append(requeteMapping.getQueriesThatInsertDataIntoTemporaryModelTable(idSource));
+		query.append(requeteMapping.getQueriesThatInsertDataIntoTemporaryModelTable());
 		
 		/*
 		 * Delete empty records if there is not link in children tables
