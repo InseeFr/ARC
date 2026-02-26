@@ -14,8 +14,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import com.google.common.collect.Streams;
-
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.dataobjects.ViewEnum;
@@ -135,7 +133,7 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 		this.nomTableModVariableMetier = ViewEnum.MOD_VARIABLE_METIER.getFullName(this.environnement);
 		this.nomTableRegleMapping = ViewEnum.MAPPING_REGLE.getFullName(this.environnement);
 		
-		this.mappingQueriesForLargeFile = new MappingQueriesForLargeFile(this.regleMappingFactory, this.nomTableSource, numberOfRecordInSourceTable);
+		this.mappingQueriesForLargeFile = new MappingQueriesForLargeFile(numberOfRecordInSourceTable);
 	}
 
 	public void construire() throws ArcException {
@@ -373,9 +371,7 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 		requete.append(ModeRequete.NESTLOOP_OFF);
 
 			for (TableMapping table : this.ensembleTableMapping) {
-				
 
-				creerTablePrepUnion(requete, table);
 				insererTablePrepUnionNew(requete, table, reglesIdentifiantes);
 				
 				// compute sql expression
@@ -416,60 +412,86 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 	}
 
 
-	
+	/**
+	 * Map the source data according to mapping rules into a temporary model table called pu (prep union)
+	 * @param returned
+	 * @param table
+	 * @param reglesIdentifiantes
+	 * @return
+	 * @throws ArcException
+	 */
 	private StringBuilder insererTablePrepUnionNew(StringBuilder returned, TableMapping table,
 			Map<String, String> reglesIdentifiantes) throws ArcException {
 		
 		StringBuilder groupsExclusionCondition = new StringBuilder();
+		List<String> prepUnionTables = new ArrayList<String>();
+		
+		boolean puNotAlreadyCreated = true;
+				
 		for (Integer groupe : table.getEnsembleGroupes()) {
 			if (tableGroups.get(idTableGroupe(table,groupe))!=null)		
 			{
-
 			groupsExclusionCondition.append(" AND NOT ").append(idTableGroupe(table, groupe));
 			String expressionSQLCalculMapping = table.expressionSQLPrepUnion(groupe, reglesIdentifiantes);
-
-			mappingQueriesForLargeFile.materializeUsefulColumnForLargeFile(returned, expressionSQLCalculMapping);
 		
-			returned.append("\n INSERT INTO ").append(PREP_UNION_TABLE);
+			returned.append("\n CREATE TEMPORARY TABLE ").append(puNotAlreadyCreated?PREP_UNION_TABLE:idTableGroupe(table,groupe)).append(FormatSQL.WITH_NO_VACUUM).append("AS");
 			returned.append("\n SELECT ");
 			returned.append(listeVariablesTypesPrepUnion(new StringBuilder(), table, "::", true));
 			returned.append("\n FROM (");
-			returned.append("\n SELECT ").append(expressionSQLCalculMapping);
+			returned.append("\n SELECT DISTINCT ").append(expressionSQLCalculMapping);
 			returned.append("\n FROM ").append(this.tableLienIdentifiants).append(" d ");
-			returned.append("\n ,").append(mappingQueriesForLargeFile.sourceTable()).append(" e ");
+			returned.append("\n ,").append(this.nomTableSource).append(" e ");
 			returned.append("\n WHERE e.id=d.id_table ");
 			returned.append("\n AND ").append(idTableGroupe(table,groupe));
-			returned.append("\n ) a ");
-			returned.append("\n GROUP BY ");
-			table.sqlListeVariables(returned);
-			returned.append(";");
-
+			returned.append("\n ) a;");
+			
+			if (!puNotAlreadyCreated)
+			{
+				prepUnionTables.add(idTableGroupe(table,groupe));
+			}
+			
+			puNotAlreadyCreated=false;
 			}
 		}
-		
-		
+				
 		if (tableNonGroup.get(idTableNGroupe(table))!=null)		
 		{
 			String expressionSQLCalculMapping = table.expressionSQLPrepUnion(null, reglesIdentifiantes);			
-
-			mappingQueriesForLargeFile.materializeUsefulColumnForLargeFile(returned, expressionSQLCalculMapping);
 			
-			returned.append("\n INSERT INTO ").append(PREP_UNION_TABLE);
+			returned.append("\n CREATE TEMPORARY TABLE ").append(puNotAlreadyCreated?PREP_UNION_TABLE:idTableNGroupe(table)).append(FormatSQL.WITH_NO_VACUUM).append("AS");
 			returned.append("\n SELECT ");
 			returned.append(listeVariablesTypesPrepUnion(new StringBuilder(), table, "::", true));
 			returned.append("\n FROM (");
-			returned.append("\n SELECT ").append(expressionSQLCalculMapping);
+			returned.append("\n SELECT DISTINCT ").append(expressionSQLCalculMapping);
 			returned.append("\n FROM ").append(this.tableLienIdentifiants).append(" d ");
-			returned.append("\n ,").append(mappingQueriesForLargeFile.sourceTable()).append(" e ");
+			returned.append("\n ,").append(this.nomTableSource).append(" e ");
 			returned.append("\n WHERE e.id=d.id_table ");
 			returned.append("\n AND ").append(idTableNGroupe(table));
 			// if table has group, records selected by group must be excluded
 			returned.append(groupsExclusionCondition);
-			returned.append("\n ) a ");
-			returned.append("\n GROUP BY ");
-			table.sqlListeVariables(returned);
-			returned.append(";");
+			returned.append("\n ) a;");
+			
+			if (!puNotAlreadyCreated)
+			{
+				prepUnionTables.add(idTableNGroupe(table));
+			}			
+			puNotAlreadyCreated=false;
 		}
+		
+		if (!prepUnionTables.isEmpty()) {
+			returned.append("\n INSERT INTO ").append(PREP_UNION_TABLE).append(" ");
+			returned.append(prepUnionTables.stream().map(t-> new StringBuilder("SELECT * FROM ").append(t)).collect(Collectors.joining(" UNION ALL ")));
+			returned.append(";");
+			
+			prepUnionTables.stream().forEach(t -> returned.append("DROP TABLE ").append(t).append(";"));
+		}
+		
+		if (puNotAlreadyCreated)
+		{
+			creerTablePrepUnion(returned, table);
+		}
+		
+
 		return returned;
 	}
 

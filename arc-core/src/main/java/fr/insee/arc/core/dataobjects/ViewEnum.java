@@ -243,7 +243,7 @@ public enum ViewEnum {
 	 * @param tablename
 	 * @return
 	 */
-	public static String getFullTableNameInSchema(SchemaEnum schema, String tablename, String...suffix) {
+	public static String getFullTableNameInSchema(SchemaEnum schema, String tablename) {
 		return (schema.equals(SchemaEnum.TEMPORARY) ? tablename : schema.getSchemaName() + Delimiters.SQL_SCHEMA_DELIMITER + tablename).toLowerCase();
 	}
 	

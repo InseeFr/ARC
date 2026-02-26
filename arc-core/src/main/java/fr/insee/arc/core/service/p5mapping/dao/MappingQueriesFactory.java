@@ -95,13 +95,4 @@ public class MappingQueriesFactory {
         this.idFamille = idFamille;
     }
 
-	public Set<String> getEnsembleNomRubriqueExistante() {
-		return ensembleNomRubriqueExistante;
-	}
-
-	public Set<String> getEnsembleIdentifiantRubriqueExistante() {
-		return ensembleIdentifiantRubriqueExistante;
-	}
-
-
 }
