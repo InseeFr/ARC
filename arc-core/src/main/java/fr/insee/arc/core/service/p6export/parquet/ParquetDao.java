@@ -8,6 +8,9 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import fr.insee.arc.core.service.p1reception.provider.DirectoriesReception;
+import fr.insee.arc.core.service.p2chargement.bo.NormeRules;
+import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.utils.consumer.ThrowingConsumer;
 import fr.insee.arc.utils.dao.DuckdbDao;
 import fr.insee.arc.utils.dao.GenericPreparedStatementBuilder;
@@ -22,6 +25,10 @@ import fr.insee.arc.utils.utils.LoggerHelper;
 public class ParquetDao {
 
 	private static final Logger LOGGER = LogManager.getLogger(ParquetDao.class);
+	
+	// Ratio MAX_PARALLEL_WORKERS parameters
+	// used not to over throttle input database or s3
+	private static final float RATIO_OF_CPU_USED_TO_EXPORT_PARQUET = 0.5F;
 	
 	// parquet file format as "file.parquet"
 	private static final String PARQUET_FILE_EXTENSION = ".parquet";
@@ -69,6 +76,8 @@ public class ParquetDao {
 		{
 			addParquetEncryptionKeyInDuckDb(connection);
 
+			defineNumberOfThreadThread(connection);
+			
 			// create output directory
 			FileUtilsArc.createDirIfNotexist(outputDirectory);
 			
@@ -79,10 +88,26 @@ public class ParquetDao {
 			}
 		};
 		
+		
 		duckdbDao.executeOnDuckdb(exportToParquetOperation);
 		
 	}
 
+	private void defineNumberOfThreadThread(Connection connection) throws ArcException {
+		
+		BDParameters bdParameters = new BDParameters(ArcDatabase.COORDINATOR);
+		
+		int maxParallelWorkers = (int) (bdParameters.getInt(null,"ApiService.MAX_PARALLEL_WORKERS", 4) * RATIO_OF_CPU_USED_TO_EXPORT_PARQUET) ;
+		maxParallelWorkers = (maxParallelWorkers < 1)? 1 : maxParallelWorkers;
+		
+		GenericPreparedStatementBuilder query = new GenericPreparedStatementBuilder();
+		query.append("SET threads=").append(query.quoteInt(maxParallelWorkers)).append(";");
+
+		duckdbDao.executeQuery(connection, query);		
+
+	}
+	
+	
 	private void addParquetEncryptionKeyInDuckDb(Connection connection) throws ArcException {
 
 		if (encryptionKey == null) {
