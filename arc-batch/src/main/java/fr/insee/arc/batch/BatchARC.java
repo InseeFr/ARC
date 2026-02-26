@@ -737,6 +737,7 @@ class BatchARC implements IReturnCode {
 	 * start paralell thread
 	 * 
 	 * @throws ArcException
+	 * @throws InterruptedException 
 	 */
 	private void executeLoopOverPhases() throws ArcException {
 
@@ -762,6 +763,13 @@ class BatchARC implements IReturnCode {
 			waitAndClear();
 
 		} while (!exit);
+		
+		// wait for maintenance thread to finish
+		try {
+			maintenance.join();
+		} catch (InterruptedException e) {
+			message("Maintenance thread had been interrupted");
+		}
 
 		message("Fin de la boucle d'itération");
 

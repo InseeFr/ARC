@@ -99,6 +99,15 @@ public class ParquetDaoTest extends ParquetDao {
 
 		// test query on
 		GenericPreparedStatementBuilder query = new GenericPreparedStatementBuilder();
+		
+		query.build(SQL.CREATE, SQL.SCHEMA, SQL.IF_NOT_EXISTS, "arc", SQL.END_QUERY); 
+		
+		query.build(SQL.CREATE, SQL.TABLE, "arc.parameter", SQL.AS, SQL.SELECT);
+		query.append("'ApiService.MAX_PARALLEL_WORKERS'::text as key");
+		query.append(",'12'::text as val");
+		query.append(SQL.END_QUERY);
+
+		
 		query.build(SQL.CREATE, SQL.TABLE, testTableName, SQL.AS, SQL.SELECT);
 		query.append("'string'::text as column_string");
 		query.append(",12::int as column_int4");
@@ -110,7 +119,8 @@ public class ParquetDaoTest extends ParquetDao {
 		query.append(",array[8, 9, 10]::int[] as column_array_int8");
 		query.append(",array[current_timestamp, current_timestamp] as column_array_timestamp");
 		query.append(",array[current_date, current_date] as column_array_date");
-
+		query.append(SQL.END_QUERY);
+		
 		UtilitaireDao.get(0).executeRequest(connection, query);
 	}
 
