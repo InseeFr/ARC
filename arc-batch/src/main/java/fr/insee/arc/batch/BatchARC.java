@@ -764,17 +764,29 @@ class BatchARC implements IReturnCode {
 
 		} while (!exit);
 		
-		// wait for maintenance thread to finish
-		try {
-			maintenance.join();
-		} catch (InterruptedException e) {
-			message("Maintenance thread had been interrupted");
-		}
+		waitForMaintenanceThreadToFinish();
 
 		message("Fin de la boucle d'itération");
 
 	}
 
+	/**
+	 * wait for the maintenance thread to finish
+	 * It is important not to vacuum tuple during parquet export
+	 */
+	private void waitForMaintenanceThreadToFinish()
+	{
+		message("Waiting maintenance thread to finish");
+		try {
+			maintenance.join();
+		} catch (InterruptedException e) {
+			maintenance.interrupt();
+			message("Maintenance thread had been interrupted");
+		}
+		message("Maintenance thread end");
+	}
+	
+	
 	private void updateProductionOn() throws ArcException {
 		if (iteration % numberOfIterationBewteenCheckTodo == 0) {
 			// check and update production on
