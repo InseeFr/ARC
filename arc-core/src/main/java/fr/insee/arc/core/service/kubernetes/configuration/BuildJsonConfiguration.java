@@ -19,7 +19,7 @@ public class BuildJsonConfiguration {
 	
 	private static PropertiesHandler properties = PropertiesHandler.getInstance();
 
-	private final static float CPU_REQUEST_LIMIT_RATIO = 0.5F;
+	private final static float EXECUTOR_CPU_REQUEST_LIMIT_RATIO = 0.5F;
 	
 	public static List<String> listOfReplicaConfiguration(ThrowingFunction<Integer, String> getSingleReplicaConfiguration) throws ArcException
 	{
@@ -100,7 +100,7 @@ public class BuildJsonConfiguration {
 			String val = matcher.group(1);
 			String unit = matcher.group(2);
 			
-			int cpuRequest = (int) (Integer.parseInt(val) * CPU_REQUEST_LIMIT_RATIO);
+			int cpuRequest = (int) (Integer.parseInt(val) * EXECUTOR_CPU_REQUEST_LIMIT_RATIO);
 			cpuRequest = (cpuRequest==0)?1:cpuRequest;
 			
 			return "" + cpuRequest + unit;
