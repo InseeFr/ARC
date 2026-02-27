@@ -17,7 +17,7 @@ public class MappingQueriesForLargeFile {
 		StringBuilder returned = new StringBuilder();
 		if (largeFile)
 		{
-			returned.append("SET local max_parallel_workers_per_gather=").append(NUMBER_OF_WORKER).append("; SET local enable_sort=off; SET local debug_parallel_query=on;");
+			returned.append("SET local max_parallel_workers_per_gather=").append(NUMBER_OF_WORKER).append("; SET local enable_sort=off; SET local parallel_setup_cost = 0; SET local parallel_tuple_cost = 0; SET local cpu_tuple_cost=0.025; SET local min_parallel_table_scan_size = 0;");
 		}
 		return returned;
 	}
