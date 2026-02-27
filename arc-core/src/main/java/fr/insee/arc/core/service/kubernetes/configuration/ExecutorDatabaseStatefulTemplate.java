@@ -157,7 +157,7 @@ public class ExecutorDatabaseStatefulTemplate {
             },
             "resources": {
               "requests": {
-                "cpu": "10m",
+                "cpu": "{cpu-request}",
                 "memory": "{ram}",
                 "ephemeral-storage": "40Mi"
               },

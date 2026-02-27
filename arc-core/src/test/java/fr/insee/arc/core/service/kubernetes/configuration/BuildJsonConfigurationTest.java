@@ -9,6 +9,15 @@ import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
 public class BuildJsonConfigurationTest {
 
 	@Test
+	public void cpuRequest() {
+		assertEquals("1m",BuildJsonConfiguration.computeCpuRequestFromLimitCPU("2m"));
+		assertEquals("1",BuildJsonConfiguration.computeCpuRequestFromLimitCPU("2"));
+		assertEquals("1",BuildJsonConfiguration.computeCpuRequestFromLimitCPU("1"));
+		assertEquals("500m",BuildJsonConfiguration.computeCpuRequestFromLimitCPU("1000m"));
+	}
+	
+	
+	@Test
 	public void kubernetesParametersTest() {
 		
 		PropertiesHandler properties=PropertiesHandler.getInstance();
@@ -176,7 +185,7 @@ public class BuildJsonConfigurationTest {
             },
             "resources": {
               "requests": {
-                "cpu": "10m",
+                "cpu": "4",
                 "memory": "8Gi",
                 "ephemeral-storage": "40Mi"
               },
