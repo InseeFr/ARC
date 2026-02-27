@@ -2,6 +2,8 @@ package fr.insee.arc.core.service.kubernetes.configuration;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import fr.insee.arc.core.service.kubernetes.bo.JsonFileParameter;
 import fr.insee.arc.utils.consumer.ThrowingFunction;
@@ -17,6 +19,7 @@ public class BuildJsonConfiguration {
 	
 	private static PropertiesHandler properties = PropertiesHandler.getInstance();
 
+	private final static int CPU_REQUEST_LIMIT_RATIO = 2;
 	
 	public static List<String> listOfReplicaConfiguration(ThrowingFunction<Integer, String> getSingleReplicaConfiguration) throws ArcException
 	{
@@ -78,6 +81,7 @@ public class BuildJsonConfiguration {
 				, JsonFileParameter.EXECUTOR_DATABASE, properties.getKubernetesExecutorDatabase() //
 				, JsonFileParameter.EXECUTOR_PORT, properties.getKubernetesExecutorPort()
 				, JsonFileParameter.IMAGE, properties.getKubernetesExecutorImage()
+				, JsonFileParameter.CPU_REQUEST, computeCpuRequestFromLimitCPU(properties.getKubernetesExecutorCpu())
 				, JsonFileParameter.CPU, properties.getKubernetesExecutorCpu()
 				, JsonFileParameter.RAM, properties.getKubernetesExecutorRam()
 				, JsonFileParameter.EPHEMERAL, properties.getKubernetesExecutorEphemeral()
@@ -86,6 +90,26 @@ public class BuildJsonConfiguration {
 		};
 	}
 
+	static String computeCpuRequestFromLimitCPU(String cpu)
+	{
+		Pattern pattern = Pattern.compile("([0123456789]*)([^0123456789]*)");
+		Matcher matcher = pattern.matcher(cpu);
+
+		if (matcher.find())
+		{
+			String val = matcher.group(1);
+			String unit = matcher.group(2);
+			
+			int cpuRequest = Integer.parseInt(val)/ CPU_REQUEST_LIMIT_RATIO;
+			cpuRequest = (cpuRequest==0)?1:cpuRequest;
+			
+			return "" + cpuRequest + unit;
+			
+		}
+		
+		return "1";
+	}
+	
 	
 	private static String applyKubernetesParameters(String kubernetesConfiguration, String[] kubernetesParameters)
 	{
