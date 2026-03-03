@@ -26,9 +26,6 @@ public class ParquetDao {
 
 	private static final Logger LOGGER = LogManager.getLogger(ParquetDao.class);
 	
-	// Ratio MAX_PARALLEL_WORKERS parameters
-	// used not to over throttle input database or s3
-	private static final float RATIO_OF_CPU_USED_TO_EXPORT_PARQUET = 0.5F;
 	
 	// parquet file format as "file.parquet"
 	private static final String PARQUET_FILE_EXTENSION = ".parquet";
@@ -97,11 +94,10 @@ public class ParquetDao {
 		
 		BDParameters bdParameters = new BDParameters(ArcDatabase.COORDINATOR);
 		
-		int maxParallelWorkers = (int) (bdParameters.getInt(null,"ApiService.MAX_PARALLEL_WORKERS", 4) * RATIO_OF_CPU_USED_TO_EXPORT_PARQUET) ;
-		maxParallelWorkers = (maxParallelWorkers < 1)? 1 : maxParallelWorkers;
+		int maxParallelWorkers = bdParameters.getInt(null,"ApiService.MAX_PARALLEL_WORKERS", 4);
 		
 		GenericPreparedStatementBuilder query = new GenericPreparedStatementBuilder();
-		query.append("SET threads=").append(query.quoteInt(maxParallelWorkers)).append(";");
+		query.append("SET pg_connection_limit=").append(query.quoteInt(maxParallelWorkers)).append(";");
 
 		duckdbDao.executeQuery(connection, query);		
 

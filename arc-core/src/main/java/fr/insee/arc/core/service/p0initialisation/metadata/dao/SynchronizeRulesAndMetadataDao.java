@@ -121,7 +121,7 @@ public class SynchronizeRulesAndMetadataDao {
 					.append(" SELECT 'DROP TABLE IF EXISTS '||schemaname||'.'||tablename||';'  AS requete_drop");
 			requeteSelectDrop.append(" FROM pg_tables where schemaname = "
 					+ requeteSelectDrop.quoteText(anExecutionEnvironment.toLowerCase()) + " ");
-			requeteSelectDrop.append(" AND tablename SIMILAR TO '%nmcl%|%ext%'");
+			requeteSelectDrop.append(" AND tablename SIMILAR TO 'nmcl%|ext%'");
 
 			List<String> requetesDeSuppressionTablesNmcl = new GenericBean(
 					UtilitaireDao.get(0).executeRequest(coordinatorConnexion, requeteSelectDrop)).mapContent()
