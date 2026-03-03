@@ -5,11 +5,10 @@
 - All notable changes to this project will be documented in this file.
 - jacoco aggregate
 
-## version-94.2.41b
-- mapping optimization with trigger to split table by columns of interest
-
-## version-94.2.40b
-- postgres optimization
+## version-94.2.51
+- fix : webservice table images were deleted by batch in multinod mode
+- mapping vertical optimization
+- better balance of file batching between the nods available
 
 ## version-94.2.39b
 - mapping optimization
