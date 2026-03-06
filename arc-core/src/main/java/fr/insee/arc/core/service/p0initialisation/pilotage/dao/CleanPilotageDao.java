@@ -48,8 +48,8 @@ public class CleanPilotageDao {
 				.appendNewLine("AND a.id_norme=b.id_norme AND a.periodicite=b.periodicite ") //
 				.appendNewLine("AND b.id_famille=c.id_famille ") //
 				// on filtre selon RG1
-				.appendNewLine("AND (a.client <@ c.client AND c.client <@ a.client) ") //
-				// test d'égalité des 2 tableaux (a.client,c.client)
+				.appendNewLine("AND (c.client <@ a.client) ") //
+				// test d'inclusion : tous les client déclarés doivent etre marqués dans le pilotage pour effacer
 				.appendNewLine(") ") //
 				// par double inclusion (A dans B & B dans A)
 
