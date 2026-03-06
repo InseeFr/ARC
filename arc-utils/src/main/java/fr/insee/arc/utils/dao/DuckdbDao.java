@@ -124,7 +124,7 @@ public class DuckdbDao {
 	 * 
 	 * @throws ArcException
 	 */
-	private void loadDuckdb() throws ArcException {
+	public void loadDuckdb() throws ArcException {
 		try {
 			Class.forName("org.duckdb.DuckDBDriver");
 		} catch (ClassNotFoundException e) {

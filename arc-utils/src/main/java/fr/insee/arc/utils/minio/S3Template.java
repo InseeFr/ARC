@@ -9,6 +9,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,39 +30,68 @@ import io.minio.Result;
 import io.minio.StatObjectArgs;
 import io.minio.StatObjectResponse;
 import io.minio.UploadObjectArgs;
+import io.minio.credentials.AwsEnvironmentProvider;
+import io.minio.credentials.MinioEnvironmentProvider;
+import io.minio.credentials.Provider;
 import io.minio.errors.ErrorResponseException;
 import io.minio.errors.InsufficientDataException;
 import io.minio.errors.InternalException;
 import io.minio.errors.InvalidResponseException;
 import io.minio.errors.ServerException;
 import io.minio.errors.XmlParserException;
+import io.minio.http.HttpUtils;
 import io.minio.messages.Item;
 import okhttp3.OkHttpClient;
 
 public class S3Template {
 
+	// for minio authentification type
+	private static final String MINIO_ACCESS_KEY = "MINIO_ACCESS_KEY";
+	private static final String MINIO_SECRET_KEY = "MINIO_SECRET_KEY";
+
+	// for aws authentification type
+	private static final String AWS_SESSION_TOKEN = "AWS_SESSION_TOKEN";
+	private static final String AWS_SECRET_ACCESS_KEY = "AWS_SECRET_ACCESS_KEY";
+	private static final String AWS_ACCESS_KEY_ID = "AWS_ACCESS_KEY_ID";
+
 	private static final Logger LOGGER = LogManager.getLogger(S3Template.class);
 
 	private static final String EXISTS_FILE = ".exists";
+	
+	protected static final long DEFAULT_CONNECTION_TIMEOUT = TimeUnit.MINUTES.toMillis(5);
 	
 	public S3Template(String s3ApiUri, String bucket, String directory, String accessKey, String secretKey) {
 		super();
 		this.s3ApiUri = s3ApiUri;
 		this.bucket = bucket;
 		this.directory = directory;
-		this.accessKey = accessKey;
-		this.secretKey = secretKey;
+		
+		System.setProperty(MINIO_ACCESS_KEY, accessKey);
+		System.setProperty(MINIO_SECRET_KEY, secretKey);
+
+	}
+	
+	public S3Template(String s3ApiUri, String bucket, String directory, String accessKey, String secretKey, String sessionToken) {
+		this.s3ApiUri = s3ApiUri;
+		this.bucket = bucket;
+		this.directory = directory;
+		
+		System.setProperty(AWS_ACCESS_KEY_ID, accessKey);
+		System.setProperty(AWS_SECRET_ACCESS_KEY, secretKey);
+		System.setProperty(AWS_SESSION_TOKEN, sessionToken);
+		
 	}
 
 	private String s3ApiUri;
 	private String bucket;
 	private String directory;
-	private String accessKey;
-	private String secretKey;
 
+	// client http used by minio
+	private OkHttpClient httpClient;
+	
+	// client minio
 	private MinioClient minioClient;
 
-	private OkHttpClient httpClient;
 	
 	
 	/**
@@ -91,9 +121,13 @@ public class S3Template {
 	}
 
 	private void buildMinioClient() throws KeyManagementException, NoSuchAlgorithmException {
-		httpClient = new OkHttpClient().newBuilder().build();
-		this.minioClient = MinioClient.builder().endpoint(s3ApiUri).credentials(accessKey, secretKey)
-				.httpClient(httpClient).build();
+		
+		httpClient = HttpUtils.newDefaultHttpClient(DEFAULT_CONNECTION_TIMEOUT, DEFAULT_CONNECTION_TIMEOUT, DEFAULT_CONNECTION_TIMEOUT);
+		
+		Provider credentialProvider = (System.getProperty(AWS_ACCESS_KEY_ID)==null)?new MinioEnvironmentProvider():new AwsEnvironmentProvider();
+		
+		this.minioClient = MinioClient.builder().endpoint(s3ApiUri).credentialsProvider(credentialProvider).httpClient(httpClient).build();
+		
 		this.minioClient.ignoreCertCheck();
 	}
 
