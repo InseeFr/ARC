@@ -66,6 +66,11 @@ public class S3Template {
 		this.bucket = bucket;
 		this.directory = directory;
 		
+		if (isS3Off())
+		{
+			return;
+		}
+		
 		System.setProperty(MINIO_ACCESS_KEY, accessKey);
 		System.setProperty(MINIO_SECRET_KEY, secretKey);
 
@@ -75,6 +80,11 @@ public class S3Template {
 		this.s3ApiUri = s3ApiUri;
 		this.bucket = bucket;
 		this.directory = directory;
+		
+		if (isS3Off())
+		{
+			return;
+		}
 		
 		System.setProperty(AWS_ACCESS_KEY_ID, accessKey);
 		System.setProperty(AWS_SECRET_ACCESS_KEY, secretKey);
