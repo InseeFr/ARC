@@ -13,6 +13,7 @@ execute 'alter database '||c.n||' set max_parallel_workers_per_gather=0;';
 execute 'alter database '||c.n||' set max_parallel_maintenance_workers=0;';
 execute 'alter database '||c.n||' set jit=off;';
 execute 'alter database '||c.n||' set client_min_messages=error;';
+execute 'alter database '||c.n||' set extra_float_digits=0;';
 end loop;
 end;
 $$;
