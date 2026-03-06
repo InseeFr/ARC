@@ -56,8 +56,11 @@ public class CleanPilotageDaoTest extends InitializeQueryTest {
 		// fichier récupéré par les 2 clients DSN déclarés depuis moins de 10j -> ne pas effacer car durée de rétention non écoulée
 		query.build("('fichier_3', 'archive_3', 'DSN_2024', 'M', '2023-11-30 10:29:25.000', 2, 'MAPPING', '{OK}', '{app_2, app_1}', array['2023-11-30 10:29:25.000', current_timestamp])");
 		query.appendNewLine(",");
-		// fichier récupéré par l'unique client RESIL depuis plus de 10j -> à effacer
+		// fichier récupéré par l'unique client RESIL depuis plus de 10j et par un client qui n'existe plus -> à effacer
 		query.build("('fichier_4', 'archive_4', 'RESIL_2024', 'M', '2023-11-30 10:29:25.000', 2, 'MAPPING', '{OK}', '{app_1}', '{2023-11-30 10:29:25.000}')");
+		query.appendNewLine(",");
+		// fichier récupéré par l'unique client RESIL depuis plus de 10j et par un client qui n'existe plus depuis plus de 10j -> à effacer
+		query.build("('fichier_41', 'archive_4', 'RESIL_2024', 'M', '2023-11-30 10:29:25.000', 2, 'MAPPING', '{OK}', '{app_1, app_3}', '{2023-11-30 10:29:25.000, 2023-11-30 10:29:25.000}')");
 		query.appendNewLine(",");
 		// fichier RESIL KO depuis plus de 10j -> à effacer
 		query.build("('fichier_5', 'archive_5', 'RESIL_2024', 'M', '2023-11-30 10:29:25.000', 2, 'CHARGEMENT', '{KO}', null, null)");
@@ -85,6 +88,7 @@ public class CleanPilotageDaoTest extends InitializeQueryTest {
 		List<String> expectedFilesToDelete = new ArrayList<String>();
 		expectedFilesToDelete.add("fichier_1"); // fichier récupéré par tous les clients depuis plus de 10j
 		expectedFilesToDelete.add("fichier_4"); // fichier récupéré par client unique depuis plus de 10j
+		expectedFilesToDelete.add("fichier_41"); // fichier récupéré par client unique depuis plus de 10j et par un client qui n'existe plus depuis plus de 10j
 		expectedFilesToDelete.add("fichier_5"); // fichier KO depuis plus de 10j
 		assertTrue(expectedFilesToDelete.size() == filesToDelete.size() && filesToDelete.containsAll(expectedFilesToDelete));
 		
