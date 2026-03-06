@@ -5,6 +5,9 @@
 - All notable changes to this project will be documented in this file.
 - jacoco aggregate
 
+## version-94.2.53b
+- up the timeout timers of minio httpClient
+
 ## version-94.2.51
 - fix : webservice table images were deleted by batch in multinod mode
 - mapping vertical optimization
