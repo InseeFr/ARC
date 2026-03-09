@@ -5,8 +5,12 @@
 - All notable changes to this project will be documented in this file.
 - jacoco aggregate
 
+## version-94.2.55
+- FIX : for the data retrieval webservice, when a client was removed from the list of allowed clients, the records previously marked with the client were not removed after etention time as it should be
+- FIX : when importing a new nomenclature table, the columns of the nomenclature tables containing an underscore in their name were not proceed correctly as the underscores were removed 
+
 ## version-94.2.53b
-- up the timeout timers of minio httpClient
+- up the timeout timers of minio httpClient to prevent s3 async error
 
 ## version-94.2.51
 - fix : webservice table images were deleted by batch in multinod mode
