@@ -187,11 +187,7 @@ public class GererNomenclatureDao extends VObjectHelperDao {
 	}
 
 	private void creationTableDeNomenclature(Connection connection, String nomenclatureTableName, String[] colonnes, String[] types) throws ArcException {
-		
-		for (int i=0; i < colonnes.length; i++) {
-			colonnes[i] = ManipString.translateAscii(colonnes[i]).toLowerCase();
-		}
-		
+
 		ArcPreparedStatementBuilder createTableRequest = new ArcPreparedStatementBuilder();
 		createTableRequest.append("CALL safe_create_table(")
 		.appendText(ViewEnum.getFullName(SchemaEnum.ARC_METADATA.getSchemaName(), nomenclatureTableName))
