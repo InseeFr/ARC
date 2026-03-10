@@ -1,9 +1,10 @@
 # Change Log
 
 ## TODO List
-- enable tar compression for bigger files
 - All notable changes to this project will be documented in this file.
-- jacoco aggregate
+- enable tar compression for bigger files
+- select in processing pipeline a number of file at least equals to number of executor
+
 
 ## version-94.2.56
 - FIX : replaced the postgres function num_nonnulls by a row assertion because the postgres functions cannot handle more than 100 arguments
