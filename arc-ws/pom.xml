@@ -1,0 +1,127 @@
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>fr.insee</groupId>
+		<artifactId>arc</artifactId>
+		<version>0.0.2-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
+	<groupId>fr.insee.arc</groupId>
+	<artifactId>arc-ws</artifactId>
+	<packaging>war</packaging>
+	<name>ARC-WS</name>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+	</properties>
+
+	<dependencies>
+		<dependency>
+		  <groupId>fr.insee.arc</groupId>
+		  <artifactId>arc-utils</artifactId>
+		  <version>${project.version}</version>
+		  <type>test-jar</type>
+		  <scope>test</scope>
+		</dependency>
+		<dependency>
+		  <groupId>fr.insee.arc</groupId>
+		  <artifactId>arc-core</artifactId>
+		  <version>${project.version}</version>
+		  <type>test-jar</type>
+		  <scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>fr.insee.arc</groupId>
+			<artifactId>arc-utils</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>fr.insee.arc</groupId>
+			<artifactId>arc-core</artifactId>
+			<version>${project.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>commons-lang</groupId>
+					<artifactId>commons-lang</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<!-- web security libs -->
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-web</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-config</artifactId>
+		</dependency>
+		<!-- Keycloak oauth2 client -->
+		<dependency>
+		    <groupId>org.springframework.security</groupId>
+		    <artifactId>spring-security-oauth2-resource-server</artifactId>
+		</dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-oauth2-jose</artifactId>
+        </dependency>
+
+		<dependency>
+			<groupId>commons-fileupload</groupId>
+			<artifactId>commons-fileupload</artifactId>
+			<version>${project.commons.fileupload.version}</version>
+			<type>jar</type>
+			<scope>compile</scope>
+		</dependency>
+
+		<dependency>
+		    <groupId>jakarta.servlet</groupId>
+		    <artifactId>jakarta.servlet-api</artifactId>
+		    <version>${project.jakarta.version}</version>
+		    <scope>provided</scope>
+		</dependency>
+		<dependency>
+		    <groupId>jakarta.servlet.jsp</groupId>
+		    <artifactId>jakarta.servlet.jsp-api</artifactId>
+		    <version>4.0.0-M1</version>
+		    <scope>provided</scope>
+		</dependency>
+		
+	</dependencies>
+
+	<build>
+		<finalName>arc-ws</finalName>
+		<resources>
+			<resource>
+				<directory>${basedir}/src/main/resources</directory>
+				<excludes>
+					<exclude>prod/*.properties</exclude>
+				</excludes>
+				<filtering>true</filtering>
+			</resource>
+			<resource>
+				<directory>src/main/webapp/WEB-INF</directory>
+			</resource>
+		</resources>
+		<plugins>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>2.2.1</version>
+				<configuration>
+					<descriptors>
+						<descriptor>src/main/resources/assembly/assembly-web.xml</descriptor>
+					</descriptors>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<version>3.3.1</version>
+			</plugin>
+		</plugins>
+
+	</build>
+</project>

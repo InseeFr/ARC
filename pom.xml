@@ -1,0 +1,366 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>fr.insee</groupId>
+	<artifactId>arc</artifactId>
+	<version>0.0.2-SNAPSHOT</version>
+	<name>ARC</name>
+	<description>ARC version type composite</description>
+	<properties>
+		<version>0.0.2-SNAPSHOT</version>
+		
+		<project.log4j.version>2.17.1</project.log4j.version>
+		<project.spring.version>6.1.21</project.spring.version>
+		<project.jackson.version>2.16.1</project.jackson.version>
+		<project.postgres.version>42.7.3</project.postgres.version>
+		<project.duckdb.version>1.1.1</project.duckdb.version>
+		<project.java.version>17</project.java.version>
+		<project.jakarta.version>6.1.0-M1</project.jakarta.version>
+		<project.maven.compiler.version>3.12.0</project.maven.compiler.version>
+		<project.org.json.version>20231013</project.org.json.version>
+		<project.commons.compress.version>1.26.0</project.commons.compress.version>
+		<project.commons.fileupload.version>1.5</project.commons.fileupload.version>
+
+		<env.arcVersion>${project.version}</env.arcVersion>
+		<env.arcVersionDate>unspecified</env.arcVersionDate>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		
+		
+		<!-- sonar rules review -->
+		<sonar.issue.ignore.multicriteria>e1,e2,e3,e4,e5,e6,e7,e81,e82,e9,e10,e11,e12,e13,e14,e15</sonar.issue.ignore.multicriteria>
+		
+		<!-- archive content cannot change directory -->
+		<sonar.issue.ignore.multicriteria.e1.ruleKey>javasecurity:S6096</sonar.issue.ignore.multicriteria.e1.ruleKey>
+		<sonar.issue.ignore.multicriteria.e1.resourceKey>**/*.java</sonar.issue.ignore.multicriteria.e1.resourceKey>
+		
+		<!-- ARC is kinda framework and user must be able to manipulate its source or target directories. On purpose -->
+		<sonar.issue.ignore.multicriteria.e2.ruleKey>javasecurity:S2083</sonar.issue.ignore.multicriteria.e2.ruleKey>
+		<sonar.issue.ignore.multicriteria.e2.resourceKey>**/*.java</sonar.issue.ignore.multicriteria.e2.resourceKey>
+		
+		<!-- Non bind sql is invoked in batch only with restricted access. No choice for maintenance query. -->
+		<sonar.issue.ignore.multicriteria.e3.ruleKey>javasecurity:S3649</sonar.issue.ignore.multicriteria.e3.ruleKey>
+		<sonar.issue.ignore.multicriteria.e3.resourceKey>**/*.java</sonar.issue.ignore.multicriteria.e3.resourceKey>
+		
+		<!-- csrf protection. This rule will have to be addressed because of internal global identification -->
+		<sonar.issue.ignore.multicriteria.e4.ruleKey>java:S4502</sonar.issue.ignore.multicriteria.e4.ruleKey>
+		<sonar.issue.ignore.multicriteria.e4.resourceKey>**/*.java</sonar.issue.ignore.multicriteria.e4.resourceKey>
+	
+		<!-- user-controlled data -->
+		<sonar.issue.ignore.multicriteria.e5.ruleKey>javasecurity:S3649</sonar.issue.ignore.multicriteria.e5.ruleKey>
+		<sonar.issue.ignore.multicriteria.e5.resourceKey>**/*.java</sonar.issue.ignore.multicriteria.e5.resourceKey>
+
+		<!-- form query type -->
+		<sonar.issue.ignore.multicriteria.e6.ruleKey>java:S3752</sonar.issue.ignore.multicriteria.e6.ruleKey>
+		<sonar.issue.ignore.multicriteria.e6.resourceKey>**/*.java</sonar.issue.ignore.multicriteria.e6.resourceKey>
+		
+		<!-- sql injection for export use case is required for now -->
+		<sonar.issue.ignore.multicriteria.e7.ruleKey>java:S2077</sonar.issue.ignore.multicriteria.e7.ruleKey>
+		<sonar.issue.ignore.multicriteria.e7.resourceKey>**/ServiceViewExport.java</sonar.issue.ignore.multicriteria.e7.resourceKey>
+		
+		<!--  no upload limit in ARC sandbox interface -->
+		<sonar.issue.ignore.multicriteria.e81.ruleKey>java:S4507</sonar.issue.ignore.multicriteria.e81.ruleKey>
+		<sonar.issue.ignore.multicriteria.e81.resourceKey>**/WebConfig.java</sonar.issue.ignore.multicriteria.e81.resourceKey>
+		<sonar.issue.ignore.multicriteria.e82.ruleKey>java:S5693</sonar.issue.ignore.multicriteria.e82.ruleKey>
+		<sonar.issue.ignore.multicriteria.e82.resourceKey>**/WebConfig.java</sonar.issue.ignore.multicriteria.e82.resourceKey>
+		
+		<!--  ignore javascript eval security test for jquery tablesorter -->
+		<sonar.issue.ignore.multicriteria.e9.ruleKey>javascript:S1523</sonar.issue.ignore.multicriteria.e9.ruleKey>
+		<sonar.issue.ignore.multicriteria.e9.resourceKey>**/jquery.tablesorter.js</sonar.issue.ignore.multicriteria.e9.resourceKey>
+		
+		<!-- zipbomb fix. Too complex for now -->
+		<sonar.issue.ignore.multicriteria.e10.ruleKey>java:S5042</sonar.issue.ignore.multicriteria.e10.ruleKey>
+		<sonar.issue.ignore.multicriteria.e10.resourceKey>**/ServiceViewFamilleNorme.java</sonar.issue.ignore.multicriteria.e10.resourceKey>
+
+		<!-- regexp backtracking. Not a risk for internal use -->
+		<sonar.issue.ignore.multicriteria.e11.ruleKey>java:S5852</sonar.issue.ignore.multicriteria.e11.ruleKey>
+		<sonar.issue.ignore.multicriteria.e11.resourceKey>**/*.java</sonar.issue.ignore.multicriteria.e11.resourceKey>
+
+		<!-- math random used to compute temporary table name. Not a risk for internal use -->
+		<sonar.issue.ignore.multicriteria.e12.ruleKey>java:S2245</sonar.issue.ignore.multicriteria.e12.ruleKey>
+		<sonar.issue.ignore.multicriteria.e12.resourceKey>**/TemporaryToken.java</sonar.issue.ignore.multicriteria.e12.resourceKey>
+
+		<!-- override log class. Not a risk for internal use-->
+		<sonar.issue.ignore.multicriteria.e13.ruleKey>java:S4792</sonar.issue.ignore.multicriteria.e13.ruleKey>
+		<sonar.issue.ignore.multicriteria.e13.resourceKey>**/LogConfigurator.java</sonar.issue.ignore.multicriteria.e13.resourceKey>
+
+		<!-- weak weak hashing algorithms. Not a risk here : just used to generate tablename but not used for security purpose -->
+		<sonar.issue.ignore.multicriteria.e14.ruleKey>java:S4790</sonar.issue.ignore.multicriteria.e14.ruleKey>
+		<sonar.issue.ignore.multicriteria.e14.resourceKey>**/ServiceHashFileName.java</sonar.issue.ignore.multicriteria.e14.resourceKey>
+
+		<!-- temporary directory is safe here. Used by user to upload and discareded very fast -->
+		<sonar.issue.ignore.multicriteria.e15.ruleKey>java:S5443</sonar.issue.ignore.multicriteria.e15.ruleKey>
+		<sonar.issue.ignore.multicriteria.e15.resourceKey>**/VObjectService.java</sonar.issue.ignore.multicriteria.e15.resourceKey>
+
+
+
+	</properties>
+	<url>https://github.com/InseeFr/ARC</url>
+
+	<issueManagement>
+		<url>https://github.com/InseeFr/ARC/issues</url>
+		<system>GitHub Issues</system>
+	</issueManagement>
+
+	<scm>
+		<url>https://github.com/InseeFr/ARC</url>
+		<connection>scm:git:https://github.com/InseeFr/ARC.git</connection>
+		<developerConnection>scm:git:git@github.com:InseeFr/ARC.git</developerConnection>
+	</scm>
+
+	<build>
+
+		<resources>
+			<resource>
+				<directory>${basedir}/src/main/resources</directory>
+				<excludes>
+					<exclude>prod/*.properties</exclude>
+				</excludes>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
+
+
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>${project.maven.compiler.version}</version>
+				<configuration>
+					<release>${project.java.version}</release>
+					<compilerArgs>
+						<arg>-parameters</arg>
+ 						<arg>-Xlint:unchecked</arg>
+					</compilerArgs>
+				</configuration>
+			</plugin>
+
+			<plugin>
+			    <groupId>pl.project13.maven</groupId>
+			    <artifactId>git-commit-id-plugin</artifactId>
+			    <version>4.9.10</version>
+			    <executions>
+			        <execution>
+			            <id>get-the-git-infos</id>
+			            <goals>
+			                <goal>revision</goal>
+			            </goals>
+			        </execution>
+			    </executions>
+				<configuration>
+                    <generateGitPropertiesFile>true</generateGitPropertiesFile>
+                    <generateGitPropertiesFilename>${project.build.outputDirectory}/git.properties</generateGitPropertiesFilename>
+                </configuration>
+			</plugin>
+			
+		</plugins>
+
+
+
+
+	</build>
+	<dependencies>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.13.1</version>
+   			<scope>test</scope>
+		</dependency>
+		
+		<dependency>
+		    <groupId>org.springframework</groupId>
+		    <artifactId>spring-test</artifactId>
+		    <version>${project.spring.version}</version>
+		    <scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-core</artifactId>
+			<version>${project.spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
+			<version>${project.spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-web</artifactId>
+			<version>${project.spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-beans</artifactId>
+			<version>${project.spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-webmvc</artifactId>
+			<version>${project.spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-expression</artifactId>
+			<version>${project.spring.version}</version>
+		</dependency>
+				<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-aop</artifactId>
+			<version>${project.spring.version}</version>
+		</dependency>
+		
+		<!-- compress/decompress archive libs -->
+		<!-- ant is used for tar.gz decompression -->		
+		<dependency>
+			<groupId>org.apache.ant</groupId>
+			<artifactId>ant</artifactId>
+			<version>1.10.11</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-compress</artifactId>
+			<version>${project.commons.compress.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.14.0</version>
+		</dependency>
+		<dependency>
+		    <groupId>commons-codec</groupId>
+		    <artifactId>commons-codec</artifactId>
+		    <version>1.16.1</version>
+		</dependency>
+
+
+		<!-- postgres -->
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>${project.postgres.version}</version>
+		</dependency>
+
+		<!-- logging -->
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-core</artifactId>
+			<version>${project.log4j.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-api</artifactId>
+			<version>${project.log4j.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-jcl</artifactId>
+			<version>${project.log4j.version}</version>
+		</dependency>
+
+		<!-- serializers -->
+				<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-annotations</artifactId>
+			<version>${project.jackson.version}</version>
+		</dependency>
+		<dependency>
+		    <groupId>com.fasterxml.jackson.core</groupId>
+		    <artifactId>jackson-core</artifactId>
+		    <version>${project.jackson.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>${project.jackson.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>${project.org.json.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.9</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-configuration2</artifactId>
+			<version>2.10.1</version>
+		</dependency>
+		
+		<dependency>
+		    <groupId>io.minio</groupId>
+		    <artifactId>minio</artifactId>
+		    <version>8.5.10</version>
+		</dependency>
+		
+		<!-- tests dependencies -->
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<version>2.27.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+		    <groupId>io.zonky.test</groupId>
+		    <artifactId>embedded-postgres</artifactId>
+		    <version>2.1.0</version>
+		    <scope>test</scope>
+		</dependency>
+		
+	</dependencies>
+	
+	<dependencyManagement>
+	    <dependencies>
+	        <dependency>
+	            <groupId>org.springframework.security</groupId>
+	            <artifactId>spring-security-bom</artifactId>
+	            <version>6.5.0</version>
+	            <type>pom</type>
+	            <scope>import</scope>
+	        </dependency>
+	    </dependencies>
+	</dependencyManagement>
+	
+	<packaging>pom</packaging>
+	<profiles>
+		<profile>
+			<id>coverage</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.jacoco</groupId>
+						<artifactId>jacoco-maven-plugin</artifactId>
+						<version>0.8.11</version>
+						<executions>
+							<execution>
+								<id>prepare-agent</id>
+								<goals>
+									<goal>prepare-agent</goal>
+								</goals>
+							</execution>
+							<execution>
+								<id>report</id>
+								<goals>
+									<goal>report</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+	<modules>
+		<module>arc-core</module>
+		<module>arc-batch</module>
+		<module>arc-web</module>
+		<module>arc-ws</module>
+		<module>arc-utils</module>
+	</modules>
+</project>

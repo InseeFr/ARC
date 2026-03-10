@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.3.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd
+        http://www.springframework.org/schema/tool http://www.springframework.org/schema/tool/spring-tool-4.3.xsd">
+
+	<context:annotation-config></context:annotation-config>
+	<context:component-scan base-package="fr.insee.arc.ws"></context:component-scan>
+	<context:component-scan base-package="fr.insee.arc.core"></context:component-scan>
+	<context:component-scan base-package="fr.insee.arc.utils"></context:component-scan>
+
+	<!-- Gestion des properties -->
+	<bean id="properties"
+		class="fr.insee.arc.utils.ressourceUtils.PropertiesHandler">
+		<property name="databasePoolName" value="${fr.insee.database.poolName}"></property>
+		<property name="databaseUrl" value="#{systemEnvironment['DATABASE_URL'] ?: '${fr.insee.database.arc.url}' }"></property>
+		<property name="databaseUsername" value="#{systemEnvironment['DATABASE_USER'] ?: '${fr.insee.database.arc.username}' }"></property>
+		<property name="databaseRestrictedUsername" value="#{systemEnvironment['DATABASE_RESTRICTED_USER'] ?: '${fr.insee.database.arc.restrictedUsername:}' }"></property>
+		<property name="databasePassword" value="#{systemEnvironment['DATABASE_PASSWORD'] ?: '${fr.insee.database.arc.password}' }"></property>
+		<property name="databaseDriverClassName" value="${fr.insee.database.arc.driverClassName}"></property>
+		<property name="logLevel" value="${fr.insee.arc.log.level:ERROR}"></property>
+		<property name="logDirectory" value="${fr.insee.arc.log.directory:}"></property>
+		<property name="logFileName" value="arc-ws"></property>
+		<property name="logConfiguration" value="${fr.insee.arc.log.XMLconfiguration:fr/insee/config/log4j2.xml}"></property>
+		<property name="batchParametersDirectory" value="#{systemEnvironment['APPLICATION_DIRECTORY'] ?: '${fr.insee.arc.batch.parametre.repertoire}' }"></property>
+		<property name="version" value="${git.tags:0.0.0}"></property>
+		<property name="versionDate" value="${git.commit.time:}"></property>
+		<property name="gitCommitId" value="${git.commit.id:}"></property>
+		<property name="application" value="${fr.insee.application:ARC}"></property>
+
+		<property name="authorizedRoles" value="#{systemEnvironment['KEYCLOAK_AUTHORIZED_ROLES'] ?: '${fr.insee.arc.roles.admin:}' }"></property>
+		<property name="keycloakRealm" value="#{systemEnvironment['KEYCLOAK_REALM'] ?: '${fr.insee.keycloak.realm:}' }"></property>
+		<property name="keycloakServer" value="#{systemEnvironment['KEYCLOAK_SERVER'] ?: '${fr.insee.keycloak.server:}' }"></property>
+		<property name="keycloakResource" value="#{systemEnvironment['KEYCLOAK_RESOURCE'] ?: '${fr.insee.keycloak.resource:}' }"></property>
+		<property name="keycloakCredential" value="#{systemEnvironment['KEYCLOAK_CREDENTIALS'] ?: '${fr.insee.keycloak.credentials.secret:}' }"></property>
+
+		<property name="kubernetesApiUri" value="#{systemEnvironment['KUBERNETES_API_URI'] ?: '${fr.insee.arc.kubernetes.api.uri}' }"></property>
+		<property name="kubernetesApiNamespace" value="#{systemEnvironment['KUBERNETES_API_NAMESPACE'] ?: '${fr.insee.arc.kubernetes.api.namespace}' }"></property>
+		<property name="kubernetesApiTokenPath" value="#{systemEnvironment['KUBERNETES_API_TOKEN_PATH'] ?: '${fr.insee.arc.kubernetes.api.token.path}' }"></property>
+		<property name="kubernetesApiTokenValue" value="#{systemEnvironment['KUBERNETES_API_TOKEN_VALUE'] ?: '${fr.insee.arc.kubernetes.api.token.value}' }"></property>
+		
+		<property name="kubernetesExecutorImage" value="#{systemEnvironment['KUBERNETES_EXECUTOR_IMAGE'] ?: '${fr.insee.arc.kubernetes.executor.image}' }"></property>
+		<property name="kubernetesExecutorNumber" value="#{systemEnvironment['KUBERNETES_EXECUTOR_NUMBER'] ?: '${fr.insee.arc.kubernetes.executor.number}' }"></property>
+		<property name="kubernetesExecutorLabel" value="#{systemEnvironment['KUBERNETES_EXECUTOR_LABEL'] ?: '${fr.insee.arc.kubernetes.executor.label}' }"></property>
+		<property name="kubernetesExecutorUser" value="#{systemEnvironment['KUBERNETES_EXECUTOR_USER'] ?: '${fr.insee.arc.kubernetes.executor.user}' }"></property>
+		<property name="kubernetesExecutorDatabase" value="#{systemEnvironment['KUBERNETES_EXECUTOR_DATABASE'] ?: '${fr.insee.arc.kubernetes.executor.database}' }"></property>
+		<property name="kubernetesExecutorPort" value="#{systemEnvironment['KUBERNETES_EXECUTOR_PORT'] ?: '${fr.insee.arc.kubernetes.executor.port}' }"></property>
+		<property name="kubernetesExecutorCpu" value="#{systemEnvironment['KUBERNETES_EXECUTOR_CPU'] ?: '${fr.insee.arc.kubernetes.executor.cpu}' }"></property>
+		<property name="kubernetesExecutorRam" value="#{systemEnvironment['KUBERNETES_EXECUTOR_RAM'] ?: '${fr.insee.arc.kubernetes.executor.ram}' }"></property>
+		<property name="kubernetesExecutorEphemeral" value="#{systemEnvironment['KUBERNETES_EXECUTOR_EPHEMERAL'] ?: '${fr.insee.arc.kubernetes.executor.ephemeral}' }"></property>
+		<property name="kubernetesExecutorEphemeralVolumeSize" value="#{systemEnvironment['KUBERNETES_EXECUTOR_EPHEMERAL_VOLUME_SIZE'] ?: '${fr.insee.arc.kubernetes.executor.ephemeral.volumeSize}' }"></property>
+		<property name="kubernetesExecutorTemptablespaceMedium" value="#{systemEnvironment['KUBERNETES_EXECUTOR_TEMPTABLESPACE_MEDIUM'] ?: '${fr.insee.arc.kubernetes.executor.temptablespace.medium}' }"></property>
+		<property name="kubernetesExecutorVolatile" value="#{systemEnvironment['KUBERNETES_EXECUTOR_VOLATILE'] ?: '${fr.insee.arc.kubernetes.executor.volatile}' }"></property>
+		
+		<property name="processExport" value="#{systemEnvironment['PROCESS_EXPORT'] ?: '${fr.insee.arc.process.export}' }"></property>
+				
+		<property name="s3InputApiUri" value="#{systemEnvironment['S3_INPUT_API_URI'] ?: '${fr.insee.arc.s3.input.api.uri}' }"></property>
+		<property name="s3InputBucket" value="#{systemEnvironment['S3_INPUT_BUCKET'] ?: '${fr.insee.arc.s3.input.bucket}' }"></property>
+		<property name="s3InputDirectory" value="#{systemEnvironment['S3_INPUT_DIRECTORY'] ?: '${fr.insee.arc.s3.input.directory}' }"></property>
+		<property name="s3InputAccess" value="#{systemEnvironment['S3_INPUT_ACCESS'] ?: '${fr.insee.arc.s3.input.access}' }"></property>
+		<property name="s3InputSecret" value="#{systemEnvironment['S3_INPUT_SECRET'] ?: '${fr.insee.arc.s3.input.secret}' }"></property>		
+		<property name="s3OutputApiUri" value="#{systemEnvironment['S3_OUTPUT_API_URI'] ?: '${fr.insee.arc.s3.output.api.uri}' }"></property>
+		<property name="s3OutputBucket" value="#{systemEnvironment['S3_OUTPUT_BUCKET'] ?: '${fr.insee.arc.s3.output.bucket}' }"></property>
+		<property name="s3OutputDirectory" value="#{systemEnvironment['S3_OUTPUT_DIRECTORY'] ?: '${fr.insee.arc.s3.output.directory}' }"></property>
+		<property name="s3OutputAccess" value="#{systemEnvironment['S3_OUTPUT_ACCESS'] ?: '${fr.insee.arc.s3.output.access}' }"></property>
+		<property name="s3OutputSecret" value="#{systemEnvironment['S3_OUTPUT_SECRET'] ?: '${fr.insee.arc.s3.output.secret}' }"></property>	
+		<property name="s3OutputParquetKey" value="#{systemEnvironment['S3_OUTPUT_PARQUET_KEY'] ?: '${fr.insee.arc.s3.output.parquet.key}' }"></property>	
+
+		<property name="filesRetentionDays" value="#{systemEnvironment['FILES_RETENTION_DAYS'] ?: '${fr.insee.arc.files.retention.days:}' }"></property>
+
+	</bean>
+	
+	<bean id="activeLoggerDispatcher" class="fr.insee.arc.core.util.DefaultLoggerDispatcher"></bean>
+
+</beans>

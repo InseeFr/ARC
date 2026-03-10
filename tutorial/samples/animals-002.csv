@@ -1,0 +1,132 @@
+animal;biome;status;popularity;cost;location
+Grizzly Bear;Boreal Forest;Endangered;3.5;$15,000;North America
+Polar Bear;Tundra;Low risk;3;$10,000;Arctic
+American Beaver;Wetlands;Vulnerable;3;$10,000;North America
+Dromedary Camel;Desert;Low Risk;0.5;$1,250;North Africa
+Cheetah;Savannah;Vulnerable;2.5;$7,500;Africa
+Chimpanzee;Tropical Rainforest;Endangered;3.5;$15,000;Central Africa
+Nile Crocodile;Wetlands;Low Risk;1.5;$3,000;Central Africa
+African Elephant;Savannah;Endangered;4;$20,000;Africa
+Greater Flamingo;Wetlands;Low Risk;1;$2,000;Central Africa
+Thomson's Gazelle;Savannah;Low Risk;0.5;$1,250;East Africa
+Gemsbok;Scrub;Low Risk;1;$2,000;Southern Africa
+Reticulated Giraffe;Savannah;Low Risk;2.5;$7,500;East Africa
+Mountain Gorilla;Tropical Rainforest;Endangered;4;$20,000;Central Africa
+Hippopotamus;Wetlands;Vulnerable;2.5;$7,500;Central Africa
+Ibex;Alpine;Vulnerable;1.5;$3,000;European Alps
+Jaguar;Tropical Rainforest;Low Risk;2;$5,500;South America
+Red Kangaroo;Scrub;Low Risk;1.5;$3,000;Australia
+Ring-Tailed Lemur;Temperate Forest;Vulnerable;3;$10,000;Madagascar
+Snow Leopard;Alpine;Endangered;4;$20,000;Asia
+Lion;Savannah;Vulnerable;2.5;$7,500;Africa
+Moose;Boreal Forest;Low Risk;0.5;$1,250;North America
+Okapi;Tropical Rainforest;Low Risk;2;$5,500;Central Africa
+Ostrich;Savannah;Low Risk;2;$5,500;Africa
+Giant Panda;Temperate Forest;Endangered;5;$50,000;China
+Red Panda;Temperate Forest;Endangered;4;$20,000;China
+Common Peafowl;Temperate Forest;Low Risk;0.5;$1,250;Asia
+Emperor Penguin;Tundra;Low Risk;1;$2,000;Antarctica
+Black Rhinoceros;Savannah;Critically Endangered;3;$10,000;East Africa
+Bengal Tiger;Tropical Rainforest;Endangered;3.5;$15,000;Southeast Asia
+Common Zebra;Savannah;Low Risk;1.5;$3,000;East Africa
+Giant Sable Antelope;Savannah;Critically Endangered;2;$5,500;Southern Africa
+Spectacled Bear;Temperate Forest;Vulnerable;4;$20,000;South America
+American Bison;Grassland;Low Risk;0.5;$1,250;North America
+Caribou;Tundra;Vulnerable;0.5;$1,250;Arctic
+Fennec Fox;Desert;Low Risk;2;$5,500;North Africa
+Crested Gibbon;Tropical Rainforest;Endangered;4;$20,000;Southeast Asia
+Przewalski's Wild Horse;Grassland;Critically Endangered;3;$10,000;Central Asia
+Koala;Temperate Forest;Low Risk;2.5;$7,500;Australia
+Komodo Dragon;Scrub;Vulnerable;2;$5,500;Southeast Asia
+Spanish Lynx;Temperate Forest;Critically Endangered;3.5;$15,000;Spain
+Markhor;Alpine;Endangered;2;$5,500;Asia
+Orangutan;Tropical Rainforest;Endangered;4.5;$35,000;Southeast Asia
+Scimitar-Horned Oryx;Desert;Critically Endangered;1;$2,000;North Africa
+Florida Panther;Wetlands;Critically Endangered;5;$45,000;Florida
+Javan Rhinoceros;Tropical Rainforest;Critically Endangered;3.5;$15,000;Southeast Asia
+Baird's Tapir;Tropical Rainforest;Endangered;1.5;$3,000;Central America
+Galapagos Giant Tortoise;Scrub;Endangered;1.5;$3,000;South America
+African Wild Dog;Savannah;Endangered;3.5;$15,000;Southern Africa
+Gray Wolf;Boreal Forest;Low Risk;2.5;$7,500;North America
+Wolverine;Boreal Forest;Vulnerable;3;$10,000;North America
+Aardvark;Scrub;Low Risk;2.5;$10,000;Africa
+African Buffalo;Wetlands;Low Risk;0.5;$1,250;Africa
+African Spurred Tortoise;Desert;Vulnerable;1;$2,000;North Africa
+Barbary Ape;Temperate Forest;Vulnerable;2.5;$7,500;Northwest Africa
+Bongo;Tropical Rainforest;Low Risk;0.5;$1,250;Central Africa
+Caracal;Scrub;Low Risk;4.5;$35,000;Africa and Asia
+Ethiopian Wolf;Alpine;Critically Endangered;5;$45,000;Ethiopia
+Gelada;Alpine;Low Risk;3.5;$15,000;Ethiopia
+Gerenuk;Scrub;Low Risk;2;$5,500;Africa
+Mandrill;Tropical Rainforest;Vulnerable;4.5;$35,000;Central Africa
+Masai Giraffe;Savannah;Low Risk;1;$2,000;Africa
+Meerkat;Scrub;Low Risk;3.5;$15,000;South Africa
+Nile Monitor;Wetlands;Low Risk;1.5;$3,000;Africa
+Pygmy Hippopotamus;Tropical Rainforest;Critically Endangered;4;$20,000;Central Africa
+Ratel;Grassland;Low Risk;2;$5,500;Africa and Asia
+Secretary Bird;Grassland;Low Risk;3;$10,000;Africa and Asia
+Striped Hyena;Desert;Low Risk;4;$20,000;North Africa
+Warthog;Savannah;Low Risk;3;$10,000;Africa
+White Rhinoceros;Scrub;Low Risk;2.5;$7,500;South Africa
+Wildebeest;Savannah;Low Risk;1.5;$3,000;Africa
+Carnotaurus;Boreal Forest;Extinct;3;$10,000;South America
+Styracosaurus;Tropical Rainforest;Extinct;1;$2,000;North America
+Triceratops;Boreal Forest;Extinct;4;$20,000;North America
+Tyrannosaurus rex;Tropical Rainforest;Extinct;5;$50,000;North America
+Beluga;Tundra;Vulnerable;0.5;$1,250;Arctic Ocean
+Bottlenose Dolphin;Coastal;Vulnerable;3.5;$15,000;Global Warm Oceans
+West Indian Manatee;Coastal;Vulnerable;1.5;$3,000;Atlantic Ocean
+Blue Marlin;Pelagic;Low Risk;1;$2,000;Atlantic Ocean
+Narwhal;Tundra;Vulnerable;3;$10,000;Arctic Ocean
+Sea Otter;Coastal;Endangered;2.5;$7,500;North Pacific Coasts
+Rockhopper Penguin;Coastal;Vulnerable;2;$5,500;Southern Ocean Islands
+Manta Ray;Reef;Low Risk;0.5;$1,250;Global Warm Oceans
+California Sea Lion;Coastal;Low Risk;1.5;$3,000;East Pacific Coast
+Goblin Shark;Benthic;Low Risk;4;$20,000;Global Warm Oceans
+Scalloped Hammerhead;Pelagic;Low Risk;3.5;$15,000;Global Warm Oceans
+Blacktip Reef Shark;Reef;Low Risk;3;$10,000;Indo-Pacific Oceans
+Whale Shark;Benthic;Vulnerable;4.5;$35,000;Global Warm Oceans
+White Shark;Benthic;Vulnerable;5;$45,000;Coasts Worldwide
+Leatherback Sea Turtle;Pelagic;Critically Endangered;2.5;$7,500;Global Warm Oceans
+Green Sea Turtle;Coastal;Endangered;1;$2,000;Global Warm Oceans
+Pacific Walrus;Tundra;Low Risk;4.5;$35,000;Arctic Ocean
+False Killer Whale;Coastal;Low Risk;4;$20,000;Coasts Worldwide
+Orca;Tundra;Low Risk;5;$50,000;Circumpolar Oceans
+Short-Finned Pilot Whale;Pelagic;Low Risk;2;$5,500;Global Warm Oceans
+Ankylosaurus;Wetlands;Extinct;4;$45,000;North America
+Aurochs;Temperate Forest;Extinct;1;$5,500;Eurasia
+Short-Faced Bear;Tundra;Extinct;4;$45,000;North America
+Elephant Bird;Wetlands;Extinct;2.5;$15,000;Madagascar
+Bluebuck;Grassland;Extinct;0.5;$3,000;Southern Africa
+Giant Camel;Grassland;Extinct;1.5;$7,500;North America
+Saber-Toothed Cat;Boreal Forest;Extinct;4;$45,000;North America
+Bush-Antlered Deer;Temperate Forest;Extinct;1.5;$7,500;Eurasia
+Deinonychus;Tropical Rainforest;Extinct;2.5;$15,000;North America
+Deinosuchus;Tropical Rainforest;Extinct;4.5;$60,000;North America
+Dimetrodon;Wetlands;Extinct;3.5;$35,000;North America
+Diprotodon;Wetlands;Extinct;2;$10,000;Australia
+Dodo;Tropical Rainforest;Extinct;0.5;$3,000;Mauritius
+Doedicurus;Scrub;Extinct;2;$10,000;South America
+Dwarf Sicilian Elephant;Grassland;Extinct;3;$15,000;Mediterranean Islands
+Gigantopithecus;Tropical Rainforest;Extinct;4.5;$35,000;China
+Kentrosaurus;Wetlands;Extinct;2;$10,000;East Africa
+Cave Lion;Alpine;Extinct;3.5;$35,000;Europe
+American Mastodon;Boreal Forest;Extinct;4.5;$60,000;North America
+Killer Penguin;Tundra;Extinct;None;Non-Adoptable;
+Protarchaeopteryx;Wetlands;Extinct;1;$5,500;Asia
+Quagga;Savannah;Extinct;1.5;$3,000;Africa
+Woolly Rhinoceros;Tundra;Extinct;3.5;$35,000;Eurasia
+Sivatherium;Savannah;Extinct;1;$5,500;Africa
+Giant Ground Sloth;Scrub;Extinct;5;$80,000;South America
+Stegosaurus;Boreal Forest;Extinct;4;$45,000;North America
+Stokesosaurus;Boreal Forest;Extinct;1.5;$7,500;North America
+Thylacine;Temperate Forest;Extinct;3;$20,000;Tasmania
+Utahraptor;Boreal Forest;Extinct;4.5;$60,000;North America
+Velociraptor;Desert;Extinct;0.5;$3,000;Central Asia
+Warrah;Grassland;Extinct;2.5;$15,000;Falkland Islands
+Giant Warthog;Savannah;Extinct;3.5;$35,000;Africa
+Addax;Desert;Critically Endangered;2;$5,500;North Africa
+Asiatic Black Bear;Temperate Forest;Vulnerable;2;$10,000;Asia
+Asian Elephant;Scrub;Endangered;3.5;$15,000;Southeast Asia
+Black Leopard;Tropical Rainforest;Low Risk;3;$10,000;Africa
+Musk Ox;Tundra;Low Risk;0.5;$1,500;Arctic

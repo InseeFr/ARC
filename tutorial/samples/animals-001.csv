@@ -1,0 +1,88 @@
+Animal;Terrain;Status;Cost;Location/Era
+African Elephant;Savannah;Vulnerable;$2,500;Africa
+Olive Baboon;Savannah;Least Concern;$900;Africa
+Plains Zebra;Savannah;Near Threatened;$800;Africa
+Black Rhinoceros;Savannah;Critically Endangered;$1,200;Africa
+Thompson's Gazelle;Savannah;Near Threatened;$500;Africa
+Common Wildebeest;Savannah;Least Concern;$1,000;Africa
+Giraffe;Savannah;Vulnerable;$1,600;Africa
+African Buffalo;Savannah;Least Concern;$1,200;Africa
+Hippopotamus;Savannah;Vulnerable;$1,200;Africa
+Sable Antelope;Savannah;Vulnerable;$900;Africa
+African Lion;Savannah;Vulnerable;$700;Africa
+Cheetah;Savannah;Vulnerable;$1,600;Africa
+Leopard;Savannah;Vulnerable;$1,100;Africa
+African Wild Dog;Savannah;Endangered;$600;Africa
+Spotted Hyena;Savannah;Least Concern;$1,200;Africa
+Greater Flamingo;Savannah;Least Concern;$750;Africa
+Ostrich;Savannah;Least Concern;$1,100;Africa
+African Warthog;Savannah;Least Concern;$600;Africa
+Blackbuck;Savannah;Near Threatened;$600;Asia
+Ankylosaurus;Savannah;Extinct;$2,700;North America (Cretaceous)
+Triceratops;Savannah;Extinct;$4,000;North America (Cretaceous)
+Red Kangaroo;Savannah;Least Concern;$650;Australia
+Przewalski's Wild Horse;Grassland;Endangered;$1,000;Asia
+Giant Ground Sloth;Grassland;Extinct;$2,000;South America (Ice Age)
+Macrauchenia;Grassland;Extinct;$1,500;South America (Ice Age)
+American Bison;Grassland;Near Threatened;$1,500;North America
+Tyrannosaurus rex;Grassland;Extinct;$6,500;North America (Cretaceous)
+Black Bear;Deciduous Forest;Least Concern;$850;North America
+Moose;Deciduous Forest;Least Concern;$700;North America
+Mexican Gray Wolf;Deciduous Forest;Endangered;$1,000;North America
+Styracosaurus;Deciduous Forest;Extinct;$2,600;North America (Cretaceous)
+Apatosaurus;Deciduous Forest;Extinct;$5,000;North America (Jurassic)
+Japanese Serow;Deciduous Forest;Least Concern;$800;Asia
+Iguanodon;Deciduous Forest;Extinct;$3,700;Europe (Cretaceous)
+Plateosaurus;Deciduous Forest;Extinct;$2,600;Europe (Triassic)
+Unicorn;Deciduous Forest;Rare;$6,000;Europe
+Spinosaurus;Coniferous Forest;Extinct;$4,100;Africa (Cretaceous)
+Kentrosaurus;Coniferous Forest;Extinct;$3,700;Africa (Jurassic)
+Siberian Tiger;Coniferous Forest;Endangered;$1,000;Siberia
+Grizzly Bear;Coniferous Forest;Least Concern;$1,000;North America
+Gray Wolf;Coniferous Forest;Least Concern;$900;North America
+Lambeosaurus;Coniferous Forest;Extinct;$3,000;North America (Cretaceous)
+Camptosaurus;Coniferous Forest;Extinct;$2,500;North America (Jurassic)
+Stegosaurus;Coniferous Forest;Extinct;$4,000;North America (Jurassic)
+Bigfoot;Coniferous Forest;Rare;$10,000;North America
+Gallimimus;Coniferous Forest;Extinct;$1,250;Asia (Cretaceous)
+Velociraptor;Coniferous Forest;Extinct;$3,500;Asia (Cretaceous)
+Mandrill;Tropical Rainforest;Vulnerable;$1,300;Africa
+Chimpanzee;Tropical Rainforest;Endangered;$1,500;Africa
+Lowland Gorilla;Tropical Rainforest;Critically Endangered;$2,500;Africa
+Okapi;Tropical Rainforest;Endangered;$1,800;Africa
+Bongo;Tropical Rainforest;Near Threatened;$900;Africa
+White Bengal Tiger;Tropical Rainforest;Endangered;$1,500;Asia
+Asian Elephant;Tropical Rainforest;Endangered;$1,500;Asia
+Orangutan;Tropical Rainforest;Endangered;$1,650;Asia
+Javan Rhinoceros;Tropical Rainforest;Critically Endangered;$4,000;Asia
+Bengal Tiger;Tropical Rainforest;Endangered;$800;Asia
+Black Leopard;Tropical Rainforest;Vulnerable;$1,600;Asia
+Clouded Leopard;Tropical Rainforest;Vulnerable;$1,800;Asia
+Komodo Dragon;Tropical Rainforest;Vulnerable;$1,750;Asia
+Malayan Tapir;Tropical Rainforest;Endangered;$850;Asia
+Caudipteryx;Tropical Rainforest;Extinct;$1,500;Asia (Jurassic)
+Jaguar;Tropical Rainforest;Near Threatened;$1,100;South America
+Giant Anteater;Tropical Rainforest;Vulnerable;$600;South America
+Herrerasaurus;Tropical Rainforest;Extinct;$2,000;South America (Triassic)
+Allosaurus;Tropical Rainforest;Extinct;$4,500;North America (Jurassic)
+Coelophysis;Tropical Rainforest;Extinct;$1,700;North America (Triassic)
+Markhor;Highland;Near Threatened;$1,400;Asia
+Snow Leopard;Highland;Endangered;$2,400;Asia
+Giant Panda;Highland;Vulnerable;$5,000;Asia
+Asian Black Bear;Highland;Vulnerable;$1,100;Asia
+Llama;Highland;Least Concern;$800;South America
+Mountain Lion;Highland;Least Concern;$700;North America
+Ibex;Highland;Least Concern;$625;Eurasia
+American Bighorn Sheep;Highland;Least Concern;$600;North America
+Saber-Toothed Cat;Tundra;Extinct;$2,500;North America (Ice Age)
+Magnet;Tundra;Vulnerable;$1,500;Arctic
+Polar Bear;Tundra;Vulnerable;$1,500;Arctic
+Reindeer;Tundra;Vulnerable;$400;Arctic
+Arctic Wolf;Tundra;Least Concern;$1,150;Arctic
+Yeti;Tundra;Rare;$10,000;Arctic
+Emperor Penguin;Tundra;Near Threatened;$1,100;Antarctica
+Woolly Mammoth;Tundra;Extinct;$3,200;Asia (Ice Age)
+Giant Tortoise;Tundra;Extinct;$2,500;Australia (Ice Age)
+Woolly Rhinoceros;Tundra;Extinct;$2,500;Europe (Ice Age)
+Gemsbok;Desert;Least Concern;$900;Africa
+Dromedary Camel;Desert;Least Concern;$900;Africa

@@ -1,0 +1,10 @@
+﻿NE PAS RENOMMER ! L'assembly Maven se charge de modifier le nom du fichier lors	de la création d'un livrable.
+
+
+Fichier blanc pour formater la création de l'archive de livraison par Maven.
+A remplir avec les informations pertinentes pour une fiche de livraison.
+
+
+NOTE : l'archive créée par Maven contient deux jeux de fichiers properties :
+	- les fichiers de développement, contenus dans src/main/resources/fr/insee/config, et placés le répertoire 'properties-de-dev' de l'archive
+	- les fichiers de production, contenus dans src/main/resources/assembly, et déployés à la racine de l'archive

@@ -1,0 +1,46 @@
+@startuml
+ 
+folder "Input folder" {
+	[Input files] 
+}
+  
+folder "Register OK folder" {
+	[Registered files]
+} 
+  
+frame "Arc Application" {
+	[Register Service]
+	[Identification Service]
+	[Load Service]
+	[Structure Service]
+	[Control Service]
+	[Filter Service]
+	[Format Service]
+}
+
+database "PostgreSQL" {
+	[Load Tables]
+	[Structure Tables]
+	[Control Tables]
+	[Filter Tables]
+	[Format Tables]
+}
+
+
+[Register Service] -right-> [Identification Service]
+[Identification Service] -right-> [Load Service]
+[Load Service] -right-> [Structure Service]
+[Structure Service] -right-> [Control Service]
+[Control Service] -right-> [Filter Service]
+[Filter Service] -right-> [Format Service]
+
+[Register Service] <-up- [Input files] : Are read
+[Register Service] -up-> [Registered files] : Write
+
+[Load Service] -down-> [Load Tables]
+[Structure Service] -down-> [Structure Tables]
+[Control Service] -down-> [Control Tables]
+[Filter Service] -down-> [Filter Tables]
+[Format Service] -down-> [Format Tables]
+
+ @enduml

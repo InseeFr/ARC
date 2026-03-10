@@ -1,0 +1,29 @@
+name: Build
+
+on:
+  push:
+  pull_request:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    - name: Set up JDK
+      uses: actions/setup-java@v1
+      with:
+        java-version: 17
+    - name: Verify with Maven and Sonar
+      if: ${{ github.actor != 'dependabot[bot]' }}
+      run: mvn verify sonar:sonar -Pcoverage -Dsonar.projectKey=fr.insee:arc -Dsonar.organization=inseefr -Dsonar.host.url=https://sonarcloud.io
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+    - name: Verify with Maven (Dependabot)
+      # Dependabot does not have access to secrets
+      if: ${{ github.actor == 'dependabot[bot]' }}
+      run: mvn verify

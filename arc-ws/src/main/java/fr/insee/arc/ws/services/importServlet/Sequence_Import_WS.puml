@@ -1,0 +1,36 @@
+@startuml
+  title Diagramme de séquence de l'appel du service d'import des tables ARC
+  actor Service as S
+  boundary WebServiceArc as WS
+  database DataBaseArc as DBArc
+  database DataBaseArtemis as DBDsn
+  == Initiation de la requête ==
+  Activate S
+  S -> WS : Envoi d'une demande
+  Activate WS
+  WS -> DBArc : Archiver les données du client
+  WS -> WS : Création d'un token pour la négociation
+  WS --> S : token
+  Deactivate WS
+  == Récupération des tables ==
+  loop Tant que WebServiceArc renvoie un nom de table
+    S --> WS : token
+    Activate WS
+      Activate DBArc
+        WS -> DBArc : Dois-je envoyer une table au client ?
+	    DBArc --> WS : <un nom de table>
+	  Deactivate DBArc
+	  WS --> S : <un nom de table>
+    Deactivate WS
+    S --> WS : <un nom de table>
+    Activate WS
+      Activate DBArc
+        WS -> DBArc : Récupérer les données de <un nom de table>
+        DBArc --> WS : données de <un nom de table>
+      Deactivate DBArc
+      WS -> S : Données de <un nom de table>
+    Deactivate WS
+    S -> DBDsn : création de la table <un nom de table>
+  end
+  Deactivate S
+@enduml
