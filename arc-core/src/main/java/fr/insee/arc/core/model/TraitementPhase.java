@@ -62,7 +62,7 @@ public enum TraitementPhase {
     }  
 
     
-	private final static Map<Integer, TraitementPhase> traitementPhaseMapByOrdre = Stream.of(TraitementPhase.values())
+	private static final Map<Integer, TraitementPhase> traitementPhaseMapByOrdre = Stream.of(TraitementPhase.values())
 			.collect(Collectors.toMap(TraitementPhase::getOrdre, t -> t)); 
 
     

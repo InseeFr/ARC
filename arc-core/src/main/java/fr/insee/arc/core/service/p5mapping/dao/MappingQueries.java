@@ -424,7 +424,7 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 			Map<String, String> reglesIdentifiantes) throws ArcException {
 		
 		StringBuilder groupsExclusionCondition = new StringBuilder();
-		List<String> prepUnionTables = new ArrayList<String>();
+		List<String> prepUnionTables = new ArrayList<>();
 		
 		boolean puNotAlreadyCreated = true;
 				

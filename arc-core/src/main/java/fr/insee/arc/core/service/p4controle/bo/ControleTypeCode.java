@@ -31,7 +31,7 @@ public enum ControleTypeCode {
 		this.nom = nom;
 	}
 	
-	private final static Map<String, ControleTypeCode> controleTypeCodeMapByNom = Stream.of(ControleTypeCode.values()).collect(Collectors.toMap(ControleTypeCode::getNom, t -> t)); 
+	private static final Map<String, ControleTypeCode> controleTypeCodeMapByNom = Stream.of(ControleTypeCode.values()).collect(Collectors.toMap(ControleTypeCode::getNom, t -> t)); 
 
 	public static ControleTypeCode getEnum(String code) throws ArcException {
 

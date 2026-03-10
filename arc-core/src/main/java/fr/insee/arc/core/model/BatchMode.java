@@ -6,9 +6,9 @@ public class BatchMode {
 		throw new IllegalStateException("Utility class");
 	}
 	
-	public final static String UNSET = null;
-	public final static String NORMAL = "N";
-	public final static String KEEP_INTERMEDIATE_DATA = "K";
+	public static final String UNSET = null;
+	public static final String NORMAL = "N";
+	public static final String KEEP_INTERMEDIATE_DATA = "K";
 
 	
 	public static String computeBatchMode(boolean isBatchMode, boolean isBatchModeMustKeepIntermediateData)

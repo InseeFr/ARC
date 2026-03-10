@@ -84,7 +84,7 @@ public class RegleMappingGlobale extends AbstractRegleMappingSimple {
         this.expressionSQL = UtilitaireDao.get(0).getString(this.connexion, new ArcPreparedStatementBuilder(returned));
     }
 
-    private final static String tokenTable(String nomCourt) {
+    private static final String tokenTable(String nomCourt) {
         return TOKEN_DEBUT_TABLE + nomCourt + TOKEN_FIN_TABLE;
     }
 

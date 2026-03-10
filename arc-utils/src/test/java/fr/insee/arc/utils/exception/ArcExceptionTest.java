@@ -18,16 +18,16 @@ public class ArcExceptionTest {
 	@RegisterExtension
 	public LogAppenderResource appender = new LogAppenderResource(LogManager.getLogger(ArcException.class));
 
-	private final static File UNKNOWN_FILE = new File("f.test");
-	private final static String EXPECTED_MESSAGE_JAVA_EXCEPTION = String
+	private static final File UNKNOWN_FILE = new File("f.test");
+	private static final String EXPECTED_MESSAGE_JAVA_EXCEPTION = String
 			.format("%s Le fichier %s n'a pas pu être effacé", Level.ERROR.toString(), UNKNOWN_FILE);
-	private final static String EXPECTED_STACK_JAVA_EXCEPTION = String
+	private static final String EXPECTED_STACK_JAVA_EXCEPTION = String
 			.format("java.nio.file.NoSuchFileException: %s", UNKNOWN_FILE);
 
-	private final static String RUBRIQUE_NAME = "ma_rubrique";
-	private final static String EXPECTED_MESSAGE_BUSINESS_EXCEPTION = String
+	private static final String RUBRIQUE_NAME = "ma_rubrique";
+	private static final String EXPECTED_MESSAGE_BUSINESS_EXCEPTION = String
 			.format("%s La rubrique fille %s n'existe pas dans les règles de formatage", Level.ERROR.toString(), RUBRIQUE_NAME);
-	private final static String EXPECTED_STACK_BUSINESS_EXCEPTION = String
+	private static final  String EXPECTED_STACK_BUSINESS_EXCEPTION = String
 			.format("java.lang.Throwable: La rubrique fille %s n'existe pas dans les règles de formatage", RUBRIQUE_NAME);
 	
 	

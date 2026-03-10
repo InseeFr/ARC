@@ -83,7 +83,7 @@ public class ExecuteEngineOperation {
 	}
 	
 	// les tables temporaires des phases respectives valent a,b,c,d ...
-	private final static int TEMPORARY_TABLE_ASCII_BASE_NAME=97;
+	private static final int TEMPORARY_TABLE_ASCII_BASE_NAME=97;
 
 	
 	private String generateTemporaryTableName(int i)

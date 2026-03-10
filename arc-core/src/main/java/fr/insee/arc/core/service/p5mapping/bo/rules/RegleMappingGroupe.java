@@ -30,7 +30,7 @@ public class RegleMappingGroupe extends AbstractRegleMapping {
     /**
      * Comment reconnaître une règle de groupe ?
      */
-    public final static String REGEX_REGLE_GROUPE = "^\\{\\{.*\\}";
+    public static final String REGEX_REGLE_GROUPE = "^\\{\\{.*\\}";
 
     private static final String REGEX_EXPRESSION_NOMBRE = " *[1-9]\\d* *";
 
