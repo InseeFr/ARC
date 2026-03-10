@@ -911,7 +911,7 @@ public class MappingQueries implements IConstanteCaractere, IConstanteNumerique 
 	 */
 	private static String checkIsNotNull(Set<String> ensembleIdentifiants) {
 		StringBuilder requete = new StringBuilder();
-		requete.append("num_nonnulls(" + Format.untokenize(ensembleIdentifiants, ",") + ")>0");
+		requete.append("not row(" + Format.untokenize(ensembleIdentifiants, ",") + ") is null");
 		return requete.toString();
 
 	}
