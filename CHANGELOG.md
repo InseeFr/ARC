@@ -5,6 +5,9 @@
 - All notable changes to this project will be documented in this file.
 - jacoco aggregate
 
+## version-94.2.56
+- FIX : replaced the postgres function num_nonnulls by a row assertion because the postgres functions cannot handle more than 100 arguments
+
 ## version-94.2.55
 - FIX : for the data retrieval webservice, when a client was removed from the list of allowed clients, the records previously marked with the client were not removed after etention time as it should be
 - FIX : when importing a new nomenclature table, the columns of the nomenclature tables containing an underscore in their name were not proceed correctly as the underscores were removed 
