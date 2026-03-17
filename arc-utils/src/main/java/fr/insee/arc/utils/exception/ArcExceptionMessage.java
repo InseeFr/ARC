@@ -6,8 +6,11 @@ public enum ArcExceptionMessage {
 
 	FILE_IS_EMPTY("Le fichier %s est vide"),
 	FILE_RENAME_FAILED("Le fichier %s n'a pas pu être renommé vers %s "),
-	FILE_COPY_FAILED("Le fichier %s n'a pas pu être copié vers %s "),
+	FILE_S3_OPERATION_FAILED("Erreur operation s3 : %s %s"),
+	FILE_COPY_FAILED("Le fichier %s n'a pas pu être copié vers %s"),
+	FILE_COPY_FAILED_RETRY("Le fichier %s n'a pas pu être copié vers %s - RETRY %s"),
 	FILE_DELETE_FAILED("Le fichier %s n'a pas pu être effacé"),
+	FILE_DELETE_FAILED_RETRY("Le fichier %s n'a pas pu être effacé - RETRY %s"),
 	FILE_READ_FAILED("Le fichier %s n'a pas pu être lu"),
 	FILE_EXTRACT_FAILED("Le fichier archive %s n'a pas pu être extrait"),
 	FILE_WRITE_FAILED("Le fichier %s n'a pas pu être écrit"),
