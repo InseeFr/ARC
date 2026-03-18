@@ -483,7 +483,6 @@ public class S3Template {
 	 * @throws ArcException
 	 */
 	public void deleteDirectory(String path) throws ArcException {
-		delete(absoluteDirectoryPath(path));
 		delete(listObjectsInDirectory(path, true, true, false));
 	}
 
