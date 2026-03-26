@@ -12,6 +12,7 @@ import org.springframework.security.oauth2.client.registration.InMemoryClientReg
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.header.writers.XXssProtectionHeaderWriter;
+import org.springframework.web.filter.ForwardedHeaderFilter;
 
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
@@ -78,6 +79,12 @@ public class WebSecurityConfiguration extends Oauth2ClientForKeycloak {
 		http.exceptionHandling(e -> e.accessDeniedPage("/denied"));
 		
 		return http.build();
+	}
+	
+	@Bean
+	ForwardedHeaderFilter forwardedHeaderFilter() {
+		
+	    return new ForwardedHeaderFilter();
 	}
 
 }
