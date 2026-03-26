@@ -2,13 +2,18 @@ package fr.insee.arc.web;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.header.writers.XXssProtectionHeaderWriter;
@@ -44,7 +49,7 @@ public class WebSecurityConfiguration extends Oauth2ClientForKeycloak {
 
 	@Bean
 	SecurityFilterChain clientSecurityFilterChain(HttpSecurity http, PropertiesHandler properties) throws Exception {
-		
+				
         http.headers(
                 headers -> headers
                         .xssProtection(xXssConfig -> xXssConfig.headerValue(XXssProtectionHeaderWriter.HeaderValue.ENABLED))
@@ -54,6 +59,8 @@ public class WebSecurityConfiguration extends Oauth2ClientForKeycloak {
 		
 		// oath2 keycloak
 		if (WebAttributesName.isKeycloakActive(properties.getKeycloakRealm())) {
+					
+			http.addFilterBefore(new ForwardedHeaderFilter(), OAuth2AuthorizationRequestRedirectFilter.class);
 			
 			http.oauth2Login(o -> o.userInfoEndpoint(u -> u.userAuthoritiesMapper(userAuthoritiesMapper())))
 			.authorizeHttpRequests(t -> t.requestMatchers(SECURE_URI_FILTER).hasAnyAuthority(PropertiesHandler.getInstance().getAuthorizedRoles()));
@@ -79,12 +86,6 @@ public class WebSecurityConfiguration extends Oauth2ClientForKeycloak {
 		http.exceptionHandling(e -> e.accessDeniedPage("/denied"));
 		
 		return http.build();
-	}
-	
-	@Bean
-	ForwardedHeaderFilter forwardedHeaderFilter() {
-		
-	    return new ForwardedHeaderFilter();
 	}
 
 }
