@@ -48,7 +48,7 @@ public class WebSecurityConfiguration extends Oauth2ClientForKeycloak {
 	}
 
 	@Bean
-	SecurityFilterChain clientSecurityFilterChain(HttpSecurity http, PropertiesHandler properties) throws Exception {
+	SecurityFilterChain clientSecurityFilterChain(HttpSecurity http, PropertiesHandler properties, ForwardedHeaderFilter headersConversionFilter) throws Exception {
 				
         http.headers(
                 headers -> headers
@@ -60,7 +60,7 @@ public class WebSecurityConfiguration extends Oauth2ClientForKeycloak {
 		// oath2 keycloak
 		if (WebAttributesName.isKeycloakActive(properties.getKeycloakRealm())) {
 					
-			http.addFilterBefore(new ForwardedHeaderFilter(), OAuth2AuthorizationRequestRedirectFilter.class);
+			http.addFilterBefore(headersConversionFilter, OAuth2AuthorizationRequestRedirectFilter.class);
 			
 			http.oauth2Login(o -> o.userInfoEndpoint(u -> u.userAuthoritiesMapper(userAuthoritiesMapper())))
 			.authorizeHttpRequests(t -> t.requestMatchers(SECURE_URI_FILTER).hasAnyAuthority(PropertiesHandler.getInstance().getAuthorizedRoles()));
@@ -88,4 +88,14 @@ public class WebSecurityConfiguration extends Oauth2ClientForKeycloak {
 		return http.build();
 	}
 
+	/**
+	 * Add a filter to use http headers
+	 * @return
+	 */
+	@Bean
+	ForwardedHeaderFilter forwardedHeaderFilter() {
+	    return new ForwardedHeaderFilter();
+	}
+	
+	
 }
