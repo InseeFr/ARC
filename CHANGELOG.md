@@ -5,6 +5,9 @@
 - enable tar compression for bigger files
 - select in processing pipeline a number of file at least equals to number of executor
 
+## version-94.2.65
+- Non beta version with security update (jackson, spring)
+
 ## version-94.2.60
 - FIX: minio s3 operations are checked and tried again on errors
 
