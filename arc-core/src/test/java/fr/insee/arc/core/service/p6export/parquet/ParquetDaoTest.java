@@ -100,15 +100,15 @@ public class ParquetDaoTest extends ParquetDao {
 		// test query on
 		GenericPreparedStatementBuilder query = new GenericPreparedStatementBuilder();
 		
-		query.build(SQL.CREATE, SQL.SCHEMA, SQL.IF_NOT_EXISTS, "arc", SQL.END_QUERY); 
+		query.build("DROP SCHEMA IF EXISTS arc CASCADE;");
+		query.build("CREATE SCHEMA arc;"); 
 		
-		query.build(SQL.CREATE, SQL.TABLE, "arc.parameter", SQL.AS, SQL.SELECT);
+		query.build("CREATE TABLE arc.parameter AS SELECT ");
 		query.append("'ApiService.MAX_PARALLEL_WORKERS'::text as key");
 		query.append(",'12'::text as val");
 		query.append(SQL.END_QUERY);
 
-		
-		query.build(SQL.CREATE, SQL.TABLE, testTableName, SQL.AS, SQL.SELECT);
+		query.build("CREATE TABLE ",testTableName, " AS SELECT ");
 		query.append("'string'::text as column_string");
 		query.append(",12::int as column_int4");
 		query.append(",123::bigint as column_int8");
