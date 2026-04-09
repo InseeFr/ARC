@@ -589,7 +589,7 @@ public class S3Template {
 	 * @return vrai si le chemin est celui d'un répertoire qui existe
 	 * @throws ArcException
 	 */
-	public boolean isDirectory(String path) throws ArcException {
+	public boolean isDirectory(String path) {
 		return isExists(path) && path.endsWith("/");
 	}
 
@@ -641,7 +641,7 @@ public class S3Template {
 		return listObjectsInDirectory(path, false, false, false);
 	}
 
-	public void closeMinioClient() throws ArcException {
+	public void closeMinioClient() {
 		if (isS3Off())
 			return;
 		httpClient.dispatcher().executorService().shutdown();

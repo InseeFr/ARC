@@ -11,11 +11,8 @@ import okhttp3.Response;
 
 public class OkHttpInterceptor implements Interceptor {
 
-	private static final Logger LOGGER = LogManager.getLogger(S3Template.class);
-	
-	
-	public OkHttpInterceptor() {
-	}
+	private static final Logger LOGGER = LogManager.getLogger(OkHttpInterceptor.class);
+
 
 	@Override
 	public Response intercept(Chain chain) throws IOException {

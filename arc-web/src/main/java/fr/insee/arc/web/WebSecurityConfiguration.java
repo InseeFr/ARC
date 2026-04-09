@@ -2,12 +2,8 @@ package fr.insee.arc.web;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -57,14 +53,14 @@ public class WebSecurityConfiguration extends Oauth2ClientForKeycloak {
                                 csp ->
                                         csp.policyDirectives("img-src 'self' data:; style-src-elem 'self' data:; script-src-elem 'self' data:; style-src 'unsafe-inline'; default-src 'self'; script-src 'unsafe-inline'; form-action 'self'; object-src 'none';")));
 		
-		// oath2 keycloak
+		// oauth2 keycloak
 		if (WebAttributesName.isKeycloakActive(properties.getKeycloakRealm())) {
-					
+			
+			// apply the header filter before the oauth2 filter so that the rediction uri will be reworked according to the http headers directives
 			http.addFilterBefore(headersConversionFilter, OAuth2AuthorizationRequestRedirectFilter.class);
 			
 			http.oauth2Login(o -> o.userInfoEndpoint(u -> u.userAuthoritiesMapper(userAuthoritiesMapper())))
-			.authorizeHttpRequests(t -> t.requestMatchers(SECURE_URI_FILTER).hasAnyAuthority(PropertiesHandler.getInstance().getAuthorizedRoles()));
-			
+			.authorizeHttpRequests(t -> t.requestMatchers(SECURE_URI_FILTER).hasAnyAuthority(PropertiesHandler.getInstance().getAuthorizedRoles()));	
 
 			// disable debugging screens when property is not set else filter to this role
 			if (properties.getDisableDebugGui().isEmpty()) {
