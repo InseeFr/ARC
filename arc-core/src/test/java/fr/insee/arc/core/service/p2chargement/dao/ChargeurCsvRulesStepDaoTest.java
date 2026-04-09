@@ -1,14 +1,11 @@
 package fr.insee.arc.core.service.p2chargement.dao;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
-import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.service.p2chargement.bo.CSVFormatRules;
 import fr.insee.arc.core.service.p2chargement.operation.ParseFormatRulesOperation;
 
@@ -50,6 +47,17 @@ class ChargeurCsvRulesStepDaoTest {
 
 		// columns renamed during calculation by step
 		assertEquals(Arrays.asList("v_depot$new$","v_fichier$new$","v_step1$new2$", "v_step2$new3$"), z.getColumnsRenamed());
+		
+	}
+	
+	@Test
+	void testRenameVariable()
+	{
+		ChargeurCsvRulesStepDao z = new ChargeurCsvRulesStepDao(null,"source_table");
+
+		assertEquals("",z.variableSuffixForStep(0));
+		assertEquals("$new$",z.variableSuffixForStep(1));
+		assertEquals("$new5$",z.variableSuffixForStep(5));
 		
 	}
 	

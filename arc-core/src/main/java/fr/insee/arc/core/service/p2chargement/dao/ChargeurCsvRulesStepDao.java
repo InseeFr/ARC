@@ -49,7 +49,7 @@ public class ChargeurCsvRulesStepDao {
 		
 		if (step.equals(1))
 		{
-			return String.format(Delimiters.RENAME_SUFFIX,"");
+			return String.format(Delimiters.RENAME_SUFFIX_STEP,"");
 		}
 		
 		return String.format(Delimiters.RENAME_SUFFIX_STEP, step);
