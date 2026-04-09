@@ -58,7 +58,7 @@ public enum CSVFormatRules implements IParseFormatRules {
 	private String afterTag;
 	// condition et parsing : tag de fin. On parse l'expression avant ce tag si il est trouvé
 	private String beforeTag;
-	// savoir si le programme doit arreter le parsing lorsque il match ce critère ou continer pour trouver un autre critère
+	// savoir si le programme doit arreter le parsing lorsque il match ce critère ou continuer pour trouver un autre critère
 	private boolean stop;
 	
 	

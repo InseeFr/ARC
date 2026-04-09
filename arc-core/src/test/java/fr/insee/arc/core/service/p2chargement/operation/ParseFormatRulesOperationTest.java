@@ -4,16 +4,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
-import fr.insee.arc.core.service.global.bo.FileIdCard;
 import fr.insee.arc.core.service.p2chargement.bo.CSVFormatRules;
-import fr.insee.arc.core.service.p2chargement.bo.IdCardChargement;
-import fr.insee.arc.core.service.p2chargement.factory.TypeChargement;
 
 public class ParseFormatRulesOperationTest {
 
 	@Test
 	public void testParsing() {
-		FileIdCard n = new FileIdCard("my_file");
+
 		String formatRules = "<encoding>WIN1252</encoding>\r\n" + "<headers>col</headers>\r\n"
 				+ "<quote>E'\2'</quote>\r\n"
 				+ "i_00=case when (case length(rtrim(substring(v_col,1,16))) when 3 then 'DEP' when 6 then 'COM' else substring(v_col,31,2) end) in ('00','10','21','30','31','36','40','50','52','60') then (select max(v.id) from A v where v.id<=u.id and (case length(rtrim(substring(v.v_col,1,16))) when 3 then 'DEP' when 6 then 'COM' else substring(v.v_col,31,2) end)='00') end\r\n"
@@ -36,10 +33,8 @@ public class ParseFormatRulesOperationTest {
 				+ "<where>length(rtrim(substring(v_col,1,16))) != 3 and length(rtrim(substring(v_col,1,16))) != 6\r\n"
 				+ "<index>(case length(rtrim(substring(v_col,1,16))) when 3 then 'DEP' when 6 then 'COM' else substring(v_col,31,2) end),id\r\n";
 
-		IdCardChargement r = new IdCardChargement(TypeChargement.PLAT, "E'\1'", formatRules);
-		n.setIdCardChargement(r);
 
-		ParseFormatRulesOperation<CSVFormatRules> parseCSV = new ParseFormatRulesOperation<>(n, CSVFormatRules.class);
+		ParseFormatRulesOperation<CSVFormatRules> parseCSV = new ParseFormatRulesOperation<>(formatRules, CSVFormatRules.class);
 		parseCSV.parseFormatRules();
 
 		assertEquals("WIN1252", parseCSV.getValue(CSVFormatRules.ENCODING));

@@ -23,7 +23,6 @@ import fr.insee.arc.core.service.p2chargement.bo.CSVFormatRules;
 import fr.insee.arc.core.service.p2chargement.operation.ParseFormatRulesOperation;
 import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
-import fr.insee.arc.utils.database.Delimiters;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
 
@@ -33,6 +32,9 @@ public class ChargeurCsvDao {
 	private FileIdCard fileIdCard;
 	private CSVFileAttributes fileAttributes;
 	private ParseFormatRulesOperation<CSVFormatRules> parser;
+	
+	private ChargeurCsvRulesStepDao chargeurCsvRulesStepDao;
+	
 	private String tmpChargementBrut;
 	private String tmpChargementArc;
 
@@ -44,6 +46,7 @@ public class ChargeurCsvDao {
 		this.parser = parser;
 		this.tmpChargementArc = ThreadTemporaryTable.TABLE_TEMP_CHARGEMENT_A;
 		this.tmpChargementBrut = ThreadTemporaryTable.TABLE_TEMP_CHARGEMENT_B;
+		this.chargeurCsvRulesStepDao = new ChargeurCsvRulesStepDao(parser, tmpChargementArc);
 	}
 
 	private static final int SINGLE_FULL_PARTITION = 1;
@@ -120,6 +123,15 @@ public class ChargeurCsvDao {
 		UtilitaireDao.get(0).importing(this.sandbox.getConnection(), this.tmpChargementBrut,
 				columns, inputStreamToCopyInDatabase, ignoreFirstLine, separateur, quote, encoding);
 
+		
+		
+		System.out.println("§§§§§§§§§§§§!");
+		ArcPreparedStatementBuilder req = new ArcPreparedStatementBuilder();
+		req.append("DROP TABLE IF EXISTS arc_bas2." + this.tmpChargementBrut + " ;");
+		req.append("CREATE TABLE arc_bas2." + this.tmpChargementBrut + " AS SELECT * FROM "+ this.tmpChargementBrut + ";");
+		UtilitaireDao.get(0).executeRequest(this.sandbox.getConnection(), req);
+
+		
 	}
 
 	/**
@@ -214,7 +226,7 @@ public class ChargeurCsvDao {
 			return;
 		}
 
-		execQueryCreateContainerWithNewColumnsExpressionRules();
+		execQueryCreateContainerWithNewColumnsExpressionRules2();
 
 		// Itération
 
@@ -284,11 +296,11 @@ public class ChargeurCsvDao {
 	}
 
 	/**
-	 * crée une tbale vide avec les colonnes d'expression
+	 * create an empty table with new columns defined in user expression
 	 * 
 	 * @throws ArcException
 	 */
-	private void execQueryCreateContainerWithNewColumnsExpressionRules() throws ArcException {
+	private void execQueryCreateContainerWithNewColumnsExpressionRules2() throws ArcException {
 
 		if (parser.getValues(CSVFormatRules.COLUMN_DEFINITION).isEmpty()) {
 			return;
@@ -299,44 +311,11 @@ public class ChargeurCsvDao {
 		// Creation de la table vide avant insert
 		query.append("\n DROP TABLE IF EXISTS TTT; ");
 		query.append("\n CREATE TEMPORARY TABLE TTT AS ");
-		query.append("\n SELECT w.* FROM ");
-		query.append("\n (SELECT v.* ");
-
-		queryColumnsExpression(query, true, 0);
-
-		query.append("\n FROM ");
-		query.append("\n (SELECT u.* ");
-
-		queryColumnsExpression(query, false, 0);
-
-		query.append("\n FROM " + this.tmpChargementArc + " u ) v ) w ");
-		query.append("\n WHERE false ");
-		for (String s : parser.getValues(CSVFormatRules.FILTER_WHERE)) {
-			query.append("\n AND (" + s + ")");
-		}
+		query.append(chargeurCsvRulesStepDao.queryColumnExpression(0, "AND false"));
 		query.append(";");
 		UtilitaireDao.get(0).executeRequest(sandbox.getConnection(), query);
 
 	}
-
-	private void queryColumnsExpression(StringBuilder req, boolean useRenameSuffix, int partitionNumber) {
-		for (int i = 0; i < parser.getValues(CSVFormatRules.COLUMN_DEFINITION).size(); i++) {
-			// si on trouve dans l'expression le suffix alors on sait qu'on a voulu
-			// préalablement calculer la valeur
-
-			boolean hasRenameSuffix = parser.getValues(CSVFormatRules.COLUMN_EXPRESSION).get(i)
-					.contains(Delimiters.RENAME_SUFFIX);
-
-			if ((useRenameSuffix ? hasRenameSuffix : !hasRenameSuffix)) {
-				req.append("\n ,");
-				req.append(parser.getValues(CSVFormatRules.COLUMN_EXPRESSION).get(i)
-						.replace(Delimiters.PARTITION_NUMBER_PLACEHOLDER, partitionNumber + "000000000000::bigint"));
-				req.append(" as ");
-				req.append(parser.getValues(CSVFormatRules.COLUMN_DEFINITION).get(i) + Delimiters.RENAME_SUFFIX + " ");
-			}
-		}
-	}
-
 	/*
 	 * compute a number of partition for the load table
 	 */
@@ -387,10 +366,10 @@ public class ChargeurCsvDao {
 		// iterate over partition
 		for (int part = 0; part < numberOfPartition; part++) {
 
-			execQueryInsertDataWithNewColumnsExpressionRulesInPartition(numberOfPartition, part);
+			execQueryInsertDataWithNewColumnsExpressionRulesInPartition2(numberOfPartition, part);
 		}
 
-		execQueryRebuildColumns();
+		execQueryRebuildColumns2();
 	}
 
 	/**
@@ -400,57 +379,42 @@ public class ChargeurCsvDao {
 	 * @param part
 	 * @throws ArcException
 	 */
-	private void execQueryInsertDataWithNewColumnsExpressionRulesInPartition(int numberOfPartition, int part)
+	private void execQueryInsertDataWithNewColumnsExpressionRulesInPartition2(int numberOfPartition, int part)
 			throws ArcException {
-		StringBuilder req = new StringBuilder();
-		req.append("\n INSERT INTO TTT ");
-		req.append("\n SELECT w.* FROM ");
-		req.append("\n (SELECT v.* ");
-
-		queryColumnsExpression(req, true, part);
-
-		req.append("\n FROM ");
-		req.append("\n (SELECT u.* ");
-
-		queryColumnsExpression(req, false, part);
-
-		req.append("\n FROM " + this.tmpChargementArc + " u ");
-
-		// add partition key if more than one partition
+		
+		StringBuilder query = new StringBuilder();
+		query.append("\n INSERT INTO TTT ");
+		
+		String partitionWhereClause = null;
 		if (numberOfPartition > SINGLE_FULL_PARTITION) {
-			req.append("\n WHERE abs(hashtext(" + parser.getValues(CSVFormatRules.PARTITION_EXPRESSION).get(0)
-					+ "::text)) % " + numberOfPartition + "=" + part + " ");
+			partitionWhereClause = "AND abs(hashtext(" + parser.getValues(CSVFormatRules.PARTITION_EXPRESSION).get(0)
+					+ "::text)) % " + numberOfPartition + "=" + part;
 		}
-		req.append("\n ) v ) w ");
-		req.append("\n WHERE true ");
-
-		// add filter where clause
-		for (String s : parser.getValues(CSVFormatRules.FILTER_WHERE)) {
-			req.append("\n AND (" + s + ")");
-		}
-		req.append(";");
-		UtilitaireDao.get(0).executeRequest(sandbox.getConnection(), req);
+		
+		query.append(chargeurCsvRulesStepDao.queryColumnExpression(0, partitionWhereClause));
+		UtilitaireDao.get(0).executeRequest(sandbox.getConnection(), query);
+		
 	}
 
 	/**
 	 * rebuild columns if a columns defined in rule is same as a source column,
-	 * source columns is deleted and replaced by the column defnied in rules
+	 * source columns is deleted and replaced by the column defined in rules
 	 * 
 	 * @throws ArcException
 	 */
-	private void execQueryRebuildColumns() throws ArcException {
+	private void execQueryRebuildColumns2() throws ArcException {
 
 		List<String> colsIn = execQuerySelectColumnsFromLoadTable();
 
-		StringBuilder query = new StringBuilder();
-		for (int i = 0; i < parser.getValues(CSVFormatRules.COLUMN_DEFINITION).size(); i++) {
+		StringBuilder query = new StringBuilder();		
+		for (int i = 0; i < chargeurCsvRulesStepDao.getColumns().size(); i++) {
 
-			if (colsIn.contains(parser.getValues(CSVFormatRules.COLUMN_DEFINITION).get(i))) {
+			if (colsIn.contains(chargeurCsvRulesStepDao.getColumns().get(i))) {
 				query.append("\n ALTER TABLE TTT DROP COLUMN "
-						+ parser.getValues(CSVFormatRules.COLUMN_DEFINITION).get(i) + ";");
+						+ chargeurCsvRulesStepDao.getColumns().get(i) + ";");
 			}
-			query.append("\n ALTER TABLE TTT RENAME COLUMN " + parser.getValues(CSVFormatRules.COLUMN_DEFINITION).get(i)
-					+ Delimiters.RENAME_SUFFIX + " TO " + parser.getValues(CSVFormatRules.COLUMN_DEFINITION).get(i)
+			query.append("\n ALTER TABLE TTT RENAME COLUMN " + chargeurCsvRulesStepDao.getColumnsRenamed().get(i) 
+					+ " TO " + chargeurCsvRulesStepDao.getColumns().get(i)
 					+ ";");
 		}
 

@@ -69,7 +69,7 @@ public class ChargeurCSV implements IChargeur {
 				threadChargementService.getEnvExecution());
 		this.fileIdCard = threadChargementService.getFileIdCard();
 		this.fileAttributes = new CSVFileAttributes();
-		this.parser = new ParseFormatRulesOperation<>(fileIdCard, CSVFormatRules.class);
+		this.parser = new ParseFormatRulesOperation<>(this.fileIdCard.getIdCardChargement().getFormat(), CSVFormatRules.class);
 		this.dao = new ChargeurCsvDao(this.sandbox, this.fileAttributes, this.fileIdCard, this.parser);
 
 		this.tableChargementPilTemp = threadChargementService.getTableChargementPilTemp();
@@ -290,7 +290,7 @@ public class ChargeurCSV implements IChargeur {
 		StaticLoggerDispatcher.info(LOGGER, "** FlatBaseToIdedFlatBase **");
 		java.util.Date beginDate = new java.util.Date();
 
-		// create the container table to tran
+		// create the container table to transform
 		dao.execQueryCreateContainerWithArcMetadata();
 
 		applyFormat();
