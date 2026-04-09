@@ -136,8 +136,6 @@ class BatchARC implements IReturnCode {
 	 */
 	void execute() {
 		
-		Integer returnCode = STATUS_FAILURE_TECHNICAL_WARNING;
-		
 		try (Connection batchConnection = UtilitaireDao.get(0).getDriverConnexion();)
 		{
 			
@@ -169,31 +167,19 @@ class BatchARC implements IReturnCode {
 
 		} catch (Exception ex) {
 			LoggerHelper.errorGenTextAsComment(BatchARC.class, "main()", LOGGER, ex);
-			returnCode = STATUS_FAILURE_TECHNICAL_WARNING;
-		}
-		finally 
-		{
-			// exit code
-			endBatch(returnCode);
+			System.exit(STATUS_FAILURE_TECHNICAL_WARNING);
 		}
 
+		// exit code
+		endBatch();
 
 	}
 
 	/**
 	 * end the batch
 	 */
-	private void endBatch(Integer returnCode) {
-		
-		// drop volatile databases
-		try {
-			executeIfVolatile(this::executorsDatabaseDrop);
-		} catch (ArcException ex) {
-			LoggerHelper.errorGenTextAsComment(BatchARC.class, "main()", LOGGER, ex);
-		}
-		
+	private void endBatch() {
 		message("Fin du batch");
-		
 		System.exit(STATUS_SUCCESS);
 	}
 
@@ -364,7 +350,8 @@ class BatchARC implements IReturnCode {
 
 		// volatile mode is on if kubernetes have executor defined and volatile mode is
 		// set
-		this.volatileOn = properties.isVolatileOn();
+		this.volatileOn = !properties.getKubernetesExecutorVolatile().isEmpty() //
+				&& (properties.getKubernetesExecutorNumber() > 0);
 
 		message("Volatile database : "+volatileOn);
 
@@ -453,6 +440,9 @@ class BatchARC implements IReturnCode {
 		effacerRepertoireChargement(repertoire, envExecution);
 
 		executeIfExportActive(this::export);
+		
+		// drop volatile databases
+		executeIfVolatile(this::executorsDatabaseDrop);
 
 		message("Traitement Fin");
 
