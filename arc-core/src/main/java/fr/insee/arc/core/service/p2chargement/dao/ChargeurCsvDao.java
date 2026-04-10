@@ -123,15 +123,6 @@ public class ChargeurCsvDao {
 		UtilitaireDao.get(0).importing(this.sandbox.getConnection(), this.tmpChargementBrut,
 				columns, inputStreamToCopyInDatabase, ignoreFirstLine, separateur, quote, encoding);
 
-		
-		
-		System.out.println("§§§§§§§§§§§§!");
-		ArcPreparedStatementBuilder req = new ArcPreparedStatementBuilder();
-		req.append("DROP TABLE IF EXISTS arc_bas2." + this.tmpChargementBrut + " ;");
-		req.append("CREATE TABLE arc_bas2." + this.tmpChargementBrut + " AS SELECT * FROM "+ this.tmpChargementBrut + ";");
-		UtilitaireDao.get(0).executeRequest(this.sandbox.getConnection(), req);
-
-		
 	}
 
 	/**
