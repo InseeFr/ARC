@@ -35,16 +35,16 @@ public enum CSVFormatRules implements IParseFormatRules {
 	FILTER_WHERE("<where>","</where>", true),
 	// index creation expression
 	INDEX("<index>","</index>", true),
-	
-	// comment bloc
-	COMMENT("/*","*/", true),
-	
+
 	// to add a column
 	// column_name=column sql expression
 	// column name
 	COLUMN_DEFINITION(null,"=", false),
 	// column definition
-	COLUMN_EXPRESSION("=",null, true)
+	COLUMN_EXPRESSION("=",null, true),
+	
+	// comment bloc
+	COMMENT("/*","*/", true)
 	;
 
 	
