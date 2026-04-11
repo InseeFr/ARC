@@ -213,11 +213,13 @@ public class ChargeurCsvDao {
 	 * 
 	 */
 	public void execQueryApplyColumnsExpressionRules() throws ArcException {
-		if (parser.getValues(CSVFormatRules.COLUMN_DEFINITION).isEmpty()) {
+		
+		if (parser.getValues(CSVFormatRules.COLUMN_DEFINITION).isEmpty() && parser.getValues(CSVFormatRules.FILTER_WHERE).isEmpty())
+		{
 			return;
 		}
-
-		execQueryCreateContainerWithNewColumnsExpressionRules2();
+		
+		execQueryCreateContainerWithNewColumnsExpressionRules();
 
 		// Itération
 
@@ -291,11 +293,7 @@ public class ChargeurCsvDao {
 	 * 
 	 * @throws ArcException
 	 */
-	private void execQueryCreateContainerWithNewColumnsExpressionRules2() throws ArcException {
-
-		if (parser.getValues(CSVFormatRules.COLUMN_DEFINITION).isEmpty()) {
-			return;
-		}
+	private void execQueryCreateContainerWithNewColumnsExpressionRules() throws ArcException {
 
 		StringBuilder query = new StringBuilder();
 
@@ -360,7 +358,7 @@ public class ChargeurCsvDao {
 			execQueryInsertDataWithNewColumnsExpressionRulesInPartition2(numberOfPartition, part);
 		}
 
-		execQueryRebuildColumns2();
+		execQueryRebuildColumns();
 	}
 
 	/**
@@ -393,7 +391,7 @@ public class ChargeurCsvDao {
 	 * 
 	 * @throws ArcException
 	 */
-	private void execQueryRebuildColumns2() throws ArcException {
+	private void execQueryRebuildColumns() throws ArcException {
 
 		List<String> colsIn = execQuerySelectColumnsFromLoadTable();
 

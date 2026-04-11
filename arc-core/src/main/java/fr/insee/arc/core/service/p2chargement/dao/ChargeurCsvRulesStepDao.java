@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.service.p2chargement.bo.CSVFormatRules;
@@ -55,17 +56,34 @@ public class ChargeurCsvRulesStepDao {
 		return String.format(Delimiters.RENAME_SUFFIX_STEP, step);
 	}
 
+	protected String removeStepInformation(String columnName, Integer step)
+	{
+		return columnName.replace(variableSuffixForStep(step), "");
+	}
 	
+	/**
+	 * Dispatch column and filter expressions by step
+	 */
 	public void prepareCollections()
 	{
+		/**
+		 * Column definition may contain a hint with the step where the variable should be calculated
+		 * So we rebuild the raw user expression with the column definition and expression
+		 * to detect the right step where the calculus must happen 
+		 */
+		List<String> columnDefinitionAndExpression = IntStream.range(0, parser.getValues(CSVFormatRules.COLUMN_DEFINITION).size()).boxed()
+		.map(i-> CSVFormatRules.columnRawExpression(
+					parser.getValues(CSVFormatRules.COLUMN_DEFINITION).get(i)
+					, parser.getValues(CSVFormatRules.COLUMN_EXPRESSION).get(i))
+				).toList();
 		
-		// 
-		this.dispatchColumnExpressionByStep = dispatchExpressionByStep(CSVFormatRules.COLUMN_EXPRESSION);		
-		this.dispatchFilterExpressionByStep = dispatchExpressionByStep(CSVFormatRules.FILTER_WHERE);
+		
+		this.dispatchColumnExpressionByStep = dispatchExpressionByStep(columnDefinitionAndExpression);		
+		this.dispatchFilterExpressionByStep = dispatchExpressionByStep(parser.getValues(CSVFormatRules.FILTER_WHERE));
 		
 		this.numberOfStep = Integer.max(
-				Collections.max(this.dispatchColumnExpressionByStep.keySet())
-				, Collections.max(this.dispatchFilterExpressionByStep.keySet())
+				dispatchColumnExpressionByStep.isEmpty()?0:Collections.max(this.dispatchColumnExpressionByStep.keySet())
+				, dispatchFilterExpressionByStep.isEmpty()?0:Collections.max(this.dispatchFilterExpressionByStep.keySet())
 				);
 		
 		this.columns = new ArrayList<>();
@@ -78,6 +96,8 @@ public class ChargeurCsvRulesStepDao {
 			{
 				for (Integer index : dispatchColumnExpressionByStep.get(step))
 				{
+					// rework column definition to remove the step hint
+					parser.getValues(CSVFormatRules.COLUMN_DEFINITION).set(index, removeStepInformation(parser.getValues(CSVFormatRules.COLUMN_DEFINITION).get(index),step));
 					columns.add(parser.getValues(CSVFormatRules.COLUMN_DEFINITION).get(index));
 					columnsRenamed.add(parser.getValues(CSVFormatRules.COLUMN_DEFINITION).get(index)+variableSuffixForStep(step+1));
 				}
@@ -85,6 +105,8 @@ public class ChargeurCsvRulesStepDao {
 		}
 		
 	}
+	
+	
 	
 	public ArcPreparedStatementBuilder queryColumnExpression(int partitionNumber, String whereExpression)
 	{
@@ -101,7 +123,7 @@ public class ChargeurCsvRulesStepDao {
 	
 	
 	/**
-	 * recursive method to ecapuslate each step
+	 * recursive method to encapuslate each step
 	 * @param query
 	 * @param step
 	 * @param partitionNumber
@@ -175,11 +197,11 @@ public class ChargeurCsvRulesStepDao {
 	 * Dispatch column expression by step
 	 * @return
 	 */
-	protected Map<Integer, List<Integer>> dispatchExpressionByStep(CSVFormatRules ruleExpression)
+	protected Map<Integer, List<Integer>> dispatchExpressionByStep(List<String> ruleExpression)
 	{
 		Map<Integer, List<Integer>> dispatchedExpression= new HashMap<>();
 			
-			for (int i = 0; i < parser.getValues(ruleExpression).size(); i++) {
+			for (int i = 0; i < ruleExpression.size(); i++) {
 				
 				for (int step=MAX_STEPS; step>=0; step--)
 				{
@@ -194,7 +216,7 @@ public class ChargeurCsvRulesStepDao {
 						break;
 					}
 					
-					if (parser.getValues(ruleExpression).get(i).contains(variableSuffixForStep(step)))
+					if (ruleExpression.get(i).contains(variableSuffixForStep(step)))
 					{
 						if (dispatchedExpression.get(step)==null)
 						{

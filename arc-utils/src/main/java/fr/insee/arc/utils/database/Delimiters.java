@@ -17,5 +17,7 @@ public class Delimiters {
 	public static final String SQL_SCHEMA_DELIMITER = ".";
 	
 	public static final String FILE_TOKEN_DELIMITER = "_";
+	
+	public static final String EXPRESSSION_TOKEN_DELIMITER = "=";
 
 }

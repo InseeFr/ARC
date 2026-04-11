@@ -1,5 +1,7 @@
 package fr.insee.arc.core.service.p2chargement.bo;
 
+import fr.insee.arc.utils.database.Delimiters;
+
 public enum CSVFormatRules implements IParseFormatRules {
 
 	// order is important
@@ -35,16 +37,16 @@ public enum CSVFormatRules implements IParseFormatRules {
 	FILTER_WHERE("<where>","</where>", true),
 	// index creation expression
 	INDEX("<index>","</index>", true),
-
+	
+	// comment bloc
+	COMMENT("/*","*/", true),
+	
 	// to add a column
 	// column_name=column sql expression
 	// column name
-	COLUMN_DEFINITION(null,"=", false),
+	COLUMN_DEFINITION(null,Delimiters.EXPRESSSION_TOKEN_DELIMITER, false),
 	// column definition
-	COLUMN_EXPRESSION("=",null, true),
-	
-	// comment bloc
-	COMMENT("/*","*/", true)
+	COLUMN_EXPRESSION(Delimiters.EXPRESSSION_TOKEN_DELIMITER,null, true)
 	;
 
 	
@@ -76,5 +78,15 @@ public enum CSVFormatRules implements IParseFormatRules {
 		return this.stop;
 	}
 
+	/**
+	 * Rebuild the user column definition
+	 * @param ColumnDefinition
+	 * @param ColumnExpression
+	 * @return
+	 */
+	public static String columnRawExpression(String ColumnDefinition, String ColumnExpression)
+	{
+		return new StringBuilder(ColumnDefinition).append(Delimiters.EXPRESSSION_TOKEN_DELIMITER).append(ColumnExpression).toString();
+	}
 	
 }
