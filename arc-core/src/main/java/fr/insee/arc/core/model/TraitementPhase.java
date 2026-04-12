@@ -126,7 +126,7 @@ public enum TraitementPhase {
 	}
 	
 	public static List<TraitementPhase> getListPhaseExecutableInBas() {
-		return listPhasesBetween(TraitementPhase.INITIALISATION, TraitementPhase.MAPPING);
+		return listPhasesBetween(TraitementPhase.INITIALISATION, TraitementPhase.EXPORT);
 	}
 
 	public static List<TraitementPhase> getListPhaseReportedInBas() {

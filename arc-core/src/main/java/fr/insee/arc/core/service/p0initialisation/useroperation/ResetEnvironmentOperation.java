@@ -49,6 +49,11 @@ public class ResetEnvironmentOperation {
 		Connection connection = sandbox.getConnection();
 		String envExecution = sandbox.getSchema();
 
+		if (phase.equals(TraitementPhase.EXPORT)) {
+			resetEnvironmentDao.resetExport(querySelection);
+			return;
+		}
+		
 		// MAJ de la table de pilotage
 		Integer nbLignes = 0;
 

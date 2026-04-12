@@ -102,4 +102,17 @@ public class ResetEnvironementDao {
 		return query;
 	}
 
+	public void resetExport(List<String> selectedEntries) throws ArcException {
+		ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
+		requete.append("UPDATE  " + ViewEnum.PILOTAGE_FICHIER.getFullName(sandbox.getSchema()));
+		requete.append(" SET client=null, date_client=null ");
+		if (!selectedEntries.isEmpty()) {
+			requete.append("WHERE " + ColumnEnum.ID_SOURCE.getColumnName() + " IN (SELECT distinct "
+					+ ColumnEnum.ID_SOURCE.getColumnName() + " FROM (");
+			requete.append(querySelection(selectedEntries));
+			requete.append(") q1 ) ");
+		}
+		UtilitaireDao.get(0).executeRequest(sandbox.getConnection(), requete);
+	}
+
 }
