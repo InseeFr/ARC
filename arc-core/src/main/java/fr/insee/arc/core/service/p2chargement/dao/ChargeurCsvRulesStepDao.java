@@ -66,6 +66,18 @@ public class ChargeurCsvRulesStepDao {
 	 */
 	public void prepareCollections()
 	{
+		
+		dispatchTheUserExpressionsByCalculationStep();
+		
+		computeColumnsNameByCalculationStep();
+		
+	}
+	
+	
+	/**
+	 * Determine at which calculation step the expression must be calculated
+	 */
+	private void dispatchTheUserExpressionsByCalculationStep() {
 		/**
 		 * Column definition may contain a hint with the step where the variable should be calculated
 		 * So we rebuild the raw user expression with the column definition and expression
@@ -86,6 +98,19 @@ public class ChargeurCsvRulesStepDao {
 				, dispatchFilterExpressionByStep.isEmpty()?0:Collections.max(this.dispatchFilterExpressionByStep.keySet())
 				);
 		
+	}
+
+	/**
+	 * When a user declare a column to calculate as the expression "v_column=expr"
+	 * The v_column is renamed as v_column$new#stepnumber+1#$ during steps calculation so 
+	 *   it may be referenced in the further calculation steps
+	 * The orginal column name is kept in a separate List in order to rename columns at the end of calculation.
+	 * The parser COLUMN_DEFINITION is reworked to remove the step hints given by the user
+	 *   "v_column$new3$=expr" indicating that v_clumn must be calculated at step 3 will be rewrited 
+	 *   as "v_column=expr" after the step information had been stored
+	 */
+	private void computeColumnsNameByCalculationStep() {
+
 		this.columns = new ArrayList<>();
 		this.columnsRenamed = new ArrayList<>();
 
@@ -103,11 +128,9 @@ public class ChargeurCsvRulesStepDao {
 				}
 			}
 		}
-		
 	}
-	
-	
-	
+
+
 	public ArcPreparedStatementBuilder queryColumnExpression(int partitionNumber, String whereExpression)
 	{
 		if (this.numberOfStep==null)
