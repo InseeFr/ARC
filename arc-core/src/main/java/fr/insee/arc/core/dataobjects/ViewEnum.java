@@ -81,10 +81,9 @@ public enum ViewEnum {
 	, PARAMETER("parameter", SchemaEnum.ARC_METADATA, ColumnEnum.KEY, ColumnEnum.VAL, ColumnEnum.DESCRIPTION) //
 
 	// table d'export
-	, EXPORT("export", SchemaEnum.SANDBOX, ColumnEnum.FILE_NAME, ColumnEnum.ZIP, ColumnEnum.TABLE_TO_EXPORT,
+	, EXPORT("export", SchemaEnum.SANDBOX, ColumnEnum.TIMESTAMP_DIRECTORY, ColumnEnum.FILE_NAME, ColumnEnum.ZIP, ColumnEnum.TABLE_TO_EXPORT,
 			ColumnEnum.HEADERS, ColumnEnum.NULLS, ColumnEnum.FILTER_TABLE, ColumnEnum.ORDER_TABLE,
-			ColumnEnum.NOMENCLATURE_EXPORT, ColumnEnum.COLUMNS_ARRAY_HEADER, ColumnEnum.COLUMNS_ARRAY_VALUE,
-			ColumnEnum.ETAT) //
+			ColumnEnum.NOMENCLATURE_EXPORT, ColumnEnum.JSON_KEY_VALUE, ColumnEnum.ETAT) //
 	, EXPORT_OPTION("export_option",  SchemaEnum.SANDBOX, ColumnEnum.NOM_TABLE_METIER
 			, ColumnEnum.EXPORT_PARQUET_OPTION, ColumnEnum.EXPORT_COORDINATOR_OPTION) //
 	

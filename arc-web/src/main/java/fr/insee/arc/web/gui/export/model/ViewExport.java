@@ -3,6 +3,8 @@ package fr.insee.arc.web.gui.export.model;
 import java.util.HashMap;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
+import fr.insee.arc.core.dataobjects.ColumnEnum;
+import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.web.gui.all.util.ConstantVObject;
 import fr.insee.arc.web.gui.all.util.VObject;
 import fr.insee.arc.web.gui.all.util.ConstantVObject.ColumnRendering;
@@ -25,19 +27,17 @@ public class ViewExport extends VObject {
             private static final long serialVersionUID = -3124381932840827423L;
 
             {
-                put("file_name", new ColumnRendering(true, "Nom du fichier à créer", "11%", "text", null, true));
-                put("zip", new ColumnRendering(true, "Format d'export", "4%", "select", new ArcPreparedStatementBuilder("select id, val from arc.ext_export_format order by id"), true));
-                put("headers", new ColumnRendering(true, "Créer la ligne d'entête ?", "10%", "text", null, true));
-                put("nulls", new ColumnRendering(true, "Mettre null pour les valeurs à null ?", "10%", "text", null, true));
-                put("table_to_export", new ColumnRendering(true, "Table à exporter", "11%", "text", null, true));
-                put("nomenclature_export", new ColumnRendering(true, "Nomenclature de définition de l'export", "11%", "text", null, true));
-                put("filter_table", new ColumnRendering(true, "Filtre", "11%", "text", null, true));
-                put("order_table", new ColumnRendering(true, "Tri", "11%", "text", null, true));
-                put("columns_array_header", new ColumnRendering(true, "Colonne tableau contenant des entetes", "11%", "text", null, true));
-                put("columns_array_value", new ColumnRendering(true, "Colonne tableau contenant des valeurs", "11%", "text", null, true));
-                put("etat", new ColumnRendering(true, "Etat du dernier export", "10%", "text", null, false));
-
-                
+                put(ColumnEnum.TIMESTAMP_DIRECTORY.getColumnName(), new ColumnRendering(true, "label.export.timestamp", "8%", "text", null, true));
+            	put(ColumnEnum.FILE_NAME.getColumnName(), new ColumnRendering(true, "label.export.file.name", "15%", "text", null, true));
+                put(ColumnEnum.ZIP.getColumnName(), new ColumnRendering(true, "label.export.file.format", "6%", "select", new ArcPreparedStatementBuilder("select id, val from arc.ext_export_format order by id"), true));
+                put(ColumnEnum.HEADERS.getColumnName(), new ColumnRendering(true, "label.export.table.headers", "8%", "text", null, true));
+                put(ColumnEnum.NULLS.getColumnName(), new ColumnRendering(true, "label.export.table.nulls", "8%", "text", null, true));
+                put(ColumnEnum.TABLE_TO_EXPORT.getColumnName(), new ColumnRendering(true, "label.export.table.name", "15%", "text", null, true));
+                put(ColumnEnum.NOMENCLATURE_EXPORT.getColumnName(), new ColumnRendering(true, "label.export.file.schema", "15%", "text", null, true));
+                put(ColumnEnum.FILTER_TABLE.getColumnName(), new ColumnRendering(true, "label.export.table.filter", "10%", "text", null, true));
+                put(ColumnEnum.ORDER_TABLE.getColumnName(), new ColumnRendering(true, "label.export.table.order", "10%", "text", null, true));
+                put(ColumnEnum.JSON_KEY_VALUE.getColumnName(), new ColumnRendering(true, "label.export.table.json", "15%", "text", null, true));
+                put(ColumnEnum.ETAT.getColumnName(), new ColumnRendering(true, "label.export.etat", "15%", "text", null, true));
              }
         }));
     }

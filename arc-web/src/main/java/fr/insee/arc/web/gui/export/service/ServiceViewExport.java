@@ -88,7 +88,7 @@ public class ServiceViewExport extends InteractorExport {
 				dao.startExportUpdateState(fileName, fileIndex, false);
 
 				switch (zip.get(fileIndex)) {
-				case "1": // Zip
+				case "0": // Zip
 					exportZip(dirOut, rules, fileIndex);
 					break;
 				case "2": // GZ

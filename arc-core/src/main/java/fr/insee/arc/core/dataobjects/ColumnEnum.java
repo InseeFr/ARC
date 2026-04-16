@@ -31,7 +31,7 @@ public enum ColumnEnum {
 	, ENVIRONMENT("environment", TypeEnum.TEXT, "") // ihm_ws_context
 	, ENV_DESCRIPTION("env_description", TypeEnum.TEXT, "") // ext_etat_jeuderegle
 	, ERROR_ROW_PROCESSING("error_row_processing", TypeEnum.TEXT, "") // ihm_controle_regle
-	, ETAT("etat", TypeEnum.TEXT, "") // ihm_jeuderegle,ihm_norme,ihm_calendrier, export
+	, ETAT("etat", TypeEnum.TEXT, "") // ihm_jeuderegle,ihm_norme,ihm_calendrier,export
 	, EVENT_TIMESTAMP("event_timestamp", TypeEnum.TIMESTAMP, "") // security_webservice_log
 	, EXPRESSION("expression", TypeEnum.TEXT, "") // ihm_ws_query
 	, EXPR_NOM("expr_nom", TypeEnum.TEXT, "") // ihm_expression
@@ -95,12 +95,12 @@ public enum ColumnEnum {
 	, XSD_ORDRE("xsd_ordre", TypeEnum.INTEGER, "") // ihm_controle_regle
 	, XSD_ROLE("xsd_role", TypeEnum.TEXT, "") // ihm_controle_regle
 
+	, TIMESTAMP_DIRECTORY("timestamp_directory", TypeEnum.TEXT, "") // export
 	, FILE_NAME("file_name", TypeEnum.TEXT, "") // export
 	, TABLE_TO_EXPORT("table_to_export", TypeEnum.TEXT, "") // export
 	, NOMENCLATURE_EXPORT("nomenclature_export", TypeEnum.TEXT, "") // export
 	, FILTER_TABLE("filter_table", TypeEnum.TEXT, "") // export
-	, COLUMNS_ARRAY_HEADER("columns_array_header", TypeEnum.TEXT, "") // export
-	, COLUMNS_ARRAY_VALUE("columns_array_value", TypeEnum.TEXT, "") // export
+	, JSON_KEY_VALUE("json_key_value", TypeEnum.TEXT, "") //export
 	, NULLS("nulls", TypeEnum.TEXT, "") // export
 	, HEADERS("headers", TypeEnum.TEXT, "") // export
 	, ORDER_TABLE("order_table", TypeEnum.TEXT, "") // export

@@ -51,7 +51,11 @@ public class GenericBean {
 		this.content = reworkListAsContent(contentList);
 	}
 	
-	
+	/**
+	 * Translate a list as a genericBean content
+	 * @param contentList
+	 * @return
+	 */
 	protected static List<List<String>> reworkListAsContent(List<String> contentList) {
 		
 		List<List<String>> contentReworked =new ArrayList<>();

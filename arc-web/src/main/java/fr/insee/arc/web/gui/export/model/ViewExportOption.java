@@ -21,12 +21,12 @@ public class ViewExportOption extends VObject {
         new HashMap<String, ColumnRendering>() {
         	private static final long serialVersionUID = -4260429835977421646L;
 			{
-            put("nom_table_metier", new ColumnRendering(true, "label.tablename", "80%", "text", null, true));
-            put("export_parquet_option", new ColumnRendering(true, "label.export.parquet", "10%", 
+            put("nom_table_metier", new ColumnRendering(true, "label.tablename", "60%", "text", null, true));
+            put("export_parquet_option", new ColumnRendering(true, "label.export.parquet", "20%", 
             		"select",
 					new ArcPreparedStatementBuilder("select id, val from arc.ext_etat order by id desc")
             		, true));
-            put("export_coordinator_option", new ColumnRendering(true, "label.export.coordinator", "10%",
+            put("export_coordinator_option", new ColumnRendering(true, "label.export.coordinator", "20%",
             		"select",
 					new ArcPreparedStatementBuilder("select id, val from arc.ext_etat order by id desc")
             		, true));

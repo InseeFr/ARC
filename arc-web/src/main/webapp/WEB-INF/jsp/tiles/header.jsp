@@ -15,8 +15,8 @@
 	</button>
 	<c:forEach items="en,fr" var="lang">
 		<c:choose>
-			<c:when test="${fn:startsWith(pageContext.response.locale,lang)}">
-				<a class="btn-sm text-body font-weight-bold"><u>${lang}</u></a>
+			<c:when test="${pageContext.response.locale==lang}">
+				<a class="btn-sm text-body font-weight-bold">${lang}</a>
 			</c:when>
 			<c:otherwise>
 				<c:url value="" var="localeUrl">

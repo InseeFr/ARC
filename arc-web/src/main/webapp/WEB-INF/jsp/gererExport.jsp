@@ -29,10 +29,44 @@ accept-charset="UTF-8"
 
 <div class="container-fluid">
 <c:import url="/WEB-INF/jsp/tiles/template_environment.jsp"></c:import>
+
 <div class="row">
 <div class="col-md-12 border-right">
+
+
 <div class="row">
-<div class="col-md">
+<div class="col-md-8 border-right">
+<%-- EXPORT TAB --%>
+<c:set var="view" value="${viewExportOption}"  scope="request"/>
+<c:import url="tiles/templateVObject.jsp">
+<c:param name="btnSelect" value ="true" />
+<c:param name="btnSee" value ="true" />
+<c:param name="btnSort" value ="true" />
+<c:param name="btnAdd" value ="true" />
+<c:param name="btnUpdate" value ="true" />
+<c:param name="btnDelete" value ="true" />
+<c:param name="ligneAdd" value ="true" />
+<c:param name="ligneFilter" value ="true" />
+<c:param name="checkbox" value ="true" />
+<c:param name="checkboxVisible" value ="true" />
+<c:param name="multiSelection" value ="true" />
+<c:param name="allowResize" value ="true" />
+<c:param name="otherButton">
+<input 
+class="btn btn-primary btn-sm"
+id="startParquetExport.start"
+type="submit"
+doAction="startParquetExport"
+scope="viewExport;viewFileExport;viewExportOption;"
+value="<spring:message code="gui.button.startParquetExport"/>"></input>
+</c:param>
+</c:import>
+</div>
+</div>
+
+
+<div class="row">
+<div class="col-md-12 border-right mt-2-25">
 <!-- norm list -->
 <c:set var="view" value="${viewExport}"  scope="request"/>
 <c:import url="tiles/templateVObject.jsp">
@@ -79,7 +113,7 @@ value="<spring:message code="gui.button.exportStart"/>"></input>
 <c:param name="ligneFilter" value ="true" />
 <c:param name="checkbox" value ="true" />
 <c:param name="checkboxVisible" value ="true" />
-<c:param name="multiSelection" value ="true" />
+<c:param name="multiSelection" value ="false" />
 <c:param name="otherButton">
 <button
 class="btn btn-primary btn-sm"
@@ -95,35 +129,6 @@ ajax="false"
 </div>
 </div>
 
-<div class="row">
-<div class="col-md-6 border-right mt-2-25">
-<%-- EXPORT TAB --%>
-<c:set var="view" value="${viewExportOption}"  scope="request"/>
-<c:import url="tiles/templateVObject.jsp">
-<c:param name="btnSelect" value ="true" />
-<c:param name="btnSee" value ="true" />
-<c:param name="btnSort" value ="true" />
-<c:param name="btnAdd" value ="true" />
-<c:param name="btnUpdate" value ="true" />
-<c:param name="btnDelete" value ="true" />
-<c:param name="ligneAdd" value ="true" />
-<c:param name="ligneFilter" value ="true" />
-<c:param name="checkbox" value ="true" />
-<c:param name="checkboxVisible" value ="true" />
-<c:param name="multiSelection" value ="true" />
-<c:param name="allowResize" value ="true" />
-<c:param name="otherButton">
-<input 
-class="btn btn-primary btn-sm"
-id="startParquetExport.start"
-type="submit"
-doAction="startParquetExport"
-scope="viewExport;viewFileExport;viewExportOption;"
-value="<spring:message code="gui.button.startParquetExport"/>"></input>
-</c:param>
-</c:import>
-</div>
-</div>
 
 </div>
 </form>

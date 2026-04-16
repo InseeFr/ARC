@@ -420,8 +420,12 @@ val text,
 CONSTRAINT ext_export_format_pkey PRIMARY KEY (id) 
 ); 
 
-INSERT INTO arc.ext_export_format VALUES ('0','NA'), ('1','ZIP'), ('2','GZ') ON CONFLICT DO NOTHING; 
+-- patch 13/04/2026 : export change
+UPDATE arc.ext_export_format set val='parquet' where id='0' and val!='parquet';
+UPDATE arc.ext_export_format set val='csv' where id='1' and val!='csv';
+UPDATE arc.ext_export_format set val='csv.gz' where id='2' and val!='csv.gz';
 
+INSERT INTO arc.ext_export_format VALUES ('0','parquet'), ('1','csv'), ('2','csv.gz') ON CONFLICT DO NOTHING; 
 
 /*
  *  PATCHS version

@@ -16,6 +16,8 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.dataobjects.DataObjectService;
@@ -163,21 +165,20 @@ public class ExportDao extends VObjectHelperDao {
 	 * @throws IOException
 	 * @throws SQLException
 	 */
-	public void exportFile(Map<String, List<String>> h, int n, BufferedWriter bw, FileOutputStream fw)
+	public void exportFile(Map<String, List<String>> exportparameter, int n, BufferedWriter bw, FileOutputStream fw)
 			throws ArcException, IOException, SQLException {
-		List<String> tablesToExport = h.get("table_to_export");
-		List<String> headers = h.get("headers");
-		List<String> nulls = h.get("nulls");
-		List<String> filterTable = h.get("filter_table");
-		List<String> orderTable = h.get("order_table");
-		List<String> howToExport = h.get("nomenclature_export");
-		List<String> headersToScan = h.get("columns_array_header");
-		List<String> valuesToScan = h.get("columns_array_value");
+		List<String> tablesToExport = exportparameter.get("table_to_export");
+		List<String> headers = exportparameter.get("headers");
+		List<String> nulls = exportparameter.get("nulls");
+		List<String> filterTable = exportparameter.get("filter_table");
+		List<String> orderTable = exportparameter.get("order_table");
+		List<String> howToExport = exportparameter.get("nomenclature_export");
+		List<String> jsonKeyValueToConvert = exportparameter.get("json_key_value");
 
 		Map<String, Integer> pos = new HashMap<>();
 		List<String> headerLine = new ArrayList<>();
 
-		h = exportFileRetrieveRules(n, howToExport, tablesToExport, this.dataObjectService.getSandboxSchema());
+		Map<String, List<String>> h = exportFileRetrieveRules(n, howToExport, tablesToExport, this.dataObjectService.getSandboxSchema());
 		
 		if (h.isEmpty()) {
 			throw new ArcException(ArcExceptionMessage.GUI_EXPORT_TABLE_NOT_EXISTS);
@@ -208,33 +209,32 @@ public class ExportDao extends VObjectHelperDao {
 			try (ResultSet res = exportFileFilteredOrdered(stmt, n, tablesToExport, filterTable, orderTable, this.dataObjectService.getSandboxSchema())) {
 				ResultSetMetaData rsmd = res.getMetaData();
 	
-				ArrayList<String> output;
-				String[] tabH;
-				String[] tabV;
 				String colName;
 				while (res.next()) {
 					// reinitialiser l'arraylist de sortie
-					output = new ArrayList<>();
+					ArrayList<String> output = new ArrayList<>();
 					for (int k = 0; k < maxPos; k++) {
 						output.add("");
 					}
-	
+				
 					boolean todo = false;
-					tabH = null;
-					tabV = null;
+
+					List<String> tabH=new ArrayList<>();
+					List<String> tabV=new ArrayList<>();
+
+					
 					for (int i = 1; i <= rsmd.getColumnCount(); i++) {
 						colName = rsmd.getColumnLabel(i).toLowerCase();
 	
 						todo = true;
 						// cas ou on est dans un tableau
-						if (todo && colName.equals(headersToScan.get(n))) {
+						if (todo && colName.equals(jsonKeyValueToConvert.get(n))) {
 							todo = false;
-							tabH = (String[]) res.getArray(i).getArray();
+							
+							Map<String,String> m= convertKeyValueJsonToArray(res.getString(i));
+						    m.entrySet().stream().forEach(t-> { tabH.add(t.getKey()); tabV.add(t.getValue());});
 						}
-						if (todo && colName.equals(valuesToScan.get(n))) {
-							todo = false;
-							tabV = (String[]) res.getArray(i).getArray();
-						}
+
 						if (todo) {
 							todo = false;
 							if (pos.get(colName) != null) {
@@ -247,12 +247,12 @@ public class ExportDao extends VObjectHelperDao {
 					}
 	
 					// traitement des variables tableaux
-					if (tabH != null && tabV != null) {
-						for (int k = 0; k < tabH.length; k++) {
-							if (pos.get(tabH[k].toLowerCase()) != null) {
+					if (!tabH.isEmpty() && !tabV.isEmpty()) {
+						for (int k = 0; k < tabH.size(); k++) {
+							if (pos.get(tabH.get(k).toLowerCase()) != null) {
 								// if nulls value musn't be quoted as "null" and element is null then don't write
-								if (!(StringUtils.isEmpty(nulls.get(n)) && StringUtils.isEmpty(tabV[k]))) {
-									output.set(pos.get(tabH[k].toLowerCase()), tabV[k]);
+								if (!(StringUtils.isEmpty(nulls.get(n)) && StringUtils.isEmpty(tabV.get(k)))) {
+									output.set(pos.get(tabH.get(k).toLowerCase()), tabV.get(k));
 								}
 							}
 						}
@@ -271,6 +271,20 @@ public class ExportDao extends VObjectHelperDao {
 	}
 	
 	
+	@SuppressWarnings("unchecked")
+	private Map<String,String> convertKeyValueJsonToArray(String keyValueJson) {
+		  ObjectMapper mapper = new ObjectMapper();
+		  		  try {
+		  return mapper.readValue(keyValueJson, Map.class);
+		  }
+		  catch (Exception e)
+		  {
+			  System.out.println("not deserializable");  
+		  }
+		  return new HashMap<>();
+		
+	}
+
 	public VObjectService getvObjectService() {
 		return vObjectService;
 	}
