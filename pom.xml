@@ -12,7 +12,7 @@
 		<version>0.0.2-SNAPSHOT</version>
 		
 		<project.log4j.version>2.25.4</project.log4j.version>
-		<project.spring.version>7.0.6</project.spring.version>
+		<project.spring.version>7.0.7</project.spring.version>
 		<project.jackson.version>3.1.1</project.jackson.version>
 		<project.postgres.version>42.7.9</project.postgres.version>
 		<project.duckdb.version>1.4.0.0</project.duckdb.version>
