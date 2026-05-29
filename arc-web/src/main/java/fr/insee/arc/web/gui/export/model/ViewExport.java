@@ -37,6 +37,8 @@ public class ViewExport extends VObject {
                 put(ColumnEnum.FILTER_TABLE.getColumnName(), new ColumnRendering(true, "label.export.table.filter", "10%", "text", null, true));
                 put(ColumnEnum.ORDER_TABLE.getColumnName(), new ColumnRendering(true, "label.export.table.order", "10%", "text", null, true));
                 put(ColumnEnum.JSON_KEY_VALUE.getColumnName(), new ColumnRendering(true, "label.export.table.json", "15%", "text", null, true));
+                put(ColumnEnum.COLUMNS_ARRAY_HEADER.getColumnName(), new ColumnRendering(true, "label.export.table.headers", "15%", "text", null, true));
+                put(ColumnEnum.COLUMNS_ARRAY_VALUE.getColumnName(), new ColumnRendering(true, "label.export.table.values", "15%", "text", null, true));
                 put(ColumnEnum.ETAT.getColumnName(), new ColumnRendering(true, "label.export.etat", "15%", "text", null, true));
              }
         }));

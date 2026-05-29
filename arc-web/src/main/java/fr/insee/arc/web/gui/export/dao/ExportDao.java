@@ -9,6 +9,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -174,7 +175,9 @@ public class ExportDao extends VObjectHelperDao {
 		List<String> orderTable = exportparameter.get("order_table");
 		List<String> howToExport = exportparameter.get("nomenclature_export");
 		List<String> jsonKeyValueToConvert = exportparameter.get("json_key_value");
-
+		List<String> headersToConvert = exportparameter.get("columns_array_header");
+		List<String> valuesToConvert= exportparameter.get("columns_array_value");
+		
 		Map<String, Integer> pos = new HashMap<>();
 		List<String> headerLine = new ArrayList<>();
 
@@ -222,12 +225,12 @@ public class ExportDao extends VObjectHelperDao {
 					List<String> tabH=new ArrayList<>();
 					List<String> tabV=new ArrayList<>();
 
-					
+					// parcours des colonnes du fichier
 					for (int i = 1; i <= rsmd.getColumnCount(); i++) {
 						colName = rsmd.getColumnLabel(i).toLowerCase();
-	
+
 						todo = true;
-						// cas ou on est dans un tableau
+						// cas du traitement de la colonne json contenant des données a deserialiser
 						if (todo && colName.equals(jsonKeyValueToConvert.get(n))) {
 							todo = false;
 							
@@ -235,17 +238,29 @@ public class ExportDao extends VObjectHelperDao {
 						    m.entrySet().stream().forEach(t-> { tabH.add(t.getKey()); tabV.add(t.getValue());});
 						}
 
-						if (todo) {
+						// cas du traitement des colonnes headers/values contenant des données a deserialiser
+						if (todo && colName.equals(headersToConvert.get(n))) {
 							todo = false;
-							if (pos.get(colName) != null) {
+							tabH.addAll(Arrays.asList((String[]) res.getArray(i).getArray()));
+						}
+						if (todo && colName.equals(valuesToConvert.get(n))) {
+							todo = false;
+							tabV.addAll(Arrays.asList((String[]) res.getArray(i).getArray()));
+						}
+						
+						if (todo && pos.get(colName) != null) {
 								// if nulls value musn't be quoted as "null" and element is null then don't write
 								if (!(StringUtils.isEmpty(nulls.get(n)) && StringUtils.isEmpty(res.getString(i)))) {
 									output.set(pos.get(colName), res.getString(i));
-								}
 							}
 						}
 					}
 	
+					
+					System.out.println("§§§§§§§§§§§");
+					System.out.println(tabH);
+					System.out.println(tabV);
+					
 					// traitement des variables tableaux
 					if (!tabH.isEmpty() && !tabV.isEmpty()) {
 						for (int k = 0; k < tabH.size(); k++) {

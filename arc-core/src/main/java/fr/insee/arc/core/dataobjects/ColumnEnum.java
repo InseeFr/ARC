@@ -100,6 +100,8 @@ public enum ColumnEnum {
 	, TABLE_TO_EXPORT("table_to_export", TypeEnum.TEXT, "") // export
 	, NOMENCLATURE_EXPORT("nomenclature_export", TypeEnum.TEXT, "") // export
 	, FILTER_TABLE("filter_table", TypeEnum.TEXT, "") // export
+	, COLUMNS_ARRAY_HEADER("columns_array_header", TypeEnum.TEXT, "") // export
+	, COLUMNS_ARRAY_VALUE("columns_array_value", TypeEnum.TEXT, "") // export
 	, JSON_KEY_VALUE("json_key_value", TypeEnum.TEXT, "") //export
 	, NULLS("nulls", TypeEnum.TEXT, "") // export
 	, HEADERS("headers", TypeEnum.TEXT, "") // export
