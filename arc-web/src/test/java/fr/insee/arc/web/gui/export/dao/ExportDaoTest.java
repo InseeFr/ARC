@@ -108,20 +108,27 @@ public class ExportDaoTest extends InitializeQueryTest {
 	}
 
 	@Test
+	/**
+	 * retrieve the variables of a table to export
+	 * export test on the table named "export"
+	 * @throws ArcException
+	 */
 	public void exportFileRetrieve() throws ArcException {
 		
 		// add howToExport and filesToExport
 		List<String> howToExport = new ArrayList<String>();
 		howToExport.add(null);
 		List<String> tablesToExport = new ArrayList<String>();
-		tablesToExport.add("export");
+		tablesToExport.add(ViewEnum.EXPORT.getTableName());
 
 		// execute query
 		Map<String, List<String>> retrievedData = pdao.exportFileRetrieveRules(0, howToExport, tablesToExport, BddPatcherTest.testSandbox1);
 
+		System.out.println(retrievedData);
+		
 		// test the content of the view
 		assertEquals(3, retrievedData.keySet().size()); // 3 columns selected
-		assertEquals(11, retrievedData.get("varbdd").size()); // 11 columns in export table
+		assertEquals(ViewEnum.EXPORT.getColumns().size(), retrievedData.get("varbdd").size()); // 11 columns in export table
 	}
 	
 	@Test
