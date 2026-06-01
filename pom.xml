@@ -322,7 +322,7 @@
 		<dependency>
 		    <groupId>io.minio</groupId>
 		    <artifactId>minio</artifactId>
-		    <version>8.6.0</version>
+		    <version>9.0.1</version>
 		</dependency>
 		
 		<!-- https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp-jvm -->

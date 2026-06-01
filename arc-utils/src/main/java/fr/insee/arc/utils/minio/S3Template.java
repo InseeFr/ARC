@@ -2,15 +2,25 @@ package fr.insee.arc.utils.minio;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.security.InvalidKeyException;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
+import java.security.KeyStore;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateFactory;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import javax.net.ssl.KeyManager;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509TrustManager;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -21,13 +31,13 @@ import fr.insee.arc.utils.files.FileUtilsArc;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.utils.utils.ManipString;
 import io.minio.CopyObjectArgs;
-import io.minio.CopySource;
 import io.minio.DownloadObjectArgs;
 import io.minio.ListObjectsArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.minio.RemoveObjectArgs;
 import io.minio.Result;
+import io.minio.SourceObject;
 import io.minio.StatObjectArgs;
 import io.minio.StatObjectResponse;
 import io.minio.UploadObjectArgs;
@@ -35,12 +45,7 @@ import io.minio.credentials.AwsEnvironmentProvider;
 import io.minio.credentials.MinioEnvironmentProvider;
 import io.minio.credentials.Provider;
 import io.minio.errors.ErrorResponseException;
-import io.minio.errors.InsufficientDataException;
-import io.minio.errors.InternalException;
-import io.minio.errors.InvalidResponseException;
-import io.minio.errors.ServerException;
-import io.minio.errors.XmlParserException;
-import io.minio.http.HttpUtils;
+import io.minio.errors.MinioException;
 import io.minio.messages.Item;
 import okhttp3.OkHttpClient;
 
@@ -123,7 +128,7 @@ public class S3Template {
 		if (this.minioClient == null) {
 			try {
 				buildMinioClient();
-			} catch (KeyManagementException | NoSuchAlgorithmException e) {
+			} catch (MinioException e) {
 				LoggerHelper.error(LOGGER, e);
 			}
 		}
@@ -131,7 +136,7 @@ public class S3Template {
 		return minioClient;
 	}
 
-	private void buildMinioClient() throws KeyManagementException, NoSuchAlgorithmException {
+	private void buildMinioClient() throws MinioException {
 
 		httpClient = newDefaultHttpClient();
 
@@ -155,7 +160,7 @@ public class S3Template {
 		String filename = System.getenv("SSL_CERT_FILE");
 		if (filename != null && !filename.isEmpty()) {
 			try {
-				httpClient = HttpUtils.enableExternalCertificates(httpClient, filename);
+				httpClient = enableExternalCertificates(httpClient, filename);
 			} catch (GeneralSecurityException | IOException e) {
 				throw new RuntimeException(e);
 			}
@@ -194,12 +199,9 @@ public class S3Template {
 		try {
 			if (!isExists(path)) {
 				getMinioClient().putObject(PutObjectArgs.builder().bucket(bucket).object(path + EXISTS_FILE)
-						.stream(new ByteArrayInputStream(new byte[] { 0x01 }), 1, -1).build()); // fichier .exists
+						.stream(new ByteArrayInputStream(new byte[] { 0x01 }), 1L, -1L).build()); // fichier .exists
 			}
-		} catch (InvalidKeyException | ErrorResponseException | InsufficientDataException | InternalException
-				| InvalidResponseException | NoSuchAlgorithmException | ServerException | XmlParserException
-				| IllegalArgumentException | IOException e) {
-
+		} catch (MinioException e) {
 			throw new ArcException(ArcExceptionMessage.FILE_WRITE_FAILED, path);
 		}
 	}
@@ -288,10 +290,8 @@ public class S3Template {
 
 		try {
 			getMinioClient().copyObject(CopyObjectArgs.builder().bucket(bucket).object(absolutePath(pathTo))
-					.source(CopySource.builder().bucket(bucket).object(absolutePath(pathFrom)).build()).build());
-		} catch (InvalidKeyException | ErrorResponseException | InsufficientDataException | InternalException
-				| InvalidResponseException | NoSuchAlgorithmException | ServerException | XmlParserException
-				| IllegalArgumentException | IOException e) {
+					.source(SourceObject.builder().bucket(bucket).object(absolutePath(pathFrom)).build()).build());
+		} catch (MinioException e) {
 			LoggerHelper.error(LOGGER, e);
 			copyRetry(pathFrom, pathTo);
 		}
@@ -351,9 +351,7 @@ public class S3Template {
 		try {
 			getMinioClient().downloadObject(DownloadObjectArgs.builder().bucket(bucket)
 					.object(absolutePath(sourceS3Path)).filename(targetFile.getPath()).build());
-		} catch (InvalidKeyException | ErrorResponseException | InsufficientDataException | InternalException
-				| InvalidResponseException | NoSuchAlgorithmException | ServerException | XmlParserException
-				| IllegalArgumentException | IOException e) {
+		} catch (MinioException e) {
 			LoggerHelper.error(LOGGER, e);
 			downloadRetry(sourceS3Path, targetFilePath);
 		}
@@ -404,9 +402,7 @@ public class S3Template {
 		try {
 			getMinioClient().uploadObject(UploadObjectArgs.builder().bucket(bucket).object(absolutePath(pathTo))
 					.filename(fileFrom.getPath()).build());
-		} catch (InvalidKeyException | ErrorResponseException | InsufficientDataException | InternalException
-				| InvalidResponseException | NoSuchAlgorithmException | ServerException | XmlParserException
-				| IllegalArgumentException | IOException e) {
+		} catch (MinioException e) {
 			LoggerHelper.error(LOGGER, e);
 			uploadRetry(fileFrom, pathTo);
 		}
@@ -442,9 +438,7 @@ public class S3Template {
 
 		try {
 			getMinioClient().removeObject(RemoveObjectArgs.builder().bucket(bucket).object(absolutePath(path)).build());
-		} catch (InvalidKeyException | ErrorResponseException | InsufficientDataException | InternalException
-				| InvalidResponseException | NoSuchAlgorithmException | ServerException | XmlParserException
-				| IllegalArgumentException | IOException e) {
+		} catch (MinioException e) {
 			LoggerHelper.error(LOGGER, e);
 			deleteRetry(path);
 		}
@@ -528,9 +522,7 @@ public class S3Template {
 		try {
 			statObject = getMinioClient()
 					.statObject(StatObjectArgs.builder().bucket(bucket).object(absoluteFilePath(path)).build());
-		} catch (InvalidKeyException | ErrorResponseException | InsufficientDataException | InternalException
-				| InvalidResponseException | NoSuchAlgorithmException | ServerException | XmlParserException
-				| IllegalArgumentException | IOException e) {
+		} catch (MinioException e) {
 
 			throw new ArcException(ArcExceptionMessage.FILE_READ_FAILED, path);
 		}
@@ -573,9 +565,7 @@ public class S3Template {
 			if (errorCode != 404) {
 				LoggerHelper.error(LOGGER, e, "Erreur lors de l'interrogation S3. Code HTTP : ", errorCode);
 			}
-		} catch (InvalidKeyException | InsufficientDataException | InternalException | InvalidResponseException
-				| NoSuchAlgorithmException | ServerException | XmlParserException | IllegalArgumentException
-				| IOException e) {
+		} catch (MinioException e) {
 
 			LoggerHelper.error(LOGGER, e, "Erreur lors de l'interrogation S3");
 		}
@@ -619,9 +609,7 @@ public class S3Template {
 						&& (includeSubdirs || !nextObject.endsWith("/"))) {
 					listNames.add(nextObject);
 				}
-			} catch (InvalidKeyException | ErrorResponseException | IllegalArgumentException | InsufficientDataException
-					| InternalException | InvalidResponseException | NoSuchAlgorithmException | ServerException
-					| XmlParserException | IOException e) {
+			} catch (MinioException e) {
 
 				throw new ArcException(ArcExceptionMessage.FILE_READ_FAILED, path);
 			}
@@ -656,4 +644,53 @@ public class S3Template {
 		this.minioClient = null;
 	}
 
+	  /**
+	   * copied logic from
+	   * https://github.com/square/okhttp/blob/master/samples/guide/src/main/java/okhttp3/recipes/CustomTrust.java
+	   */
+	  public static OkHttpClient enableExternalCertificates(OkHttpClient httpClient, String filename)
+	      throws GeneralSecurityException, IOException {
+	    Collection<? extends Certificate> certificates = null;
+	    try (FileInputStream fis = new FileInputStream(filename)) {
+	      certificates = CertificateFactory.getInstance("X.509").generateCertificates(fis);
+	    }
+
+	    if (certificates == null || certificates.isEmpty()) {
+	      throw new IllegalArgumentException("expected non-empty set of trusted certificates");
+	    }
+
+	    char[] password = "password".toCharArray(); // Any password will work.
+
+	    // Put the certificates a key store.
+	    KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+	    // By convention, 'null' creates an empty key store.
+	    keyStore.load(null, password);
+
+	    int index = 0;
+	    for (Certificate certificate : certificates) {
+	      String certificateAlias = Integer.toString(index++);
+	      keyStore.setCertificateEntry(certificateAlias, certificate);
+	    }
+
+	    // Use it to build an X509 trust manager.
+	    KeyManagerFactory keyManagerFactory =
+	        KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+	    keyManagerFactory.init(keyStore, password);
+	    TrustManagerFactory trustManagerFactory =
+	        TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+	    trustManagerFactory.init(keyStore);
+
+	    final KeyManager[] keyManagers = keyManagerFactory.getKeyManagers();
+	    final TrustManager[] trustManagers = trustManagerFactory.getTrustManagers();
+
+	    SSLContext sslContext = SSLContext.getInstance("TLS");
+	    sslContext.init(keyManagers, trustManagers, null);
+	    SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
+
+	    return httpClient
+	        .newBuilder()
+	        .sslSocketFactory(sslSocketFactory, (X509TrustManager) trustManagers[0])
+	        .build();
+	  }
+	
 }
