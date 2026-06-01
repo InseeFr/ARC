@@ -9,8 +9,9 @@
 - New gui for unitary export (non batch)
 - Unitary export may now unserialize json key-value in column with value
 - The csv load phase may handle up to 10 steps of nested calculations
-  - to set the step number at N for a variable calculation, use var$new{N-1}$=expr
-  - to use a variable calculated as step N in expression or filter, use = ...  var$newN$
+  - to set the step number at N for a variable calculation, use var$new{N-1}$= ... expr ...
+  - Note that for backward compatibility, var$new$ is the same as var$new1$ and will be still calculated at step 2
+  - To use a variable calculated as step N in an expression or filter, use = ...  var$newN$
 - The csv load phase may handle on filter clause per step
 - Load of security cve bumps (postgres, spring, jackson, minio)
 
