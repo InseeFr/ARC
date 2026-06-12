@@ -3,7 +3,6 @@ package fr.insee.arc.core.service.global.thread;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -19,8 +18,8 @@ public class MultiThreadingTest {
 		int startIndexOfExecutorNods=0;
 		int numberOfExecutorNods=0;
 		
-		Map<Integer, List<Integer>> filesByNods = MultiThreading.dispatchFilesByNodId(listIdSource, startIndexOfExecutorNods,
-				numberOfExecutorNods);
+		Map<Integer, List<Integer>> filesByNods = MultiThreading.dispatchFilesByNod(listIdSource, startIndexOfExecutorNods,
+				numberOfExecutorNods, false);
 		
 		// test if all files had been allocated to nod 0
 		assertEquals(listIdSource.size(), filesByNods.get(0).size());
@@ -33,8 +32,8 @@ public class MultiThreadingTest {
 		int startIndexOfExecutorNods=1;
 		int numberOfExecutorNods=2;
 		
-		Map<Integer, List<Integer>> filesByNods = MultiThreading.dispatchFilesByNodId(listIdSource, startIndexOfExecutorNods,
-				numberOfExecutorNods);
+		Map<Integer, List<Integer>> filesByNods = MultiThreading.dispatchFilesByNod(listIdSource, startIndexOfExecutorNods,
+				numberOfExecutorNods,true);
 		
 		// test if all files had been allocated to executor nods 1 and 2
 		assertEquals(listIdSource.size(), filesByNods.get(1).size()+filesByNods.get(2).size());
@@ -51,8 +50,8 @@ public class MultiThreadingTest {
 		int startIndexOfExecutorNods=1;
 		int numberOfExecutorNods=2;
 				
-		Map<Integer, List<Integer>> filesByNods1 = MultiThreading.dispatchFilesByNodId(listIdSource, startIndexOfExecutorNods,
-				numberOfExecutorNods);
+		Map<Integer, List<Integer>> filesByNods1 = MultiThreading.dispatchFilesByNod(listIdSource, startIndexOfExecutorNods,
+				numberOfExecutorNods,false);
 		
 		// test if both of file list has been allocated to same executor nod when the number of total executor nods is the same
 		

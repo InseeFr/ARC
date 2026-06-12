@@ -58,8 +58,15 @@ public class ApiMultiphaseService extends ApiService {
 
 		MultiThreading mt = new MultiThreading(this);
 		
+		// If batch mode and volatile, dispatch the files in a non deterministic way but use fifo instead
+		// Because with volatiles database
+		// - all files are proceed in a single step
+		// - and all data are erased when batch fails and the retry reload all files 
+		// It helps with good performance and balancing
+		boolean dispatchNonDeterministic= ((paramBatch!=null) && properties.isVolatileOn());
+		
 		mt.execute(maxParallelWorkers, getTabIdSource().get(ColumnEnum.ID_SOURCE.getColumnName()), this.envExecution,
-				properties.getDatabaseRestrictedUsername());
+				properties.getDatabaseRestrictedUsername(), dispatchNonDeterministic);
 
 	}
 

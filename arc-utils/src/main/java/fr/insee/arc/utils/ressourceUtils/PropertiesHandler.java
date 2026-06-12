@@ -188,7 +188,8 @@ public class PropertiesHandler {
 
 	public boolean isVolatileOn()
 	{
-		return !this.getKubernetesExecutorVolatile().isEmpty() //
+		return this.getKubernetesExecutorVolatile()!=null
+				&& !this.getKubernetesExecutorVolatile().isEmpty() //
 				&& (this.getKubernetesExecutorNumber() > 0);
 	}
 	

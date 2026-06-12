@@ -3,7 +3,6 @@ package fr.insee.arc.core.service.global.thread;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,10 +54,11 @@ public class MultiThreading {
 	 * @param listIdSource
 	 * @param envExecution
 	 * @param restrictedUserName
+	 * @param deterministicDispatchOfFiles Indicate if files are dispatch by node in a deterministic way of not 
 	 * @throws ArcException
 	 */
 	public void execute(int maxParallelWorkers, List<String> listIdSource, String envExecution,
-			String restrictedUserName) {
+			String restrictedUserName, boolean dispatchNonDeterministic) {
 
 		StaticLoggerDispatcher.info(LOGGER, "/* Generation des threads multiphase */");
 
@@ -87,8 +87,9 @@ public class MultiThreading {
 			}
 
 			// dispatch files to a target nod
-			Map<Integer, List<Integer>> filesByNods = dispatchFilesByNodId(listIdSource, startIndexOfExecutorNods,
-					numberOfExecutorNods);
+			// if batch mode and volatile, do it by order
+			// if not, do it in a deterministic way
+			Map<Integer, List<Integer>> filesByNods = dispatchFilesByNod(listIdSource, startIndexOfExecutorNods,numberOfExecutorNods,dispatchNonDeterministic);
 
 			// thread iteration
 			iterateOverThreadConnections(filesByNods, connexionList);
@@ -178,32 +179,78 @@ public class MultiThreading {
 	 * @param numberOfExecutorNods
 	 * @return
 	 */
-	protected static Map<Integer, List<Integer>> dispatchFilesByNodId(List<String> listIdSource,
-			int startIndexOfExecutorNods, int numberOfExecutorNods) {
+	protected static Map<Integer, List<Integer>> dispatchFilesByNod(List<String> listIdSource,
+			int startIndexOfExecutorNods, int numberOfExecutorNods, boolean dispatchNonDeterministic) {
 		Map<Integer, List<Integer>> filesByNodId = new HashMap<>();
 
 		for (int i = startIndexOfExecutorNods; i <= numberOfExecutorNods; i++) {
 			filesByNodId.put(i, new ArrayList<>());
 		}
-
-		// sorting collection in order to be able to execute 
-		// step by step a batch of file
-		Collections.sort(listIdSource);
 		
-		for (int fileIndex = 0; fileIndex < listIdSource.size(); fileIndex++) {
-			if (numberOfExecutorNods == 0) {
-				filesByNodId.get(0).add(fileIndex);
-			} else {
-				int targetNodId = 1 + fileIndex % numberOfExecutorNods;
-				filesByNodId.get(targetNodId).add(fileIndex);
-			}
+		if (numberOfExecutorNods == 0) {
+			return dispatchFilesOnCoordinator(listIdSource, filesByNodId);
 		}
 
+		if (dispatchNonDeterministic)
+		{
+			return dispatchFilesByOrderInList(listIdSource, numberOfExecutorNods, filesByNodId);	
+		}
+
+		return dispatchFilesByName(listIdSource, numberOfExecutorNods, filesByNodId);
+	}
+
+	/**
+	 * File name if used to calculate on which nod the file will be proceeed
+	 * @param listIdSource
+	 * @param numberOfExecutorNods
+	 * @param filesByNodId
+	 * @return
+	 */
+	private static Map<Integer, List<Integer>> dispatchFilesByName(List<String> listIdSource, int numberOfExecutorNods,
+			Map<Integer, List<Integer>> filesByNodId) {
+		for (int fileIndex = 0; fileIndex < listIdSource.size(); fileIndex++) {
+			int hashCode = listIdSource.get(fileIndex).hashCode();
+			hashCode = (hashCode == Integer.MIN_VALUE) ? (Integer.MIN_VALUE + 1) : hashCode;
+			int targetNodId = 1 + Math.abs(hashCode) % numberOfExecutorNods;
+			filesByNodId.get(targetNodId).add(fileIndex);
+		}
+		
 		return filesByNodId;
 	}
 
 	/**
-	 * Build the connection pool for mutithreading returns a list of connections
+	 * Each file is dispatched to a proceeding nod according to its order index in the list of files to proceed
+	 * @param listIdSource
+	 * @param numberOfExecutorNods
+	 * @param filesByNodId
+	 * @return
+	 */
+	private static Map<Integer, List<Integer>> dispatchFilesByOrderInList(List<String> listIdSource,
+			int numberOfExecutorNods, Map<Integer, List<Integer>> filesByNodId) {
+		for (int fileIndex = 0; fileIndex < listIdSource.size(); fileIndex++) {
+			int targetNodId = 1 + fileIndex % numberOfExecutorNods;
+			filesByNodId.get(targetNodId).add(fileIndex);
+		}
+		return filesByNodId;
+	}
+
+	/**
+	 * All files are dispatch to nod 0 (coordinator)
+	 * @param listIdSource
+	 * @param filesByNodId
+	 * @return
+	 */
+	private static Map<Integer, List<Integer>> dispatchFilesOnCoordinator(List<String> listIdSource,
+			Map<Integer, List<Integer>> filesByNodId) {
+		for (int fileIndex = 0; fileIndex < listIdSource.size(); fileIndex++) {
+			filesByNodId.get(ArcDatabase.COORDINATOR.getIndex()).add(fileIndex);
+		}
+		return filesByNodId;
+	}
+
+	
+	/**
+	 * Build the connection pool for multithreading returns a list of connections
 	 * usable by the threads
 	 * 
 	 * @param parallel
