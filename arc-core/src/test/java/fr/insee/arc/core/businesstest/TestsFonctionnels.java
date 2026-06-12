@@ -23,7 +23,6 @@ import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.engine.initialisation.BddPatcherTest;
 import fr.insee.arc.core.service.p1reception.provider.DirectoryPath;
-import fr.insee.arc.core.service.p6export.dao.ExportDao;
 import fr.insee.arc.core.service.p6export.provider.DirectoryPathExport;
 import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
@@ -203,7 +202,7 @@ public class TestsFonctionnels extends InitializeQueryTest {
 		// start export phase
 		ApiServiceFactory.getService(TraitementPhase.EXPORT, sandbox, 10000000, batchMode).invokeApi();
 		
-		File fileOfParquetRootDirectory = new File(DirectoryPathExport.directoryExport(repertoire,"ARC_BAS2", ExportDao.EXPORT_CLIENT_NAME));
+		File fileOfParquetRootDirectory = new File(DirectoryPathExport.directoryExport(repertoire,"ARC_BAS2"));
 		
 		// only one directory should had been created
 		assertEquals(1,fileOfParquetRootDirectory.listFiles().length);
@@ -211,7 +210,7 @@ public class TestsFonctionnels extends InitializeQueryTest {
 		// retrieve date of export
 		String dateOfExport = fileOfParquetRootDirectory.listFiles()[0].getName();
 		
-		File fileOfParquetDirectory = new File(DirectoryPathExport.directoryExport(repertoire,"ARC_BAS2", ExportDao.EXPORT_CLIENT_NAME, dateOfExport));
+		File fileOfParquetDirectory = new File(DirectoryPathExport.directoryExport(repertoire,"ARC_BAS2", dateOfExport));
 
 		// 4 tables should had been export to parquet
 		assertEquals(4,fileOfParquetDirectory.listFiles().length);	

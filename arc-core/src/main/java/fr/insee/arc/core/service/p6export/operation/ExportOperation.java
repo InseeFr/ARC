@@ -8,11 +8,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import fr.insee.arc.core.service.global.bo.Sandbox;
+import fr.insee.arc.core.service.p6export.bo.TableToExport;
 import fr.insee.arc.core.service.p6export.dao.ExportDao;
 import fr.insee.arc.core.service.p6export.dao.ExportMasterNodDao;
 import fr.insee.arc.core.service.p6export.dao.ExportParquetDao;
 import fr.insee.arc.utils.database.ArcDatabase;
-import fr.insee.arc.utils.database.TableToRetrieve;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.utils.LoggerHelper;
 
@@ -25,7 +25,7 @@ public class ExportOperation {
 	private ExportParquetDao exportParquetDao;
 	private ExportMasterNodDao exportMasterNodDao;
 	
-	List<TableToRetrieve> mappingTablesNameExported = new ArrayList<>();
+	List<TableToExport> mappingTablesExportedToCoordinator = new ArrayList<>();
 
 	private static final Logger LOGGER = LogManager.getLogger(ExportOperation.class);
 
@@ -43,15 +43,22 @@ public class ExportOperation {
 	
 	public void exportParquet() throws ArcException {
 		
-		// select business table to be exported
-		Set<String> mappingTablesName = exportParquetDao.selectBusinessTableToExport();
-		// assign business table to the right nod
-		List<TableToRetrieve> tablesToExport = exportParquetDao.fetchBusinessTableToNod(mappingTablesName);
+
+		// select business tables and assign business table to the right nod
+		// register them
+		List<TableToExport> mappingTablesToExportAsFile = exportParquetDao.fetchBusinessTableToNod();
 		
-		mappingTablesNameExported.addAll(tablesToExport);
+		// check if any table marked for export
+		if (mappingTablesToExportAsFile.isEmpty())
+		{
+			return;
+		}
+		
+		// materialized id_source if required
+		exportDao.materializeIdSourceToExport();
 		
 		// export to parquet
-		exportParquetDao.exportTablesToParquet(dateExport, tablesToExport);
+		exportParquetDao.exportTablesToParquet(dateExport, mappingTablesToExportAsFile);
 		
 		// copy exported directory to s3
 		exportParquetDao.copyToS3Out();
@@ -70,7 +77,7 @@ public class ExportOperation {
 		}
 		
 		Set<String> mappingTablesName = exportMasterNodDao.selectBusinessTableToExport();
-		mappingTablesName.stream().forEach( t -> mappingTablesNameExported.add(new TableToRetrieve(ArcDatabase.EXECUTOR,t)));
+		mappingTablesName.stream().forEach( t -> mappingTablesExportedToCoordinator.add(new TableToExport(ArcDatabase.EXECUTOR,t)));
 		
 		LoggerHelper.warn(LOGGER, "Tables to copy in the master database : ");
 		LoggerHelper.warn(LOGGER, mappingTablesName);
@@ -95,7 +102,7 @@ public class ExportOperation {
 		
 		exportDao.commit();
 
-		exportDao.truncateExportedMappingTables(mappingTablesNameExported);
+		exportDao.truncateMappingTablesExportedToCoordinator(mappingTablesExportedToCoordinator);
 
 	}
 

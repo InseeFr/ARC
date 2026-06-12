@@ -180,7 +180,7 @@ fr.insee.arc.batch.parametre.repertoire=C:\\Temp\\
 ## Database configuration
 fr.insee.database.arc.url=jdbc:postgresql://localhost:5432/arc_single_nod
 fr.insee.database.arc.username=user
-fr.insee.database.arc.password=password
+fr.insee.database.arc.password=password // #gitleaks:allow
 fr.insee.database.arc.driverClassName=org.postgresql.Driver
 ```
 

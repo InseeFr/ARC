@@ -113,12 +113,22 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * @throws ClassNotFoundException
 	 */
 	public final Connection getDriverConnexion() throws ArcException {
+		return getDriverConnexion(false);
+	}
+	
+	/**
+	 * Retourne une connexion vers la base de données
+	 *
+	 * @return la connexion
+	 * @throws ArcException
+	 * @throws ClassNotFoundException
+	 */
+	public final Connection getDriverConnexion(boolean debugMode) throws ArcException {
 		// invocation du driver
-		try {
-
-			int validConnectionIndex = validConnectionIndex(this.pool);
-
-			ConnectionAttribute currentConnectionAttributes = properties.connectionProperties()
+		try {			
+			int validConnectionIndex = debugMode?this.pool:validConnectionIndex(this.pool);
+			ConnectionAttribute currentConnectionAttributes = 
+					(debugMode ? properties.connectionPropertiesDebug(): properties.connectionProperties())
 					.get(validConnectionIndex);
 			String driver = currentConnectionAttributes.getDatabaseDriverClassName();
 			String uri = currentConnectionAttributes.getDatabaseUrl();
@@ -225,8 +235,7 @@ public class UtilitaireDao implements IConstanteNumerique, IConstanteCaractere {
 	 * @throws ArcException
 	 */
 	public String getString(Connection connexion, GenericPreparedStatementBuilder requete) throws ArcException {
-		List<List<String>> returned = executeRequest(connexion, requete,
-				new ModeRequete[] { ModeRequete.EXTRA_FLOAT_DIGIT });
+		List<List<String>> returned = executeRequest(connexion, requete);
 		return (returned.size() <= EXECUTE_REQUEST_DATA_START_INDEX ? null
 				: returned.get(EXECUTE_REQUEST_DATA_START_INDEX).get(0));
 

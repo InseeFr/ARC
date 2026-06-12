@@ -1566,6 +1566,7 @@ public class VObjectService {
 
 	public void resetConnectionIndex() {
 		this.connectionIndex = ArcDatabase.COORDINATOR.getIndex();
+		this.connection = null;
 	}
 
 	public String getUserName() {

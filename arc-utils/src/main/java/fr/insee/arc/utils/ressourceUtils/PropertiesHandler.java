@@ -33,6 +33,9 @@ public class PropertiesHandler {
 	 * List of connection attributes
 	 */
 	private List<ConnectionAttribute> connectionProperties;
+	private List<ConnectionAttribute> connectionPropertiesDebug;
+	
+	private static final int MAX_NUMBER_OF_DEBUG_CONNECTION = 16;
 
 	/* Log */
 	private String logDirectory;
@@ -147,6 +150,7 @@ public class PropertiesHandler {
 		this.databaseUrl = databaseUrl;
 		// reset the connection getter
 		this.connectionProperties=null;
+		this.connectionPropertiesDebug=null;
 	}
 
 	public String getDatabaseUsername() {
@@ -157,16 +161,18 @@ public class PropertiesHandler {
 		this.databaseUsername = databaseUsername;
 		// reset the connection getter
 		this.connectionProperties=null;
+		this.connectionPropertiesDebug=null;
 	}
 
-	public String getDatabasePassword() {
-		return databasePassword;
+	public String getDatabasePassword() { // #gitleaks:allow
+		return databasePassword; // #gitleaks:allow
 	}
 
-	public void setDatabasePassword(String databasePassword) {
-		this.databasePassword = databasePassword;
+	public void setDatabasePassword(String databasePassword) { // #gitleaks:allow
+		this.databasePassword = databasePassword; // #gitleaks:allow
 		// reset the connection getter
 		this.connectionProperties=null;
+		this.connectionPropertiesDebug=null;
 	}
 
 	public String getDatabaseDriverClassName() {
@@ -177,8 +183,15 @@ public class PropertiesHandler {
 		this.databaseDriverClassName = databaseDriverClassName;
 		// reset the connection getter
 		this.connectionProperties=null;
+		this.connectionPropertiesDebug=null;
 	}
 
+	public boolean isVolatileOn()
+	{
+		return !this.getKubernetesExecutorVolatile().isEmpty() //
+				&& (this.getKubernetesExecutorNumber() > 0);
+	}
+	
 	public String getDatabaseSchema() {
 		return databaseSchema;
 	}
@@ -620,6 +633,7 @@ public class PropertiesHandler {
 		if (connectionProperties.size()>1 && this.getKubernetesExecutorNumber()>0)
 		{
 			this.setKubernetesExecutorNumber(0);
+			return this.connectionProperties;
 		}
 		
 		
@@ -641,6 +655,75 @@ public class PropertiesHandler {
 		return this.connectionProperties;
 
 	}
+	
+	/**
+	 * Unserialize the connection data found in properties
+	 * 
+	 * @return
+	 * @throws ArcException 
+	 */
+	public List<ConnectionAttribute> connectionPropertiesDebug() {
+		
+		if (this.connectionPropertiesDebug != null) {
+			return this.connectionPropertiesDebug;
+		}
+		
+		connectionPropertiesDebug = new ArrayList<>();
+		
+		String[] databaseUrls = ConnectionAttribute.unserialize(this.databaseUrl);
+		String[] databaseUsernames = ConnectionAttribute.unserialize(this.databaseUsername);
+		String[] databasePasswords = ConnectionAttribute.unserialize(this.databasePassword);
+		String[] databaseDriverClassNames = ConnectionAttribute.unserialize(this.databaseDriverClassName);
+		
+		// driver may only be declared once for all databases
+		if (databaseDriverClassNames.length==1 && databaseUrls.length>1)
+		{
+			String driverClassName = databaseDriverClassNames[0];
+			databaseDriverClassNames = new String[databaseUrls.length];
+			Arrays.fill(databaseDriverClassNames, driverClassName);
+		}
+
+		// fill the connectionProperties
+		for (int tokenIndex = 0; tokenIndex < databaseUrls.length; tokenIndex++) {
+			
+			ConnectionAttribute connectionAttribute = new ConnectionAttribute(databaseUrls[tokenIndex], databaseUsernames[tokenIndex],
+					databasePasswords[tokenIndex], databaseDriverClassNames[tokenIndex]);
+			
+			try {
+				connectionAttribute.setHost(remapHostAddress.apply(connectionAttribute.getHost()));
+			} catch (ArcException e) {
+				this.connectionPropertiesDebug = null;
+				return this.connectionPropertiesDebug;
+			}
+			
+			connectionPropertiesDebug
+					.add(connectionAttribute);
+		}
+
+		// if executors are declared on pool, return the connection properties list
+		if (connectionPropertiesDebug.size()>1)
+		{
+			return this.connectionPropertiesDebug;
+		}
+		
+		if (this.kubernetesExecutorLabel!=null)
+		{
+			// declare as many executor connection as MAX_NUMBER_OF_DEBUG_CONNECTION
+			for (int i=0; i<MAX_NUMBER_OF_DEBUG_CONNECTION; i++)
+			{
+				connectionPropertiesDebug
+				.add(new ConnectionAttribute(
+						KubernetesServiceLayer.getUri(this.kubernetesExecutorLabel, i, this.kubernetesExecutorDatabase, this.kubernetesExecutorPort) //
+						, this.kubernetesExecutorUser
+						, this.databasePassword //
+						, this.databaseDriverClassName //
+						));					
+			}
+		}
+		return this.connectionPropertiesDebug;
+
+	}
+	
 	
 	/**
 	 * Retrieve connection attributes for a given connection
@@ -716,5 +799,15 @@ public class PropertiesHandler {
 	public void setFilesRetentionDays(Integer filesRetentionDays) {
 		this.filesRetentionDays = filesRetentionDays;
 	}
+
+	public List<ConnectionAttribute> getConnectionProperties() {
+		return connectionProperties;
+	}
+
+	public List<ConnectionAttribute> getConnectionPropertiesDebug() {
+		return connectionPropertiesDebug;
+	}
+	
+	
 
 }

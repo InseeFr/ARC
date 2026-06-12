@@ -1,5 +1,7 @@
 package fr.insee.arc.web.gui.query.dao;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -8,8 +10,11 @@ import org.springframework.stereotype.Component;
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.dataobjects.ViewEnum;
+import fr.insee.arc.utils.dao.GenericPreparedStatementBuilder;
 import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
+import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import fr.insee.arc.web.gui.all.util.VObject;
 import fr.insee.arc.web.gui.all.util.VObjectHelperDao;
 
@@ -20,8 +25,9 @@ public class QueryDao extends VObjectHelperDao {
 	 * dao call to build query vobject
 	 * 
 	 * @param viewWsContext
+	 * @throws ArcException 
 	 */
-	public void initializeQuery(VObject viewQuery, Integer myDbConnection, String myQuery) {
+	public void initializeQuery(VObject viewQuery, Integer myDbConnection, String myQuery) throws ArcException {
 		Map<String, String> defaultInputFields = new HashMap<>();
 
 		if (myQuery == null || myQuery.isEmpty()) {
@@ -34,27 +40,34 @@ public class QueryDao extends VObjectHelperDao {
 			m = m.substring(0, m.length() - 1);
 		}
 
-		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder(m);
-
-		if (Boolean.TRUE.equals(UtilitaireDao.get(myDbConnection).testResultRequest(null, query))) {
-			this.vObjectService.setConnectionIndex(myDbConnection);
-			this.vObjectService.initialize(viewQuery, query, "arc.ihm_query", defaultInputFields);
-			this.vObjectService.resetConnectionIndex();
-
-		} else {
-
-			query = new ArcPreparedStatementBuilder();
-
-			try {
-				UtilitaireDao.get(myDbConnection).executeRequest(null, myQuery);
-				query.build(SQL.SELECT, query.quoteText("query succeed"), SQL.AS, "query_result");
-			} catch (Exception e) {
-				query.build(SQL.SELECT, query.quoteText(e.getMessage()), SQL.AS, "query_result");
+		try (Connection debugConnection = UtilitaireDao.get(myDbConnection).getDriverConnexion(true);)
+		{
+			ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder(m);
+	
+			if (Boolean.TRUE.equals(UtilitaireDao.get(myDbConnection).testResultRequest(debugConnection, query))) {
+				this.vObjectService.setConnectionIndex(myDbConnection);
+				this.vObjectService.setConnection(debugConnection);
+				this.vObjectService.initialize(viewQuery, query, "arc.ihm_query", defaultInputFields);
+			} else {
+	
+				query = new ArcPreparedStatementBuilder();
+	
+				try {
+					UtilitaireDao.get(myDbConnection).executeImmediate(debugConnection, new GenericPreparedStatementBuilder(myQuery));
+					query.build(SQL.SELECT, query.quoteText("query succeed"), SQL.AS, "query_result");
+				} catch (Exception e) {
+					query.build(SQL.SELECT, query.quoteText(e.getMessage()), SQL.AS, "query_result");
+				}
+	
+				this.vObjectService.initialize(viewQuery, query, "arc.ihm_query", defaultInputFields);
 			}
-
-			this.vObjectService.initialize(viewQuery, query, "arc.ihm_query", defaultInputFields);
-
+		} catch (SQLException e) {
+			throw new ArcException(ArcExceptionMessage.DATABASE_CONNECTION_EXECUTOR_FAILED);
 		}
+		finally {
+			this.vObjectService.resetConnectionIndex();	
+		}
+	
 
 	}
 
@@ -62,8 +75,10 @@ public class QueryDao extends VObjectHelperDao {
 	 * dao call to build tables vobject
 	 * 
 	 * @param viewWsContext
+	 * @throws ArcException 
+	 * @throws SQLException 
 	 */
-	public void initializeTable(VObject viewTable, Integer myDbConnection, String mySchema) {
+	public void initializeTable(VObject viewTable, Integer myDbConnection, String mySchema) throws ArcException {
 		ViewEnum dataModelTable = ViewEnum.PG_TABLES;
 		String nameOfViewTable = dataObjectService.getView(dataModelTable);
 		// view query
@@ -73,9 +88,19 @@ public class QueryDao extends VObjectHelperDao {
 		// default value
 		Map<String, String> defaultInputFields = new HashMap<>();
 		// initialize vobject
-		vObjectService.setConnectionIndex(myDbConnection);
-		vObjectService.initialize(viewTable, query, "arc.ihm_table", defaultInputFields);
-		this.vObjectService.resetConnectionIndex();
+		
+		// create a debug connection
+		try (Connection c = UtilitaireDao.get(myDbConnection).getDriverConnexion(true);)
+		{
+			vObjectService.setConnectionIndex(myDbConnection);
+			vObjectService.setConnection(c);
+			vObjectService.initialize(viewTable, query, "arc.ihm_table", defaultInputFields);
+		} catch (SQLException e) {
+			throw new ArcException(ArcExceptionMessage.DATABASE_CONNECTION_EXECUTOR_FAILED);
+		}
+		finally {
+			this.vObjectService.resetConnectionIndex();
+		}
 	}
 
 	public static String queryTableSelected(String mySchema, String tableName) {

@@ -16,7 +16,7 @@ public class ConnectionAttribute {
 
 	private String databaseUrl;
 	private String databaseUsername;
-	private String databasePassword;
+	private String databasePassword; // #gitleaks:allow
 	private String databaseDriverClassName;
 	private String prefix;
 	private String host;
@@ -28,7 +28,7 @@ public class ConnectionAttribute {
 		super();
 		this.databaseUrl = databaseUrl;
 		this.databaseUsername = databaseUsername;
-		this.databasePassword = databasePassword;
+		this.databasePassword = databasePassword; // #gitleaks:allow
 		this.databaseDriverClassName = databaseDriverClassName;
 
 		// deduce from postgres uri the host, the port and the database
@@ -113,8 +113,8 @@ public class ConnectionAttribute {
 		this.databaseUsername = databaseUsername;
 	}
 
-	public String getDatabasePassword() {
-		return databasePassword;
+	public String getDatabasePassword() { // #gitleaks:allow
+		return databasePassword; // #gitleaks:allow
 	}
 
 	public void setDatabasePassword(String databasePassword) {

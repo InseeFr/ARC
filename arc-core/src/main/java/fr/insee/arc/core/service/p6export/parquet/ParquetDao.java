@@ -8,8 +8,7 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import fr.insee.arc.core.service.p1reception.provider.DirectoriesReception;
-import fr.insee.arc.core.service.p2chargement.bo.NormeRules;
+import fr.insee.arc.core.service.p6export.bo.TableToExport;
 import fr.insee.arc.core.util.BDParameters;
 import fr.insee.arc.utils.consumer.ThrowingConsumer;
 import fr.insee.arc.utils.dao.DuckdbDao;
@@ -49,12 +48,12 @@ public class ParquetDao {
 	 * @param encryptionKey
 	 * @throws ArcException
 	 */
-	public void exportToParquet(List<TableToRetrieve> tables, String outputDirectory,
+	public void exportToParquet(List<TableToExport> tables, String outputDirectory,
 			ParquetEncryptionKey encryptionKey) throws ArcException {
 		exportToParquet(tables, outputDirectory, encryptionKey, false);
 	}
 	
-	
+
 	/**
 	 * Export to parquet
 	 * @param tables
@@ -63,7 +62,7 @@ public class ParquetDao {
 	 * @param exportOnlyIfNotEmpty
 	 * @throws ArcException
 	 */
-	public void exportToParquet(List<TableToRetrieve> tables, String outputDirectory,
+	public void exportToParquet(List<? extends TableToRetrieve> tables, String outputDirectory,
 			ParquetEncryptionKey encryptionKey, boolean exportIfEmpty) throws ArcException {
 
 		this.encryptionKey=encryptionKey;

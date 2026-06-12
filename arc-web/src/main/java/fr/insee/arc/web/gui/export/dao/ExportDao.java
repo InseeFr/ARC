@@ -255,11 +255,6 @@ public class ExportDao extends VObjectHelperDao {
 							}
 						}
 					}
-	
-					
-					System.out.println("§§§§§§§§§§§");
-					System.out.println(tabH);
-					System.out.println(tabV);
 					
 					// traitement des variables tableaux
 					if (!tabH.isEmpty() && !tabV.isEmpty()) {

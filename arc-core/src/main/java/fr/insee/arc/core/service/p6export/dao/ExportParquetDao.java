@@ -2,10 +2,10 @@ package fr.insee.arc.core.service.p6export.dao;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
+import java.util.stream.IntStream;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -15,6 +15,7 @@ import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.dataobjects.ViewEnum;
 import fr.insee.arc.core.model.ExportOption;
 import fr.insee.arc.core.service.global.bo.Sandbox;
+import fr.insee.arc.core.service.p6export.bo.TableToExport;
 import fr.insee.arc.core.service.p6export.parquet.ParquetDao;
 import fr.insee.arc.core.service.p6export.parquet.ParquetEncryptionKey;
 import fr.insee.arc.core.service.p6export.parquet.ParquetEncryptionKey.EncryptionType;
@@ -23,7 +24,6 @@ import fr.insee.arc.core.service.s3.ArcS3;
 import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.database.ArcDatabase;
-import fr.insee.arc.utils.database.TableToRetrieve;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.files.FileUtilsArc;
 import fr.insee.arc.utils.ressourceUtils.PropertiesHandler;
@@ -52,63 +52,81 @@ public class ExportParquetDao {
 	 * @return
 	 * @throws ArcException
 	 */
-	public Set<String> selectBusinessTableToExport() throws ArcException {
-		Set<String> mappingTablesName = new HashSet<>();
-
-		int numberOfNods = ArcDatabase.numberOfNods();
-
-		// if executor nods, get tables to retrieve from them else get from coordinator
-		if (ArcDatabase.isScaled()) {
-			queryBusinessTablesFromNods(mappingTablesName, ArcDatabase.EXECUTOR.getIndex(), numberOfNods);
-		} else {
-			queryBusinessTablesFromNods(mappingTablesName, ArcDatabase.COORDINATOR.getIndex(), numberOfNods);
-		}
-
-		return mappingTablesName;
-	}
 
 	/**
 	 * Query table name to export from mod_table_metier add them to set of tables to
 	 * export
-	 * Query is sent on all nods in order as their could be some synchronization issue if user
-	 * change tables
 	 * 
 	 * @param mappingTablesName
 	 * @param startNodConnectionIndex
 	 * @param endNodConnectionIndex
+	 * @return
 	 * @throws ArcException
 	 */
-	protected void queryBusinessTablesFromNods(Set<String> mappingTablesName, int startNodConnectionIndex,
-			int endNodConnectionIndex) throws ArcException {
+	public GenericBean selectBusinessTableToExport() throws ArcException {
 
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
-		query.build(SQL.SELECT, ColumnEnum.NOM_TABLE_METIER.alias(SQL.ALIAS_A), SQL.FROM,
-				ViewEnum.MOD_TABLE_METIER.getFullName(coordinatorSandbox.getSchema()), SQL.ALIAS_A
-				, SQL.LEFT_JOIN
-				,ViewEnum.EXPORT_OPTION.getFullName(coordinatorSandbox.getSchema()), SQL.ALIAS_B
-				, SQL.ON
-				, ColumnEnum.NOM_TABLE_METIER.alias(SQL.ALIAS_A), "=",ColumnEnum.NOM_TABLE_METIER.alias(SQL.ALIAS_B)
-				, SQL.WHERE
-				, "COALESCE(", ColumnEnum.EXPORT_PARQUET_OPTION.alias(SQL.ALIAS_B), ",", query.quoteText(ExportOption.ACTIVE.getStatus()) ,")"
-				, "=", query.quoteText(ExportOption.ACTIVE.getStatus())
-				);
 
+		query.build(SQL.WITH, ViewEnum.T1, SQL.AS, "(");
+		query.build(SQL.BR, SQL.SELECT, ColumnEnum.NOM_TABLE_METIER.alias(SQL.ALIAS_A), SQL.FROM);
+		query.build(SQL.BR, ViewEnum.MOD_TABLE_METIER.getFullName(coordinatorSandbox.getSchema()), SQL.ALIAS_A);
+		query.build(SQL.BR, SQL.LEFT_JOIN, ViewEnum.EXPORT_OPTION.getFullName(coordinatorSandbox.getSchema()),
+				SQL.ALIAS_B);
+		query.build(SQL.BR, SQL.ON, ColumnEnum.NOM_TABLE_METIER.alias(SQL.ALIAS_A), "=",
+				ColumnEnum.NOM_TABLE_METIER.alias(SQL.ALIAS_B));
+		query.build(SQL.BR, SQL.WHERE, "COALESCE(", ColumnEnum.EXPORT_PARQUET_OPTION.alias(SQL.ALIAS_B), ",",
+				query.quoteText(ExportOption.ACTIVE.getStatus()), ")", "=",
+				query.quoteText(ExportOption.ACTIVE.getStatus()));
+		query.build(SQL.BR, ")");
+		query.build(SQL.BR, SQL.SELECT, ColumnEnum.NOM_TABLE_METIER);
+		query.build(SQL.BR, ",", ColumnEnum.TIMESTAMP_DIRECTORY);
+		query.build(SQL.BR, ",", ColumnEnum.FILE_NAME);
+		query.build(SQL.BR, ",", ColumnEnum.ZIP);
+		query.build(SQL.BR, ",", ColumnEnum.NOMENCLATURE_EXPORT);
+		query.build(SQL.BR, ",", ColumnEnum.NULLS);
+		query.build(SQL.BR, ",", ColumnEnum.HEADERS);
+		query.build(SQL.BR, ",", ColumnEnum.FILTER_TABLE);
+		query.build(SQL.BR, ",", ColumnEnum.ORDER_TABLE);
+		query.build(SQL.BR, ",", ColumnEnum.JSON_KEY_VALUE);
+		query.build(SQL.BR, ",", ColumnEnum.COLUMNS_ARRAY_HEADER);
+		query.build(SQL.BR, ",", ColumnEnum.COLUMNS_ARRAY_VALUE);
+		query.build(SQL.BR, SQL.FROM, ViewEnum.T1, SQL.ALIAS_A);
+		query.build(SQL.BR, SQL.LEFT_JOIN, ViewEnum.EXPORT.getFullName(coordinatorSandbox.getSchema()), SQL.ALIAS_B);
+		query.build(SQL.BR, SQL.ON, ColumnEnum.NOM_TABLE_METIER.alias(SQL.ALIAS_A), "=",
+				ColumnEnum.TABLE_TO_EXPORT.alias(SQL.ALIAS_B));
 
-		for (int connectionIndex = startNodConnectionIndex; connectionIndex < endNodConnectionIndex; connectionIndex++) {
-			
-			GenericBean gb = new GenericBean(UtilitaireDao.get(connectionIndex).executeRequest(null, query));
-			mappingTablesName.addAll(gb.getColumnValues(ColumnEnum.NOM_TABLE_METIER.getColumnName()));
-		}
+		GenericBean gb = new GenericBean(
+				UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).executeRequest(null, query));
+
+		return gb;
 	}
 
-	public List<TableToRetrieve> fetchBusinessTableToNod(Set<String> mappingTablesName) {
-		List<TableToRetrieve> tablesToExport = new ArrayList<>();
-		// business mapping table tagged to executor nod if connection is scaled
-		mappingTablesName.stream()
-				.forEach(t -> tablesToExport.add(
-						new TableToRetrieve(ArcDatabase.isScaled() ? ArcDatabase.EXECUTOR : ArcDatabase.COORDINATOR, //
-								ViewEnum.getFullName(this.coordinatorSandbox.getSchema(), t) //
-						)));
+	public List<TableToExport> fetchBusinessTableToNod() throws ArcException {
+		
+		GenericBean mappingTablesNameToExport = selectBusinessTableToExport();
+		
+		List<TableToExport> tablesToExport = new ArrayList<>();
+		Map<String, List<String>> m = mappingTablesNameToExport.mapContent();
+
+		IntStream.range(0, mappingTablesNameToExport.getContent().size()).boxed().forEach(rowIndex -> {
+
+			// the business mapping tables are tagged to executor nod if connection is scaled
+			TableToExport tableToExport = new TableToExport(
+					ArcDatabase.isScaled() ? ArcDatabase.EXECUTOR : ArcDatabase.COORDINATOR,
+					ViewEnum.getFullName(this.coordinatorSandbox.getSchema(),
+							m.get(ColumnEnum.NOM_TABLE_METIER.getColumnName()).get(rowIndex)))
+					.setTimestampDirectory(m.get(ColumnEnum.TIMESTAMP_DIRECTORY.getColumnName()).get(rowIndex)) //
+					.setFileName(m.get(ColumnEnum.FILE_NAME.getColumnName()).get(rowIndex)) //
+					.setFileFormat(m.get(ColumnEnum.ZIP.getColumnName()).get(rowIndex)) //
+					.setNullAsNull(m.get(ColumnEnum.NULLS.getColumnName()).get(rowIndex)) //
+					.setHeaders(m.get(ColumnEnum.HEADERS.getColumnName()).get(rowIndex)) //
+					.setTableSqlFilter(m.get(ColumnEnum.FILTER_TABLE.getColumnName()).get(rowIndex))
+					.setTableSqlOrder(m.get(ColumnEnum.ORDER_TABLE.getColumnName()).get(rowIndex))
+					.setTableSqlJsonToColumns(m.get(ColumnEnum.JSON_KEY_VALUE.getColumnName()).get(rowIndex));
+
+			tablesToExport.add(tableToExport);
+		});
+
 		return tablesToExport;
 	}
 
@@ -120,18 +138,19 @@ public class ExportParquetDao {
 	 * @param tablesToExport
 	 * @throws ArcException
 	 */
-	public void exportTablesToParquet(String dateExport, List<TableToRetrieve> tablesToExport) throws ArcException {
+	public void exportTablesToParquet(String dateExport, List<TableToExport> tablesToExport) throws ArcException {
+
 		PropertiesHandler properties = PropertiesHandler.getInstance();
 		
 		this.directoryOut = DirectoryPathExport.directoryExport(properties.getBatchParametersDirectory(),
-				this.coordinatorSandbox.getSchema(), ExportDao.EXPORT_CLIENT_NAME, dateExport);
+				this.coordinatorSandbox.getSchema(), dateExport);
 
 		this.directoryOutTemp = DirectoryPathExport.directoryExportTemp(properties.getBatchParametersDirectory(),
-				this.coordinatorSandbox.getSchema(), ExportDao.EXPORT_CLIENT_NAME, dateExport);
-		
-		this.s3Out = DirectoryPathExport.s3Export(this.coordinatorSandbox.getSchema(), ExportDao.EXPORT_CLIENT_NAME, dateExport);
+				this.coordinatorSandbox.getSchema(), dateExport);
 
-		this.s3OutTemp = DirectoryPathExport.s3ExportTemp(this.coordinatorSandbox.getSchema(), ExportDao.EXPORT_CLIENT_NAME, dateExport);
+		this.s3Out = DirectoryPathExport.s3Export(this.coordinatorSandbox.getSchema(), dateExport);
+
+		this.s3OutTemp = DirectoryPathExport.s3ExportTemp(this.coordinatorSandbox.getSchema(), dateExport);
 
 		ParquetEncryptionKey parquetEncryptionKey = properties.getS3OutputParquetKey().isEmpty() ? null
 				: new ParquetEncryptionKey(EncryptionType.KEY256, properties.getS3OutputParquetKey());
@@ -182,15 +201,17 @@ public class ExportParquetDao {
 			
 			return;
 		}
-		
-		// once upload to S3 complete, move the file in temporary bucket to the permanent bucket
+
+		// once upload to S3 complete, move the file in temporary bucket to the
+		// permanent bucket
 		ArcS3.OUTPUT_BUCKET.createDirectory(this.s3Out);
 		ArcS3.OUTPUT_BUCKET.moveDirectory(this.s3OutTemp, this.s3Out);
 	}
 	
 	/**
-	 * Roll back file system and s3 on problem
-	 * Delete the temporary directories or bucket used to export parquet files
+	 * Roll back file system and s3 on problem Delete the temporary directories or
+	 * bucket used to export parquet files
+	 * 
 	 * @throws ArcException
 	 */
 	public void rollback() throws ArcException

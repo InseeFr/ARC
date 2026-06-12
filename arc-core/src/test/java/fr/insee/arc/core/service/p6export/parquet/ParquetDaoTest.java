@@ -15,12 +15,12 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import fr.insee.arc.core.service.p6export.bo.TableToExport;
 import fr.insee.arc.core.service.p6export.parquet.ParquetEncryptionKey.EncryptionType;
 import fr.insee.arc.utils.dao.GenericPreparedStatementBuilder;
 import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.database.ArcDatabase;
-import fr.insee.arc.utils.database.TableToRetrieve;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.query.InitializeQueryTest;
 
@@ -63,8 +63,8 @@ public class ParquetDaoTest extends ParquetDao {
 		// directory is empty
 		assertEquals(0, root.listFiles().length);
 
-		exportToParquet(Arrays.asList(new TableToRetrieve(ArcDatabase.COORDINATOR, testTable1),
-				new TableToRetrieve(ArcDatabase.EXECUTOR, testTable2)), repertoire, null);
+		exportToParquet(Arrays.asList(new TableToExport(ArcDatabase.COORDINATOR, testTable1),
+				new TableToExport(ArcDatabase.EXECUTOR, testTable2)), repertoire, null);
 
 		List<String> f = Arrays.asList(root.listFiles()).stream().map(t -> t.getName()).toList();
 		assertEquals(2, f.size());
@@ -75,8 +75,8 @@ public class ParquetDaoTest extends ParquetDao {
 		assertDoesNotThrow(() -> {
 			ParquetEncryptionKey p256 = new ParquetEncryptionKey(EncryptionType.KEY256,
 					"01234567891123450123456789112345");
-			exportToParquet(Arrays.asList(new TableToRetrieve(ArcDatabase.COORDINATOR, testTable1),
-					new TableToRetrieve(ArcDatabase.EXECUTOR, testTable2)), repertoire, p256);
+			exportToParquet(Arrays.asList(new TableToExport(ArcDatabase.COORDINATOR, testTable1),
+					new TableToExport(ArcDatabase.EXECUTOR, testTable2)), repertoire, p256);
 		});
 
 	}

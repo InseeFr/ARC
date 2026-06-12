@@ -10,6 +10,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.context.WebApplicationContext;
 
 import fr.insee.arc.utils.database.ArcDatabase;
+import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.textUtils.IConstanteCaractere;
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.web.gui.all.service.ArcWebGenericService;
@@ -75,14 +76,23 @@ public class InteractorQuery extends ArcWebGenericService<ModelQuery, QueryDao> 
 
 	public void initializeQuery(VObject viewQuery) {
 		LoggerHelper.debug(LOGGER, "/* initializeQuery */");
-		dao.initializeQuery(viewQuery, myDbConnection, this.myQuery);
+		try {
+			dao.initializeQuery(viewQuery, myDbConnection, this.myQuery);
+		} catch (ArcException e) {
+			e.logMessageException();
+		}
 	}
 
 
 	// Table list
 	public void initializeTable(VObject viewTable) {
 		LoggerHelper.debug(LOGGER, "/* initializeTable */");
-		dao.initializeTable(viewTable, myDbConnection, this.mySchema);
+		try {
+			dao.initializeTable(viewTable, myDbConnection, this.mySchema);
+		} catch (ArcException e) {
+			e.logMessageException();
+		}
+		
 	}
 
 }

@@ -123,8 +123,6 @@ public class ExportDaoTest extends InitializeQueryTest {
 
 		// execute query
 		Map<String, List<String>> retrievedData = pdao.exportFileRetrieveRules(0, howToExport, tablesToExport, BddPatcherTest.testSandbox1);
-
-		System.out.println(retrievedData);
 		
 		// test the content of the view
 		assertEquals(3, retrievedData.keySet().size()); // 3 columns selected

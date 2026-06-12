@@ -17,9 +17,7 @@ public class TableToRetrieve {
 	}
 	
 	public TableToRetrieve(String nod, String tableName) {
-		super();
-		this.nod = ArcDatabase.valueOf(nod);
-		this.tableName = tableName;
+		this(ArcDatabase.valueOf(nod), tableName);
 	}
 
 	public ArcDatabase getNod() {

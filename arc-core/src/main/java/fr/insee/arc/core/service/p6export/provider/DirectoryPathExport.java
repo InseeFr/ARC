@@ -27,26 +27,21 @@ public class DirectoryPathExport {
 		return FileSystemManagement.directoryPhaseRootSubdirectories(rootDirectory, env, TraitementPhase.EXPORT);
 	}
 
-	public static String directoryExport(String rootDirectory, String env, String clientExport) {
-		return FileSystemManagement.directoryPhaseRootSubdirectories(rootDirectory, env, TraitementPhase.EXPORT, clientExport);
+	public static String directoryExport(String rootDirectory, String env, String dateExport) {
+		return FileSystemManagement.directoryPhaseRootSubdirectories(rootDirectory, env, TraitementPhase.EXPORT, dateExport);
 	}
 	
-	public static String directoryExport(String rootDirectory, String env, String clientExport, String dateExport) {
-		return FileSystemManagement.directoryPhaseRootSubdirectories(rootDirectory, env, TraitementPhase.EXPORT, clientExport,
-				dateExport);
+	public static String directoryExportTemp(String rootDirectory, String env, String dateExport) {
+		return new StringBuilder(directoryExport(rootDirectory, env, dateExport)).append(Delimiters.FILE_TOKEN_DELIMITER).append(DIR_TEMP).toString();
 	}
 	
-	public static String directoryExportTemp(String rootDirectory, String env, String clientExport, String dateExport) {
-		return new StringBuilder(directoryExport(rootDirectory, env, clientExport, dateExport)).append(Delimiters.FILE_TOKEN_DELIMITER).append(DIR_TEMP).toString();
-	}
-	
-	public static String s3Export(String env, String clientExport, String dateExport) {
-		return FileSystemManagement.directoryRootSubdirectories(S3_EXPORT_ROOT, env, clientExport,
+	public static String s3Export(String env, String dateExport) {
+		return FileSystemManagement.directoryRootSubdirectories(S3_EXPORT_ROOT, env, TraitementPhase.EXPORT.toString(),
 				dateExport);
 	}
 
-	public static String s3ExportTemp(String env, String clientExport, String dateExport) {
-		return FileSystemManagement.directoryRootSubdirectories(S3_EXPORT_ROOT_TEMP, env, clientExport,
+	public static String s3ExportTemp(String env, String dateExport) {
+		return FileSystemManagement.directoryRootSubdirectories(S3_EXPORT_ROOT_TEMP, env, TraitementPhase.EXPORT.toString(),
 				dateExport);
 	}
 

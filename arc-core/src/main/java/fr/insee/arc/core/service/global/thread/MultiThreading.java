@@ -3,6 +3,7 @@ package fr.insee.arc.core.service.global.thread;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -185,6 +186,9 @@ public class MultiThreading {
 			filesByNodId.put(i, new ArrayList<>());
 		}
 
+		// sorting collection in order to be able to execute 
+		// step by step a batch of file
+		Collections.sort(listIdSource);
 		
 		for (int fileIndex = 0; fileIndex < listIdSource.size(); fileIndex++) {
 			if (numberOfExecutorNods == 0) {

@@ -205,9 +205,10 @@ Pour que ARC puisse lire et mettre en forme les données en entrée de processus
 
 - Déclarer l'encoding du fichier parmi les [charsets Postgres](https://www.postgresql.org/docs/current/multibyte.html#CHARSET-TABLE)
 - Créer des variables
-- Faire la jointure entre les données et des nomenclatures
-- Générer de nouvelles variables
-- Indexer les données
+- Faire la jointure entre les données soruces et d'autres tables
+- Indexer les données source
+- Générer de nouvelles variables etape par étape
+- Filtrer selon les variables des étapes
 
 Par exemple :
 
