@@ -43,7 +43,7 @@ public class MultiThreadingTest {
 	/**
 	 * files must be allocate to a target nod with consistency according to their name
 	 */
-	public void dispatchFilesByNod_2ExecutorNods_fifoTest()
+	public void dispatchFilesByNod_2ExecutorNods_fifoNonDeterministicTest()
 	{
 		List<String> listIdSource = Arrays.asList("file1", "file2", "file3", "file4", "file5");
 		
@@ -51,7 +51,7 @@ public class MultiThreadingTest {
 		int numberOfExecutorNods=2;
 				
 		Map<Integer, List<Integer>> filesByNods1 = MultiThreading.dispatchFilesByNod(listIdSource, startIndexOfExecutorNods,
-				numberOfExecutorNods,false);
+				numberOfExecutorNods,true);
 		
 		// test if both of file list has been allocated to same executor nod when the number of total executor nods is the same
 		
@@ -62,4 +62,23 @@ public class MultiThreadingTest {
 		assertEquals(filesInNods2OrderedByName,Arrays.asList("file2","file4"));
 	}
 
+	public void dispatchFilesByNod_2ExecutorNods_NameHashDeterministicTest()
+	{
+		List<String> listIdSource = Arrays.asList("file1", "file2", "file3", "file4", "file5");
+		
+		int startIndexOfExecutorNods=1;
+		int numberOfExecutorNods=2;
+				
+		Map<Integer, List<Integer>> filesByNods1 = MultiThreading.dispatchFilesByNod(listIdSource, startIndexOfExecutorNods,
+				numberOfExecutorNods,true);
+		
+		// test if both of file list has been allocated to same executor nod when the number of total executor nods is the same
+		
+		List<String> filesInNods1OrderedByName = filesByNods1.get(1).stream().map(x->listIdSource.get(x)).collect(Collectors.toList());
+		List<String> filesInNods2OrderedByName= filesByNods1.get(2).stream().map(x->listIdSource.get(x)).collect(Collectors.toList());
+
+		assertEquals(filesInNods1OrderedByName,Arrays.asList("file2","file4"));
+		assertEquals(filesInNods2OrderedByName,Arrays.asList("file1","file3","file5"));
+	}
+	
 }
