@@ -138,7 +138,7 @@ class BatchARC implements IReturnCode {
 	 */
 	void execute() {
 		
-		Integer returnCode = STATUS_FAILURE_TECHNICAL_WARNING;
+		Integer returnCode = STATUS_SUCCESS;
 		
 		try (Connection batchConnection = UtilitaireDao.get(0).getDriverConnexion();)
 		{
@@ -196,7 +196,7 @@ class BatchARC implements IReturnCode {
 		
 		message("Fin du batch");
 		
-		System.exit(STATUS_SUCCESS);
+		System.exit(returnCode);
 	}
 
 
