@@ -65,6 +65,8 @@ class BatchARC implements IReturnCode {
 	 * je met tempo à la date du jour - je lance initialisation etc.
 	 */
 
+	private static final int SLEEP_BETWEEN_DATABASE_NOD_CONNECTION_TRIES_IN_MS=1000;
+	
 	private @Autowired PropertiesHandler properties;
 
 	// the sandbox schema where batch process runs
@@ -429,10 +431,40 @@ class BatchARC implements IReturnCode {
 	 */
 	private void executorsDatabaseCreate() throws ArcException {
 		message(ApiManageExecutorDatabase.create().toString());
-		Sleep.sleep(waitExecutorTimerInMS);
+		waitDatabaseNodsToPopUp();
 	}
 	
-	
+	/**
+	 * Wait for all database nod to be ready
+	 * If no connection had been able to be made before waitExecutorTimerInMS, exit with time out exception
+	 * @throws ArcException
+	 */
+	private void waitDatabaseNodsToPopUp() throws ArcException {
+		int timeOutTimer=0;
+		
+		for (int databaseIndex=ArcDatabase.COORDINATOR.getIndex();databaseIndex<ArcDatabase.numberOfNods();databaseIndex++)
+		{
+			boolean nodIsDown = true;
+			while (nodIsDown)
+			{
+				try {
+					UtilitaireDao.get(databaseIndex).executeRequest(null, "SELECT true");
+					nodIsDown=false;
+					message("Database nod "+databaseIndex+" is ready at "+timeOutTimer+" ms");
+				}
+				catch (ArcException e) {
+					Sleep.sleep(SLEEP_BETWEEN_DATABASE_NOD_CONNECTION_TRIES_IN_MS);
+					timeOutTimer+=SLEEP_BETWEEN_DATABASE_NOD_CONNECTION_TRIES_IN_MS;
+				}
+				if (timeOutTimer>waitExecutorTimerInMS)
+				{
+					throw new ArcException(ArcExceptionMessage.DATABASE_TIMEOUT, databaseIndex, waitExecutorTimerInMS);
+				}
+			}
+		}
+		
+	}
+
 	/**
 	 * drop and create volatile databases
 	 * @throws ArcException

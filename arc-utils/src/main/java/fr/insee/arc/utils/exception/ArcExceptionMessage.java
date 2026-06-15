@@ -121,7 +121,9 @@ public enum ArcExceptionMessage {
 	PARQUET_EXPORT_FAILED("L'export en parquet a échoué"),
 	
 	HOST_NOT_RESOLVED("Hôte non résolu"),
-	CONNEXION_NOT_SECURE("La connection n'est pas sécurisée")
+	CONNEXION_NOT_SECURE("La connection n'est pas sécurisée"),
+	
+	DATABASE_TIMEOUT("Le temps de connection à la base de données %s a dépassé la valeur du paramètre utilisateur waitExecutorTimerInMS (%s)")
 	
 	;
 	
