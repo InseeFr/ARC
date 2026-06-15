@@ -77,7 +77,7 @@ public class ExportOperation {
 		}
 		
 		Set<String> mappingTablesName = exportMasterNodDao.selectBusinessTableToExport();
-		mappingTablesName.stream().forEach( t -> mappingTablesExportedToCoordinator.add(new TableToExport(ArcDatabase.EXECUTOR,t)));
+		mappingTablesName.forEach( t -> mappingTablesExportedToCoordinator.add(new TableToExport(ArcDatabase.EXECUTOR,t)));
 		
 		LoggerHelper.warn(LOGGER, "Tables to copy in the master database : ");
 		LoggerHelper.warn(LOGGER, mappingTablesName);

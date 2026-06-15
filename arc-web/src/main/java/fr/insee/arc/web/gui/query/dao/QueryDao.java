@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.dataobjects.ViewEnum;
-import fr.insee.arc.utils.dao.GenericPreparedStatementBuilder;
 import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
@@ -43,24 +42,16 @@ public class QueryDao extends VObjectHelperDao {
 		try (Connection debugConnection = UtilitaireDao.get(myDbConnection).getDriverConnexion(true);)
 		{
 			ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder(m);
-	
-			if (Boolean.TRUE.equals(UtilitaireDao.get(myDbConnection).testResultRequest(debugConnection, query))) {
-				this.vObjectService.setConnectionIndex(myDbConnection);
-				this.vObjectService.setConnection(debugConnection);
-				this.vObjectService.initialize(viewQuery, query, "arc.ihm_query", defaultInputFields);
-			} else {
-	
-				query = new ArcPreparedStatementBuilder();
-	
-				try {
-					UtilitaireDao.get(myDbConnection).executeImmediate(debugConnection, new GenericPreparedStatementBuilder(myQuery));
-					query.build(SQL.SELECT, query.quoteText("query succeed"), SQL.AS, "query_result");
-				} catch (Exception e) {
-					query.build(SQL.SELECT, query.quoteText(e.getMessage()), SQL.AS, "query_result");
-				}
-	
-				this.vObjectService.initialize(viewQuery, query, "arc.ihm_query", defaultInputFields);
+
+			boolean queryHasResults = Boolean.TRUE.equals(UtilitaireDao.get(myDbConnection).testResultRequest(debugConnection, query));
+			
+			if (queryHasResults) {
+				renderQueryResult(viewQuery, myDbConnection, defaultInputFields, debugConnection, query);
 			}
+			else {
+				executeQuery(viewQuery, myDbConnection, defaultInputFields, debugConnection, query);
+			}
+			
 		} catch (SQLException e) {
 			throw new ArcException(ArcExceptionMessage.DATABASE_CONNECTION_EXECUTOR_FAILED);
 		}
@@ -69,6 +60,42 @@ public class QueryDao extends VObjectHelperDao {
 		}
 	
 
+	}
+
+	/**
+	 * query is not a select query. just execute it
+	 * @param viewQuery
+	 * @param myDbConnection
+	 * @param defaultInputFields
+	 * @param debugConnection
+	 * @param query
+	 */
+	private void executeQuery(VObject viewQuery, Integer myDbConnection, 
+			Map<String, String> defaultInputFields, Connection debugConnection, ArcPreparedStatementBuilder query) {
+
+		try {
+			UtilitaireDao.get(myDbConnection).executeImmediate(debugConnection, query);
+			query.build(SQL.SELECT, query.quoteText("query succeed"), SQL.AS, "query_result");
+		} catch (Exception e) {
+			query.build(SQL.SELECT, query.quoteText(e.getMessage()), SQL.AS, "query_result");
+		}
+
+		this.vObjectService.initialize(viewQuery, query, "arc.ihm_query", defaultInputFields);
+	}
+
+	/**
+	 * render the data of a query
+	 * @param viewQuery
+	 * @param myDbConnection
+	 * @param defaultInputFields
+	 * @param debugConnection
+	 * @param query
+	 */
+	private void renderQueryResult(VObject viewQuery, Integer myDbConnection, Map<String, String> defaultInputFields,
+			Connection debugConnection, ArcPreparedStatementBuilder query) {
+		this.vObjectService.setConnectionIndex(myDbConnection);
+		this.vObjectService.setConnection(debugConnection);
+		this.vObjectService.initialize(viewQuery, query, "arc.ihm_query", defaultInputFields);
 	}
 
 	/**

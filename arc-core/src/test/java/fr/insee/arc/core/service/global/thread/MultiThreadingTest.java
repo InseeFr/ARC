@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 
@@ -43,7 +42,7 @@ public class MultiThreadingTest {
 	/**
 	 * files must be allocate to a target nod with consistency according to their name
 	 */
-	public void dispatchFilesByNod_2ExecutorNods_fifoNonDeterministicTest()
+	void dispatchFilesByNod_2ExecutorNods_fifoNonDeterministicTest()
 	{
 		List<String> listIdSource = Arrays.asList("file1", "file2", "file3", "file4", "file5");
 		
@@ -55,8 +54,8 @@ public class MultiThreadingTest {
 		
 		// test if both of file list has been allocated to same executor nod when the number of total executor nods is the same
 		
-		List<String> filesInNods1OrderedByName = filesByNods1.get(1).stream().map(x->listIdSource.get(x)).collect(Collectors.toList());
-		List<String> filesInNods2OrderedByName= filesByNods1.get(2).stream().map(x->listIdSource.get(x)).collect(Collectors.toList());
+		List<String> filesInNods1OrderedByName = filesByNods1.get(1).stream().map(x->listIdSource.get(x)).toList();
+		List<String> filesInNods2OrderedByName= filesByNods1.get(2).stream().map(x->listIdSource.get(x)).toList();
 
 		assertEquals(filesInNods1OrderedByName,Arrays.asList("file1","file3","file5"));
 		assertEquals(filesInNods2OrderedByName,Arrays.asList("file2","file4"));
@@ -74,8 +73,8 @@ public class MultiThreadingTest {
 		
 		// test if both of file list has been allocated to same executor nod when the number of total executor nods is the same
 		
-		List<String> filesInNods1OrderedByName = filesByNods1.get(1).stream().map(x->listIdSource.get(x)).collect(Collectors.toList());
-		List<String> filesInNods2OrderedByName= filesByNods1.get(2).stream().map(x->listIdSource.get(x)).collect(Collectors.toList());
+		List<String> filesInNods1OrderedByName = filesByNods1.get(1).stream().map(listIdSource::get).toList();
+		List<String> filesInNods2OrderedByName= filesByNods1.get(2).stream().map(listIdSource::get).toList();
 
 		assertEquals(filesInNods1OrderedByName,Arrays.asList("file2","file4"));
 		assertEquals(filesInNods2OrderedByName,Arrays.asList("file1","file3","file5"));

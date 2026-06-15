@@ -15,7 +15,7 @@ import fr.insee.arc.utils.query.TestDatabase;
 class BatchARCTest extends InitializeQueryTest {
 
 	@Test
-	public void waitDatabaseNodsToPopUpTestTimeOut() throws ArcException, SQLException
+	void waitDatabaseNodsToPopUpTestTimeOut() throws SQLException
 	{
 		// BatchArc will wait for 1 second max that all database are connectable
 		BatchARC b = new BatchARC();
@@ -26,7 +26,7 @@ class BatchARCTest extends InitializeQueryTest {
 		buildProperties("tmp", new Connection[] {c, e1, e2});
 
 		// it should succeed
-		assertDoesNotThrow(() -> b.waitDatabaseNodsToPopUp());
+		assertDoesNotThrow(b::waitDatabaseNodsToPopUp);
 		
 		// computing a false uri for the nod 2
 		String uri=u.getProperties().getDatabaseUrl();
@@ -39,7 +39,7 @@ class BatchARCTest extends InitializeQueryTest {
 
 		
 		// database on nod 2 should not be connectable, so an exception is raised 
-		assertThrows(ArcException.class,() -> {b.waitDatabaseNodsToPopUp();});
+		assertThrows(ArcException.class, b::waitDatabaseNodsToPopUp);
 
 		
 	}

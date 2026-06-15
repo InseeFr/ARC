@@ -644,53 +644,47 @@ public class S3Template {
 		this.minioClient = null;
 	}
 
-	  /**
-	   * copied logic from
-	   * https://github.com/square/okhttp/blob/master/samples/guide/src/main/java/okhttp3/recipes/CustomTrust.java
-	   */
-	  public static OkHttpClient enableExternalCertificates(OkHttpClient httpClient, String filename)
-	      throws GeneralSecurityException, IOException {
-	    Collection<? extends Certificate> certificates = null;
-	    try (FileInputStream fis = new FileInputStream(filename)) {
-	      certificates = CertificateFactory.getInstance("X.509").generateCertificates(fis);
-	    }
+	// non relevant credential
+	@SuppressWarnings("java:S6437")
+	public static OkHttpClient enableExternalCertificates(OkHttpClient httpClient, String filename)
+			throws GeneralSecurityException, IOException {
+		Collection<? extends Certificate> certificates = null;
+		try (FileInputStream fis = new FileInputStream(filename)) {
+			certificates = CertificateFactory.getInstance("X.509").generateCertificates(fis);
+		}
 
-	    if (certificates == null || certificates.isEmpty()) {
-	      throw new IllegalArgumentException("expected non-empty set of trusted certificates");
-	    }
+		if (certificates == null || certificates.isEmpty()) {
+			throw new IllegalArgumentException("expected non-empty set of trusted certificates");
+		}
 
-	    char[] password = "password".toCharArray(); // Any password will work.
+		char[] password = "password".toCharArray(); // Any password will work.
 
-	    // Put the certificates a key store.
-	    KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
-	    // By convention, 'null' creates an empty key store.
-	    keyStore.load(null, password);
+		// Put the certificates a key store.
+		KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+		// By convention, 'null' creates an empty key store.
+		keyStore.load(null, password);
 
-	    int index = 0;
-	    for (Certificate certificate : certificates) {
-	      String certificateAlias = Integer.toString(index++);
-	      keyStore.setCertificateEntry(certificateAlias, certificate);
-	    }
+		int index = 0;
+		for (Certificate certificate : certificates) {
+			String certificateAlias = Integer.toString(index++);
+			keyStore.setCertificateEntry(certificateAlias, certificate);
+		}
 
-	    // Use it to build an X509 trust manager.
-	    KeyManagerFactory keyManagerFactory =
-	        KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-	    keyManagerFactory.init(keyStore, password);
-	    TrustManagerFactory trustManagerFactory =
-	        TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-	    trustManagerFactory.init(keyStore);
+		// Use it to build an X509 trust manager.
+		KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+		keyManagerFactory.init(keyStore, password);
+		TrustManagerFactory trustManagerFactory = TrustManagerFactory
+				.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+		trustManagerFactory.init(keyStore);
 
-	    final KeyManager[] keyManagers = keyManagerFactory.getKeyManagers();
-	    final TrustManager[] trustManagers = trustManagerFactory.getTrustManagers();
+		final KeyManager[] keyManagers = keyManagerFactory.getKeyManagers();
+		final TrustManager[] trustManagers = trustManagerFactory.getTrustManagers();
 
-	    SSLContext sslContext = SSLContext.getInstance("TLS");
-	    sslContext.init(keyManagers, trustManagers, null);
-	    SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
+		SSLContext sslContext = SSLContext.getInstance("TLS");
+		sslContext.init(keyManagers, trustManagers, null);
+		SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
 
-	    return httpClient
-	        .newBuilder()
-	        .sslSocketFactory(sslSocketFactory, (X509TrustManager) trustManagers[0])
-	        .build();
-	  }
+		return httpClient.newBuilder().sslSocketFactory(sslSocketFactory, (X509TrustManager) trustManagers[0]).build();
+	}
 	
 }

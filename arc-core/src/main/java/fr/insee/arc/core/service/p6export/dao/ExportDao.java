@@ -26,7 +26,6 @@ public class ExportDao {
 	private Sandbox coordinatorSandbox;
 	
 	private String exportTimeStamp;
-	private String tableOfIdSource;
 
 	// by convention the database client for EXPORT phase is named the same as the phase
 	// but this might change
@@ -71,7 +70,7 @@ public class ExportDao {
 			return;
 		}
 		
-		this.tableOfIdSource = TableNaming.buildTableNameWithTokens(coordinatorSandbox.getSchema()
+		String tableOfIdSource = TableNaming.buildTableNameWithTokens(coordinatorSandbox.getSchema()
 				, ViewEnum.ID_SOURCE, ExportDao.EXPORT_CLIENT_NAME,	new TemporaryToken().getToken());
 		
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();

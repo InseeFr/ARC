@@ -45,13 +45,6 @@ public class ExportParquetDao {
 	public ExportParquetDao(Sandbox coordinatorSandbox) {
 		this.coordinatorSandbox = coordinatorSandbox;
 	}
-	/**
-	 * select mapping tables found on the executor by listing table in
-	 * IHM_MOD_TABLE_METIER
-	 * 
-	 * @return
-	 * @throws ArcException
-	 */
 
 	/**
 	 * Query table name to export from mod_table_metier add them to set of tables to
