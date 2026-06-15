@@ -125,7 +125,7 @@ class BatchARC implements IReturnCode {
 	private int iteration = 0;
 
 	private static void message(String msg) {
-		LoggerHelper.warn(LOGGER, msg);
+		LoggerHelper.action(LOGGER, msg);
 	}
 
 	private BatchArcDao dao;
@@ -439,7 +439,7 @@ class BatchARC implements IReturnCode {
 	 * If no connection had been able to be made before waitExecutorTimerInMS, exit with time out exception
 	 * @throws ArcException
 	 */
-	private void waitDatabaseNodsToPopUp() throws ArcException {
+	protected void waitDatabaseNodsToPopUp() throws ArcException {
 		int timeOutTimer=0;
 		
 		for (int databaseIndex=ArcDatabase.COORDINATOR.getIndex();databaseIndex<ArcDatabase.numberOfNods();databaseIndex++)
@@ -931,6 +931,10 @@ class BatchARC implements IReturnCode {
 	private void waitAndClear() {
 		Sleep.sleep(delay);
 		System.gc();
+	}
+
+	public void setWaitExecutorTimerInMS(Integer waitExecutorTimerInMS) {
+		this.waitExecutorTimerInMS = waitExecutorTimerInMS;
 	}
 
 }

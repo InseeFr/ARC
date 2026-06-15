@@ -62,7 +62,7 @@ public class InitializeQueryTest {
 	}
     
     
-    private static void buildProperties(String repertoire, Connection[] connections) throws SQLException
+    public static void buildProperties(String repertoire, Connection[] connections) throws SQLException
 	{
 		PropertiesHandler testProperties=PropertiesHandler.getInstance();
 		
