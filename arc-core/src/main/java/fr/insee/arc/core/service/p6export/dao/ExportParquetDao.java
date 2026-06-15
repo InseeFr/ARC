@@ -88,10 +88,9 @@ public class ExportParquetDao {
 		query.build(SQL.BR, SQL.ON, ColumnEnum.NOM_TABLE_METIER.alias(SQL.ALIAS_A), "=",
 				ColumnEnum.TABLE_TO_EXPORT.alias(SQL.ALIAS_B));
 
-		GenericBean gb = new GenericBean(
+		return new GenericBean(
 				UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).executeRequest(null, query));
 
-		return gb;
 	}
 
 	public List<TableToExport> fetchBusinessTableToNod() throws ArcException {

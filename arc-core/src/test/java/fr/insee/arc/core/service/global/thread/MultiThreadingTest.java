@@ -54,11 +54,11 @@ public class MultiThreadingTest {
 		
 		// test if both of file list has been allocated to same executor nod when the number of total executor nods is the same
 		
-		List<String> filesInNods1OrderedByName = filesByNods1.get(1).stream().map(x->listIdSource.get(x)).toList();
-		List<String> filesInNods2OrderedByName= filesByNods1.get(2).stream().map(x->listIdSource.get(x)).toList();
+		List<String> filesInNods1OrderedByName = filesByNods1.get(1).stream().map(listIdSource::get).toList();
+		List<String> filesInNods2OrderedByName= filesByNods1.get(2).stream().map(listIdSource::get).toList();
 
-		assertEquals(filesInNods1OrderedByName,Arrays.asList("file1","file3","file5"));
-		assertEquals(filesInNods2OrderedByName,Arrays.asList("file2","file4"));
+		assertEquals(Arrays.asList("file1","file3","file5"),filesInNods1OrderedByName);
+		assertEquals(Arrays.asList("file2","file4"),filesInNods2OrderedByName);
 	}
 
 	public void dispatchFilesByNod_2ExecutorNods_NameHashDeterministicTest()
@@ -76,8 +76,8 @@ public class MultiThreadingTest {
 		List<String> filesInNods1OrderedByName = filesByNods1.get(1).stream().map(listIdSource::get).toList();
 		List<String> filesInNods2OrderedByName= filesByNods1.get(2).stream().map(listIdSource::get).toList();
 
-		assertEquals(filesInNods1OrderedByName,Arrays.asList("file2","file4"));
-		assertEquals(filesInNods2OrderedByName,Arrays.asList("file1","file3","file5"));
+		assertEquals(Arrays.asList("file2","file4"), filesInNods1OrderedByName);
+		assertEquals(Arrays.asList("file1","file3","file5"),filesInNods2OrderedByName);
 	}
 	
 }
