@@ -1,4 +1,4 @@
-FROM maven:3-eclipse-temurin-17 AS build
+FROM chainguard/maven:latest AS build
 
 # Proxies
 ARG HTTP_PROXY
