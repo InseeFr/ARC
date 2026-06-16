@@ -1,4 +1,4 @@
-FROM chainguard/maven:latest AS build
+FROM maven:3-amazoncorretto-25-alpine AS build
 
 # Proxies
 ARG HTTP_PROXY

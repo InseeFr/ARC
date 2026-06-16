@@ -5,6 +5,9 @@
 - enable tar compression for bigger files
 - select in processing pipeline a number of file at least equals to number of executor
 
+## version-94.2.74
+- use of embedded tomcat 11 in web and webservice docker image
+
 ## version-94.2.72
 - New gui for unitary export (non batch)
 - Unitary export may now unserialize json key-value in column with value
