@@ -557,33 +557,51 @@ public class VObjectService {
 	}
 
 	/**
-	 * Log action for security purposes
 	 * Find the first controller element in stack
-	 * @param currentData
+	 * @param action is a function to be executed on the element found
 	 */
-	public void trackVObjectServiceAction(Consumer<? super StackTraceElement> action)
+	public void findControllerActionInStack(Consumer<? super StackTraceElement> action)
 	{
 		Streams.of(Thread.currentThread().getStackTrace()).filter(e -> e.getClassName().contains("controller.Controller"))
 		.findFirst().ifPresent(action);
 	}
 	
 	/**
-	 * log action for security purposes
+	 * log controller user action for security purposes
 	 * @param currentData
 	 */
 	public void trackVObjectServiceAction(VObject currentData)
 	{
-		trackVObjectServiceAction(e -> LoggerHelper.action(LOGGER, getUserName() + " : "+e.getMethodName()+" : " + currentData.getSessionName()));
+		if (currentData==null)
+		{
+			trackVObjectServiceAction();
+			return;
+		}
+				
+		findControllerActionInStack(e -> LoggerHelper.action(LOGGER, getUserName() + " : "+e.getMethodName()+" : " + currentData.getSessionName()));
 	}
 
+	/**
+	 * log controller user action for security purposes
+	 * @param model
+	 */
 	public void trackVObjectServiceAction(Model model)
 	{
-		trackVObjectServiceAction(e -> LoggerHelper.action(LOGGER, getUserName() + " : "+e.getMethodName() + " : "+model.getAttribute("bacASable")));
+		if (model==null)
+		{
+			trackVObjectServiceAction();
+			return;
+		}
+		
+		findControllerActionInStack(e -> LoggerHelper.action(LOGGER, getUserName() + " : "+e.getMethodName() + " : "+model.getAttribute("bacASable")));
 	}
 		
+	/**
+	 * log controller user action for security purposes
+	 */
 	public void trackVObjectServiceAction()
 	{
-		trackVObjectServiceAction(e -> LoggerHelper.action(LOGGER, getUserName() + " : "+e.getMethodName()));
+		findControllerActionInStack(e -> LoggerHelper.action(LOGGER, getUserName() + " : "+e.getMethodName()));
 	}
 	
 	
