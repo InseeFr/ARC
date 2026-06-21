@@ -33,7 +33,7 @@ import fr.insee.arc.web.gui.all.model.ArcModel;
 import fr.insee.arc.web.gui.all.util.Session;
 import fr.insee.arc.web.gui.all.util.VObject;
 import fr.insee.arc.web.gui.all.util.VObjectService;
-import fr.insee.arc.web.gui.home.HomeAction;
+import fr.insee.arc.web.gui.home.controller.ControllerHome;
 import fr.insee.arc.web.gui.index.service.IndexAction;
 
 /**
@@ -144,7 +144,7 @@ public abstract class ArcWebGenericService<T extends ArcModel, D extends IDao> i
 		LoggerHelper.trace(LOGGER, getActionName());
 
 		// no action required for unsecured page
-		if(getActionName().equals(HomeAction.ACTION_NAME))
+		if(getActionName().equals(ControllerHome.ACTION_NAME))
 		{
 			return;
 		}
@@ -297,6 +297,14 @@ public abstract class ArcWebGenericService<T extends ArcModel, D extends IDao> i
 	}
 
 	/**
+	 * track action without model or view information
+	 */
+	public void trackVObjectServiceAction()
+	{
+		vObjectService.trackVObjectServiceAction();
+	}
+	
+	/**
 	 * 
 	 * Get all the {@link VObjectService} in the {@link ArcWebGenericService#listVObjectOrder} and generated the needed one
 	 * @param resultSuccess 
@@ -304,6 +312,9 @@ public abstract class ArcWebGenericService<T extends ArcModel, D extends IDao> i
 	 * @return
 	 */
 	public String generateDisplay(Model model, String successUri) {
+		
+		vObjectService.trackVObjectServiceAction(model);
+		
 		LoggerHelper.debug(LOGGER, "generateDisplay()", getScope());
 		// Initialize required VObjects according to scope
 		boolean defaultWhenNoScope = true;

@@ -1,4 +1,4 @@
-package fr.insee.arc.web.gui.home;
+package fr.insee.arc.web.gui.home.controller;
 
 import java.util.Map;
 
@@ -19,7 +19,7 @@ import jakarta.servlet.http.HttpServletRequest;
 
 @Controller
 @Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
-public class HomeAction extends ArcWebGenericService<NoModel, HomeDao> {
+public class ControllerHome extends ArcWebGenericService<NoModel, HomeDao> {
 
 	public static final String ACTION_NAME = "home";
 	private static final String RESULT_SUCCESS = "jsp/home.jsp";
@@ -41,6 +41,9 @@ public class HomeAction extends ArcWebGenericService<NoModel, HomeDao> {
 	
 	@RequestMapping("/denied")
 	public ResponseEntity<Map<String, Object>> denied(HttpServletRequest request) {
+		
+		trackVObjectServiceAction();
+		
 		AccessDeniedException ex = new AccessDeniedException(request.getRequestURI().toString());
 		return new ExceptionHandlerReport().reportExceptionAsMap(ex);
 	}

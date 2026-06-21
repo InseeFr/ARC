@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -23,12 +24,14 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
+import org.apache.commons.lang3.stream.Streams;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Service;
+import org.springframework.ui.Model;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -554,13 +557,35 @@ public class VObjectService {
 	}
 
 	/**
+	 * Log action for security purposes
+	 * Find the first controller element in stack
+	 * @param currentData
+	 */
+	public void trackVObjectServiceAction(Consumer<? super StackTraceElement> action)
+	{
+		Streams.of(Thread.currentThread().getStackTrace()).filter(e -> e.getClassName().contains("controller.Controller"))
+		.findFirst().ifPresent(action);
+	}
+	
+	/**
 	 * log action for security purposes
 	 * @param currentData
 	 */
-	private void trackVObjectServiceAction(VObject currentData)
+	public void trackVObjectServiceAction(VObject currentData)
 	{
-		LoggerHelper.action(LOGGER, getUserName() + " : "+Thread.currentThread().getStackTrace()[2].getMethodName()+" in " + currentData.getSessionName());
+		trackVObjectServiceAction(e -> LoggerHelper.action(LOGGER, getUserName() + " : "+e.getMethodName()+" : " + currentData.getSessionName()));
 	}
+
+	public void trackVObjectServiceAction(Model model)
+	{
+		trackVObjectServiceAction(e -> LoggerHelper.action(LOGGER, getUserName() + " : "+e.getMethodName() + " : "+model.getAttribute("bacASable")));
+	}
+		
+	public void trackVObjectServiceAction()
+	{
+		trackVObjectServiceAction(e -> LoggerHelper.action(LOGGER, getUserName() + " : "+e.getMethodName()));
+	}
+	
 	
 	/**
 	 * On peut avoir envie d'insérer une valeur calculable de façon déterministe
