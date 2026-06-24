@@ -48,23 +48,21 @@ public class ExportOperation {
 		// register them
 		List<TableToExport> mappingTablesToExportAsFile = exportParquetDao.fetchBusinessTableToNod();
 		
-		// check if any table marked for export
-		if (mappingTablesToExportAsFile.isEmpty())
-		{
-			return;
-		}
-		
 		// materialized id_source if required
 		exportDao.materializeIdSourceToExport();
 		
 		// export to parquet
 		exportParquetDao.exportTablesToParquet(dateExport, mappingTablesToExportAsFile);
 		
+		// stop if no file generated
+		exportParquetDao.stopAndClearIfNoFilesOutput();
+		
 		// copy exported directory to s3
 		exportParquetDao.copyToS3Out();
 
 	}
 
+	
 	/**
 	 * Export the data to master nod if required
 	 * Only active in scalability mode .e.e ARC with executor nods
@@ -97,7 +95,6 @@ public class ExportOperation {
 	 * @throws ArcException
 	 */
 	public void commitExport() throws ArcException {
-		
 		exportParquetDao.commitExportParquet();
 		
 		exportDao.commit();

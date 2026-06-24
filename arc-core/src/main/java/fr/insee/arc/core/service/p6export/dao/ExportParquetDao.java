@@ -41,7 +41,9 @@ public class ExportParquetDao {
 
 	private String s3Out;
 	private String s3OutTemp;
-
+	
+	private boolean isAnyTableExportedAsFile;
+	
 	public ExportParquetDao(Sandbox coordinatorSandbox) {
 		this.coordinatorSandbox = coordinatorSandbox;
 	}
@@ -87,7 +89,7 @@ public class ExportParquetDao {
 		query.build(SQL.BR, SQL.LEFT_JOIN, ViewEnum.EXPORT.getFullName(coordinatorSandbox.getSchema()), SQL.ALIAS_B);
 		query.build(SQL.BR, SQL.ON, ColumnEnum.NOM_TABLE_METIER.alias(SQL.ALIAS_A), "=",
 				ColumnEnum.TABLE_TO_EXPORT.alias(SQL.ALIAS_B));
-
+		
 		return new GenericBean(
 				UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).executeRequest(null, query));
 
@@ -132,7 +134,7 @@ public class ExportParquetDao {
 	public void exportTablesToParquet(String dateExport, List<TableToExport> tablesToExport) throws ArcException {
 
 		PropertiesHandler properties = PropertiesHandler.getInstance();
-		
+				
 		this.directoryOut = DirectoryPathExport.directoryExport(properties.getBatchParametersDirectory(),
 				this.coordinatorSandbox.getSchema(), dateExport);
 
@@ -149,8 +151,29 @@ public class ExportParquetDao {
 		new ParquetDao().exportToParquet(tablesToExport, directoryOutTemp, parquetEncryptionKey);
 	}
 
-
+	/**
+	 * Check the output of files and stop if empty
+	 */
+	public void stopAndClearIfNoFilesOutput() throws ArcException
+	{
+		this.isAnyTableExportedAsFile = (new File(this.directoryOutTemp).listFiles().length > 0);
+		
+		if (this.isAnyTableExportedAsFile)
+		{
+			return;
+		}
+		
+		FileUtilsArc.deleteDirectory(directoryOutTemp);
+	}
+	
+	
 	public void copyToS3Out() throws ArcException {
+		
+		if (!isAnyTableExportedAsFile)
+		{
+			LoggerHelper.warn(LOGGER, "No parquet file created ! copyToS3Out skipped");
+			return;
+		}
 		
 		if (ArcS3.OUTPUT_BUCKET.isS3Off())
 		{
@@ -174,6 +197,12 @@ public class ExportParquetDao {
 	// move files in temporary folder to final folders
 	public void commitExportParquet() throws ArcException
 	{
+		if (!isAnyTableExportedAsFile)
+		{
+			LoggerHelper.warn(LOGGER, "No parquet file created ! commitExportParquet skipped");
+			return;
+		}
+		
 		if (ArcS3.OUTPUT_BUCKET.isS3Off())
 		{
 			// move files from directoryOutTemp to directoryOut if s3 is off
@@ -207,6 +236,12 @@ public class ExportParquetDao {
 	 */
 	public void rollback() throws ArcException
 	{
+		if (!isAnyTableExportedAsFile)
+		{
+			LoggerHelper.warn(LOGGER, "No parquet file created ! parquet rollback skipped");
+			return;
+		}
+		
 		// delete the temporary export directory
 		FileUtilsArc.deleteDirectory(this.directoryOut);
 		
