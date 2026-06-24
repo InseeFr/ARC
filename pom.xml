@@ -13,7 +13,7 @@
 		
 		<project.log4j.version>2.25.4</project.log4j.version>
 		<project.spring.version>7.0.7</project.spring.version>
-		<project.jackson.version>3.1.1</project.jackson.version>
+		<project.jackson.version>3.1.4</project.jackson.version>
 		<project.postgres.version>42.7.11</project.postgres.version>
 		<project.duckdb.version>1.4.0.0</project.duckdb.version>
 		<project.duckdb.extension.version>1.4.0</project.duckdb.extension.version>
