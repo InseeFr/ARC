@@ -9,7 +9,7 @@ public class DirectoryPathExport {
 	private DirectoryPathExport() {
 		throw new IllegalStateException("Utility class");
 	}
-
+	
 	private static final String S3_EXPORT_ROOT = "ARC";
 
 	private static final String S3_EXPORT_ROOT_TEMP = "TEMP_ARC";
@@ -34,15 +34,13 @@ public class DirectoryPathExport {
 	public static String directoryExportTemp(String rootDirectory, String env, String dateExport) {
 		return new StringBuilder(directoryExport(rootDirectory, env, dateExport)).append(Delimiters.FILE_TOKEN_DELIMITER).append(DIR_TEMP).toString();
 	}
-	
+
 	public static String s3Export(String env, String dateExport) {
-		return FileSystemManagement.directoryRootSubdirectories(S3_EXPORT_ROOT, env, TraitementPhase.EXPORT.toString(),
-				dateExport);
+		return FileSystemManagement.s3RootSubdirectories(S3_EXPORT_ROOT, env, TraitementPhase.EXPORT.toString(),	dateExport);
 	}
 
 	public static String s3ExportTemp(String env, String dateExport) {
-		return FileSystemManagement.directoryRootSubdirectories(S3_EXPORT_ROOT_TEMP, env, TraitementPhase.EXPORT.toString(),
-				dateExport);
+		return FileSystemManagement.s3RootSubdirectories(S3_EXPORT_ROOT_TEMP, env, TraitementPhase.EXPORT.toString(),dateExport);
 	}
 
 }

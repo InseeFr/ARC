@@ -118,7 +118,6 @@ public class ExportParquetDao {
 
 			tablesToExport.add(tableToExport);
 		});
-
 		return tablesToExport;
 	}
 
@@ -165,7 +164,7 @@ public class ExportParquetDao {
 		for (File f : Objects.requireNonNull(new File(this.directoryOutTemp).listFiles())) {
 			ArcS3.OUTPUT_BUCKET.upload(f, this.s3OutTemp + File.separator + f.getName());
 		}
-		
+
 		// delete the temporary export directory
 		FileUtilsArc.deleteDirectory(this.directoryOutTemp);
 

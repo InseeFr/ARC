@@ -668,7 +668,6 @@ class BatchARC implements IReturnCode {
 		List<String> aBouger = exportOn ? //
 				dao.execQuerySelectArchiveNotExported(envExecution) //
 				: dao.execQuerySelectArchiveEnCours(envExecution);
-
 		dejaEnCours = (!aBouger.isEmpty());
 
 		// si oui, on essaie de recopier les archives dans chargement OK

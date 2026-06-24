@@ -59,7 +59,6 @@ public class BatchArcDao {
 
 		ArcPreparedStatementBuilder query = queryPipelineNotFinished(envExecution,
 				ConditionExecution.PHASE_PRECEDENTE_TERMINE_PIPELINE_NON_TERMINE);
-
 		return new GenericBean(UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).executeRequest(batchConnection, query))
 				.getColumnValues(ColumnEnum.CONTAINER.getColumnName());
 	}
@@ -77,7 +76,6 @@ public class BatchArcDao {
 		query.append(queryPipelineNotFinished(envExecution, ConditionExecution.PHASE_PRECEDENTE_TERMINE_PIPELINE_NON_TERMINE));
 		query.build(SQL.UNION);
 		query.append(queryPipelineNotFinished(envExecution, ConditionExecution.PIPELINE_TERMINE_DONNEES_NON_EXPORTEES));
-		
 		return new GenericBean(UtilitaireDao.get(ArcDatabase.COORDINATOR.getIndex()).executeRequest(batchConnection, query))
 				.getColumnValues(ColumnEnum.CONTAINER.getColumnName());
 	}

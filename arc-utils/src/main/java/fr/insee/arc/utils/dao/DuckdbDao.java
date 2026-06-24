@@ -39,7 +39,7 @@ public class DuckdbDao {
 		connectionProperties.setProperty("preserve_insertion_order", "false");
 		
 		try (Connection connection = DriverManager.getConnection("jdbc:duckdb:",connectionProperties)) {
-
+			
 			// unzip extensions
 			unzipExtensions(connection);
 

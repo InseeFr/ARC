@@ -189,10 +189,16 @@ public class S3Template {
 
 		if (isS3Off())
 			return;
-
+		
 		path = asDirectory(path); // ajouté au path si manquant
 		int indexSecondLastSubstr = path.lastIndexOf("/", path.length() - 2); // index de l'avant dernier "/"
 		String parentPath = asDirectory(path.substring(0, indexSecondLastSubstr + 1));
+		
+		LoggerHelper.warn(LOGGER, "directory >>>"+this.directory+"<<<");
+		LoggerHelper.warn(LOGGER, "path >>>"+path+"<<<");
+		LoggerHelper.warn(LOGGER, "parentPath >>>"+parentPath+"<<<");
+
+		
 		if (!parentPath.equals(asDirectory(this.directory))) {
 			createDirectoryRecursively(parentPath); // crée les répertoires parents
 		}
@@ -553,6 +559,11 @@ public class S3Template {
 	 * @throws ArcException
 	 */
 	public boolean isExists(String path) {
+		
+		
+		LoggerHelper.warn(LOGGER, "isExists >>"+path+"<<");
+
+		
 		boolean found = false;
 		try {
 			@SuppressWarnings("unused")

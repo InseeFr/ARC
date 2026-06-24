@@ -30,6 +30,8 @@ public class FileSystemManagement {
 
 	private static final String DIRECTORY_OLD_QUALIFIIER = "OLD";
 	
+	private static final String S3_PATH_DELIMITER = "/";
+
 	
 	/**
 	 * return archives directories found in environment
@@ -65,6 +67,12 @@ public class FileSystemManagement {
 			directoryPath.append(File.separator + subdirectory);
 		}
 		return directoryPath.toString();
+	}
+	
+	
+		public static String s3RootSubdirectories(String rootDirectory, String env, String...subdirectories)
+	{
+		return directoryRootSubdirectories(rootDirectory, env, subdirectories).replace(File.separator, S3_PATH_DELIMITER); 
 	}
 	
 	

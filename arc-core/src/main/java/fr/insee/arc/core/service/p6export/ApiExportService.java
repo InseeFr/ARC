@@ -23,6 +23,7 @@ public class ApiExportService  extends ApiService {
 	public void executer() throws ArcException {
 
 		try {
+			
 		exportOperation.initializeExport();
 		
 		exportOperation.exportParquet();
