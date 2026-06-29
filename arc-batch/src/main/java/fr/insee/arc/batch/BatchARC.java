@@ -168,6 +168,7 @@ class BatchARC implements IReturnCode {
 
 			// finalize batch
 			executeIfProductionActive(this::batchFinalize);
+			
 
 		} catch (Exception ex) {
 			LoggerHelper.errorGenTextAsComment(BatchARC.class, "main()", LOGGER, ex);
@@ -183,22 +184,42 @@ class BatchARC implements IReturnCode {
 	}
 
 	/**
-	 * end the batch
+	 * End the batch
+	 * 
+	 * Executor database must be drop only if production is on
+	 * 1. because of debugging purpose as we may want to interrupt process in order to know what is happening in an executor database
+	 * 2. because the process children threads will be interrupted before the database are dropped and thus
+	 * no connection error will be marked and the next batch will be able to recover the process
+	 * 
+	 * @param returnCode return code sent by jvm on batch exit
 	 */
+	
 	private void endBatch(Integer returnCode) {
 		
-		// drop volatile databases
 		try {
-			executeIfVolatile(this::executorsDatabaseDrop);
-		} catch (ArcException ex) {
-			LoggerHelper.errorGenTextAsComment(BatchARC.class, "main()", LOGGER, ex);
+			executeIfProductionActive(this::executeIfVolatileDropExecutorsDatabase);
+		} catch (ArcException e) {
+			LoggerHelper.errorGenTextAsComment(BatchARC.class, "main()", LOGGER, e);
 		}
 		
 		message("Fin du batch");
 		
 		System.exit(returnCode);
+		
 	}
 
+	
+	/**
+	 * drop volatile executor databases
+	 */
+	private void executeIfVolatileDropExecutorsDatabase() {
+		try {
+			executeIfVolatile(this::executorsDatabaseDrop);
+		} catch (ArcException e) {
+			LoggerHelper.errorGenTextAsComment(BatchARC.class, "main()", LOGGER, e);
+		}	
+	}
+	
 
 	/**
 	 * Remap given database uri to use ip adress instead of dns name during batch loop
