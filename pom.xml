@@ -13,6 +13,7 @@
 		
 		<project.log4j.version>2.25.4</project.log4j.version>
 		<project.spring.version>7.0.7</project.spring.version>
+        <project.jackson.version.old>2.22.0</project.jackson.version.old>
 		<project.jackson.version>3.2.0</project.jackson.version>
 		<project.postgres.version>42.7.11</project.postgres.version>
 		<project.duckdb.version>1.4.0.0</project.duckdb.version>
@@ -261,22 +262,6 @@
 
 		<!-- serializers -->
 		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-annotations</artifactId>
-			<version>2.21</version>
-		</dependency>
-		<dependency>
-		    <groupId>tools.jackson.core</groupId>
-		    <artifactId>jackson-core</artifactId>
-		    <version>${project.jackson.version}</version>
-		</dependency>
-		<dependency>
-		    <groupId>com.fasterxml.jackson.core</groupId>
-		    <artifactId>jackson-core</artifactId>
-		    <version>2.22.0</version>
-		    <scope>compile</scope>
-		</dependency>
-		<dependency>
 			<groupId>tools.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
 			<version>${project.jackson.version}</version>
@@ -284,7 +269,7 @@
 		<dependency>
 		    <groupId>com.fasterxml.jackson.core</groupId>
 		    <artifactId>jackson-databind</artifactId>
-		    <version>2.22.0</version>
+		    <version>${project.jackson.version.old}</version>
 		    <scope>compile</scope>
 		</dependency>
 		<dependency>
