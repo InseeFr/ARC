@@ -57,7 +57,7 @@ COPY . /usr/src/app/
 RUN chmod +x usr/src/app/docker/script.sh && usr/src/app/docker/script.sh
 
 # get jre light image
-FROM eclipse-temurin:25-jre-ubi10-minimal
+FROM ubuntu/jre:25-26.04_edge
 
 ENV ARC_LOGLEVEL=$LOG_LEVEL
 
