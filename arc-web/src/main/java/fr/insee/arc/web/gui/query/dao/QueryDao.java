@@ -73,14 +73,17 @@ public class QueryDao extends VObjectHelperDao {
 	private void executeQuery(VObject viewQuery, Integer myDbConnection, 
 			Map<String, String> defaultInputFields, Connection debugConnection, ArcPreparedStatementBuilder query) {
 
+		ArcPreparedStatementBuilder feedbackQuery = new ArcPreparedStatementBuilder();
+		
 		try {
 			UtilitaireDao.get(myDbConnection).executeImmediate(debugConnection, query);
-			query.build(SQL.SELECT, query.quoteText("query succeed"), SQL.AS, "query_result");
+			feedbackQuery.build(SQL.SELECT, feedbackQuery.quoteText("query succeed"), SQL.AS, "query_result");
 		} catch (Exception e) {
-			query.build(SQL.SELECT, query.quoteText(e.getMessage()), SQL.AS, "query_result");
+			query = new ArcPreparedStatementBuilder();
+			feedbackQuery.build(SQL.SELECT, feedbackQuery.quoteText(e.getMessage()), SQL.AS, "query_result");
 		}
-
-		this.vObjectService.initialize(viewQuery, query, "arc.ihm_query", defaultInputFields);
+		
+		this.vObjectService.initialize(viewQuery, feedbackQuery, "arc.ihm_query", defaultInputFields);
 	}
 
 	/**
