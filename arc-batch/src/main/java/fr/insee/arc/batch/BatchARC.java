@@ -66,6 +66,7 @@ class BatchARC implements IReturnCode {
 	 */
 
 	private static final int SLEEP_BETWEEN_DATABASE_NOD_CONNECTION_TRIES_IN_MS=1000;
+	private static final int SLEEP_AFTER_DATABASE_NOD_DELETE_IN_MS=10000;
 	
 	private @Autowired PropertiesHandler properties;
 
@@ -443,6 +444,7 @@ class BatchARC implements IReturnCode {
 	 */
 	private void executorsDatabaseDrop() throws ArcException {
 		message(ApiManageExecutorDatabase.delete().toString());
+		Sleep.sleep(SLEEP_AFTER_DATABASE_NOD_DELETE_IN_MS);
 	}
 	
 	/**
