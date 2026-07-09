@@ -170,6 +170,9 @@ class BatchARC implements IReturnCode {
 			// finalize batch
 			executeIfProductionActive(this::batchFinalize);
 			
+			// drop executor database
+			executeIfProductionActive(this::executeIfVolatileDropExecutorsDatabase);
+			
 
 		} catch (Exception ex) {
 			LoggerHelper.errorGenTextAsComment(BatchARC.class, "main()", LOGGER, ex);
@@ -196,13 +199,7 @@ class BatchARC implements IReturnCode {
 	 */
 	
 	private void endBatch(Integer returnCode) {
-		
-		try {
-			executeIfProductionActive(this::executeIfVolatileDropExecutorsDatabase);
-		} catch (ArcException e) {
-			LoggerHelper.errorGenTextAsComment(BatchARC.class, "main()", LOGGER, e);
-		}
-		
+
 		message("Fin du batch");
 		
 		System.exit(returnCode);
