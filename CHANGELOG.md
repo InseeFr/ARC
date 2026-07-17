@@ -5,6 +5,16 @@
 - enable tar compression for bigger files
 - select in processing pipeline a number of file at least equals to number of executor
 
+## version-94.2.90
+- cve fix for spring and jackson
+- cve fix for docker image
+- S3
+  - minio update version
+  - empty directories are deleted
+- Arc batch module
+  - in volatile mode, arc now waits for the asynchonous kubernetes executors to pop before continuing
+  - connection are released correctly on error
+
 ## version-94.2.74
 - use of embedded tomcat 11 in web and webservice docker image
 
