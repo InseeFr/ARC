@@ -12,7 +12,7 @@
 		<version>0.0.2-SNAPSHOT</version>
 		
 		<project.log4j.version>2.25.4</project.log4j.version>
-		<project.spring.version>7.0.7</project.spring.version>
+		<project.spring.version>7.0.8</project.spring.version>
         <project.jackson.version.old>2.22.1</project.jackson.version.old>
 		<project.jackson.version>3.2.1</project.jackson.version>
 		<project.postgres.version>42.7.12</project.postgres.version>
