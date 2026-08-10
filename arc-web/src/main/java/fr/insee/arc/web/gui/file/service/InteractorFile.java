@@ -11,16 +11,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import jakarta.servlet.http.HttpServletResponse;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
-import org.springframework.context.annotation.ScopedProxyMode;
-import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
-import org.springframework.web.context.WebApplicationContext;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.utils.exception.ArcException;
@@ -31,9 +25,8 @@ import fr.insee.arc.web.gui.all.util.VObject;
 import fr.insee.arc.web.gui.all.util.VObjectService;
 import fr.insee.arc.web.gui.file.dao.FileDao;
 import fr.insee.arc.web.gui.file.model.ModelFile;
+import jakarta.servlet.http.HttpServletResponse;
 
-@Service
-@Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class InteractorFile extends ArcWebGenericService<ModelFile, FileDao> {
 
 	protected static final String IS_DIRECTORY = "isdirectory";

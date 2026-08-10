@@ -11,12 +11,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
-import org.springframework.context.annotation.Scope;
-import org.springframework.context.annotation.ScopedProxyMode;
-import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.context.WebApplicationContext;
 
 import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.model.TraitementPhase;
@@ -32,8 +28,6 @@ import fr.insee.arc.web.gui.all.util.VObject;
 import fr.insee.arc.web.gui.pilotage.dao.PilotageDao;
 import fr.insee.arc.web.gui.pilotage.model.ModelPilotage;
 
-@Service
-@Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class InteractorPilotage extends ArcWebGenericService<ModelPilotage, PilotageDao> {
 
 	protected static final String ENV_DESCRIPTION = "envDescription";
@@ -98,15 +92,7 @@ public class InteractorPilotage extends ArcWebGenericService<ModelPilotage, Pilo
 	public void initializePilotageBAS(VObject viewPilotageBAS) {
 		LoggerHelper.debug(LOGGER, "* initializePilotageBAS *");
 
-		System.out.println("§§§§§§§§§§§§§§§ 1");		
-		System.out.println(viewPilotageBAS.getHeadersDLabel());
-		System.out.println(viewPilotageBAS.getHeadersVLabel());
-		
 		dao.initializePilotageBAS(viewPilotageBAS);
-
-		System.out.println("§§§§§§§§§§§§§§§ 2");		
-		System.out.println(viewPilotageBAS.getHeadersDLabel());
-		System.out.println(viewPilotageBAS.getHeadersVLabel());
 		
 		List<String> columns = viewPilotageBAS.getHeadersDLabel();
 		Map<String, ColumnRendering> columnRendering = viewPilotageBAS.getConstantVObject().getColumnRender();
@@ -120,10 +106,7 @@ public class InteractorPilotage extends ArcWebGenericService<ModelPilotage, Pilo
 
 		// now display the columns only which have positive values
 		for (LineObject l : viewPilotageBAS.getContent()) {
-			for (int i = 1; i < columns.size(); i++) {
-
-				System.out.println("§§§§§§§§§§§§§§§ "+columns.get(i) + ":"+ l.getD().get(i)+"/");
-				
+			for (int i = 1; i < columns.size(); i++) {				
 				if (!l.getD().get(i).equals("0")) {
 					columnRendering.get(columns.get(i)).setVisible(true);
 				}
@@ -141,18 +124,7 @@ public class InteractorPilotage extends ArcWebGenericService<ModelPilotage, Pilo
 			loggerDispatcher.error("Error in initializePilotageBAS", e, LOGGER);
 		}
 		
-		this.vObjectService.saveInSession(viewPilotageBAS);
-		
-		System.out.println("§§§§§§§§§§§§§§§ 3");		
-		System.out.println(viewPilotageBAS.getHeadersDLabel());
-		System.out.println(viewPilotageBAS.getHeadersVLabel());
-		viewPilotageBAS.getContent().getT().forEach(l -> 
-				{
-					l.getD().forEach(c -> System.out.print(c+"|"));
-					System.out.println("");
-				}
-				);
-		
+		this.vObjectService.saveInSession(viewPilotageBAS);	
 
 	}
 

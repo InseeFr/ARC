@@ -6,10 +6,6 @@ import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
-import org.springframework.context.annotation.ScopedProxyMode;
-import org.springframework.stereotype.Service;
-import org.springframework.web.context.WebApplicationContext;
 
 import fr.insee.arc.utils.utils.LoggerHelper;
 import fr.insee.arc.web.gui.all.service.ArcWebGenericService;
@@ -17,8 +13,6 @@ import fr.insee.arc.web.gui.all.util.VObject;
 import fr.insee.arc.web.gui.webservice.dao.WebserviceDao;
 import fr.insee.arc.web.gui.webservice.model.ModelWebservice;
 
-@Service
-@Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class InteractorWebservice extends ArcWebGenericService<ModelWebservice, WebserviceDao> {
 
 	protected static final String RESULT_SUCCESS = "jsp/gererWebservice.jsp";

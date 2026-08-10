@@ -16,6 +16,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.annotation.RequestScope;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -36,6 +37,7 @@ import fr.insee.arc.web.gui.all.util.VObjectHelperDao;
 import fr.insee.arc.web.gui.all.util.VObjectService;
 
 @Component
+@RequestScope
 public class ExportDao extends VObjectHelperDao {
 
 	/**

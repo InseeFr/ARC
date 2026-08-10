@@ -7,10 +7,6 @@ import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
-import org.springframework.context.annotation.ScopedProxyMode;
-import org.springframework.stereotype.Service;
-import org.springframework.web.context.WebApplicationContext;
 
 import fr.insee.arc.core.util.StaticLoggerDispatcher;
 import fr.insee.arc.utils.utils.LoggerHelper;
@@ -21,8 +17,6 @@ import fr.insee.arc.web.gui.famillenorme.dao.GererFamilleNormeDao;
 import fr.insee.arc.web.gui.famillenorme.model.ModelGererFamille;
 import fr.insee.arc.web.gui.famillenorme.model.ViewVariableMetier;
 
-@Service
-@Scope(scopeName = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class InteractorFamilleNorme extends ArcWebGenericService<ModelGererFamille,GererFamilleNormeDao> {
 
 	protected static final String RESULT_SUCCESS = "jsp/gererFamilleNorme.jsp";

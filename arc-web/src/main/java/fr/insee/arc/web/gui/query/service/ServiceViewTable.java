@@ -1,5 +1,6 @@
 package fr.insee.arc.web.gui.query.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -19,6 +20,7 @@ public class ServiceViewTable extends InteractorQuery {
 			model.addAttribute("myQuery", myQuery);
 		}
 		model.addAttribute("myDbConnection", myDbConnection);
+		views.getViewTable().setSelectedLines(new ArrayList<>());
 		return basicAction(model, RESULT_SUCCESS);
 	}
 

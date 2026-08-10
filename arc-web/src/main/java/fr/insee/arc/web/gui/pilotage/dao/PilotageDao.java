@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.annotation.RequestScope;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.ColumnEnum;
@@ -34,6 +35,7 @@ import fr.insee.arc.web.gui.all.util.VObjectService;
 import jakarta.servlet.http.HttpServletResponse;
 
 @Component
+@RequestScope
 public class PilotageDao extends VObjectHelperDao {
 	
 	public void initializePilotageBAS(VObject viewPilotageBAS) {
@@ -85,9 +87,6 @@ public class PilotageDao extends VObjectHelperDao {
 		requete.append(") ttt ");
 		requete.append("group by date_entree ");
 
-		System.out.println("§§§§§§§§§§§§§ query");
-		System.out.println(requete);
-		
 		this.vObjectService.initialize(viewPilotageBAS, requete, null, defaultInputFields);
 
 	}

@@ -1,11 +1,12 @@
 package fr.insee.arc.core.dataobjects;
 
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.annotation.RequestScope;
 
-import fr.insee.arc.utils.dao.SQL;
 import fr.insee.arc.utils.database.Delimiters;
 
 @Component
+@RequestScope
 public class DataObjectService {
 
 	/**
