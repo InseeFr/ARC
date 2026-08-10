@@ -85,6 +85,9 @@ public class PilotageDao extends VObjectHelperDao {
 		requete.append(") ttt ");
 		requete.append("group by date_entree ");
 
+		System.out.println("§§§§§§§§§§§§§ query");
+		System.out.println(requete);
+		
 		this.vObjectService.initialize(viewPilotageBAS, requete, null, defaultInputFields);
 
 	}

@@ -106,8 +106,6 @@ public abstract class ArcWebGenericService<T extends ArcModel, D extends IDao> i
 	
 	/** Are the Kubernetes options enabled?*/
 	private boolean isKube;
-
-	protected boolean isRefreshMonitoring = false;
 	
 	/** user idep **/
 	private String userName;

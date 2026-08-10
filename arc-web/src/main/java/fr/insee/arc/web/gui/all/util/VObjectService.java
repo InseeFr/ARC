@@ -300,13 +300,18 @@ public class VObjectService {
 			data.setSelectedColumns(selectedColumns);
 			data.setSavedContent(data.getContent());
 
-			// The data is saved in the session
-			session.put(data.getSessionName(), data.copy());
-
+			saveInSession(data);
+			
 		} catch (Exception ex) {
 			LoggerHelper.errorGenTextAsComment(getClass(), "initialize()", LOGGER, ex);
 		}
 
+	}
+	
+	public void saveInSession(VObject data)
+	{
+		// The data is saved in the session
+		session.put(data.getSessionName(), data.copy());
 	}
 
 	// set the default pagination size if the parameter is null

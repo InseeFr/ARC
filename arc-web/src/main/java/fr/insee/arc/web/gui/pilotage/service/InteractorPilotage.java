@@ -76,14 +76,13 @@ public class InteractorPilotage extends ArcWebGenericService<ModelPilotage, Pilo
 		views.setViewFichierBAS(vObjectService.preInitialize(arcModel.getViewFichierBAS()));
 
 		// If the sandbox changed, have to destroy all table and re create later
-		if (this.isRefreshMonitoring) {
-			vObjectService.destroy(views.getViewPilotageBAS());
-			vObjectService.destroy(views.getViewRapportBAS());
-			vObjectService.destroy(views.getViewArchiveBAS());
-			vObjectService.destroy(views.getViewEntrepotBAS());
-			vObjectService.destroy(views.getViewFichierBAS());
-			this.isRefreshMonitoring = false;
-		}
+
+		vObjectService.destroy(views.getViewPilotageBAS());
+		vObjectService.destroy(views.getViewRapportBAS());
+		vObjectService.destroy(views.getViewArchiveBAS());
+		vObjectService.destroy(views.getViewEntrepotBAS());
+		vObjectService.destroy(views.getViewFichierBAS());
+
 
 		putVObject(views.getViewPilotageBAS(), t -> initializePilotageBAS(t));
 		putVObject(views.getViewRapportBAS(), t -> initializeRapportBAS(t));
@@ -99,8 +98,16 @@ public class InteractorPilotage extends ArcWebGenericService<ModelPilotage, Pilo
 	public void initializePilotageBAS(VObject viewPilotageBAS) {
 		LoggerHelper.debug(LOGGER, "* initializePilotageBAS *");
 
+		System.out.println("§§§§§§§§§§§§§§§ 1");		
+		System.out.println(viewPilotageBAS.getHeadersDLabel());
+		System.out.println(viewPilotageBAS.getHeadersVLabel());
+		
 		dao.initializePilotageBAS(viewPilotageBAS);
 
+		System.out.println("§§§§§§§§§§§§§§§ 2");		
+		System.out.println(viewPilotageBAS.getHeadersDLabel());
+		System.out.println(viewPilotageBAS.getHeadersVLabel());
+		
 		List<String> columns = viewPilotageBAS.getHeadersDLabel();
 		Map<String, ColumnRendering> columnRendering = viewPilotageBAS.getConstantVObject().getColumnRender();
 
@@ -112,9 +119,11 @@ public class InteractorPilotage extends ArcWebGenericService<ModelPilotage, Pilo
 		}
 
 		// now display the columns only which have positive values
-
 		for (LineObject l : viewPilotageBAS.getContent()) {
 			for (int i = 1; i < columns.size(); i++) {
+
+				System.out.println("§§§§§§§§§§§§§§§ "+columns.get(i) + ":"+ l.getD().get(i)+"/");
+				
 				if (!l.getD().get(i).equals("0")) {
 					columnRendering.get(columns.get(i)).setVisible(true);
 				}
@@ -131,6 +140,20 @@ public class InteractorPilotage extends ArcWebGenericService<ModelPilotage, Pilo
 		} catch (ArcException e) {
 			loggerDispatcher.error("Error in initializePilotageBAS", e, LOGGER);
 		}
+		
+		this.vObjectService.saveInSession(viewPilotageBAS);
+		
+		System.out.println("§§§§§§§§§§§§§§§ 3");		
+		System.out.println(viewPilotageBAS.getHeadersDLabel());
+		System.out.println(viewPilotageBAS.getHeadersVLabel());
+		viewPilotageBAS.getContent().getT().forEach(l -> 
+				{
+					l.getD().forEach(c -> System.out.print(c+"|"));
+					System.out.println("");
+				}
+				);
+		
+
 	}
 
 	// visual des Pilotages du bac à sable
