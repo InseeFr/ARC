@@ -5,6 +5,9 @@
 - enable tar compression for bigger files
 - select in processing pipeline a number of file at least equals to number of executor
 
+## version-94.2.94
+- fix sandbox cross session gui bug
+
 ## version-94.2.91
 - cve fix postgres and jackson
 
