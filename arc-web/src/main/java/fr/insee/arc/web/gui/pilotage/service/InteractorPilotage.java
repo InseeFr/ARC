@@ -69,15 +69,6 @@ public class InteractorPilotage extends ArcWebGenericService<ModelPilotage, Pilo
 		views.setViewEntrepotBAS(vObjectService.preInitialize(arcModel.getViewEntrepotBAS()));
 		views.setViewFichierBAS(vObjectService.preInitialize(arcModel.getViewFichierBAS()));
 
-		// If the sandbox changed, have to destroy all table and re create later
-
-		vObjectService.destroy(views.getViewPilotageBAS());
-		vObjectService.destroy(views.getViewRapportBAS());
-		vObjectService.destroy(views.getViewArchiveBAS());
-		vObjectService.destroy(views.getViewEntrepotBAS());
-		vObjectService.destroy(views.getViewFichierBAS());
-
-
 		putVObject(views.getViewPilotageBAS(), t -> initializePilotageBAS(t));
 		putVObject(views.getViewRapportBAS(), t -> initializeRapportBAS(t));
 		putVObject(views.getViewArchiveBAS(), t -> initializeArchiveBAS(t, views.getViewEntrepotBAS()));
