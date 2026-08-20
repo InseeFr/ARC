@@ -5,6 +5,10 @@
 - enable tar compression for bigger files
 - select in processing pipeline a number of file at least equals to number of executor
 
+## version-94.2.95
+- fix gui bug in the pilotage of files gui
+- cve fix log4j
+
 ## version-94.2.94
 - fix sandbox cross session gui bug
 
