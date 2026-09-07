@@ -26,6 +26,12 @@ begin
 -- fix dump restore : return true if reference table doesn't exist
 if (not public.check_object_exists('arc.ext_etat_jeuderegle')) then return true; end if;
 
+-- Autorise la restauration si la table de référence est vide
+IF (NOT EXISTS (SELECT 1 FROM arc.ext_etat_jeuderegle)) THEN
+    RETURN true;
+END IF;
+
+-- vérification de la contrainte
 if (unsafe is null or not (unsafe in (select replace(id,'.','_') from arc.ext_etat_jeuderegle where isenv)))
 then
 RAISE EXCEPTION '% format is not correct. Must be a declared sandbox.', unsafe; 
