@@ -1,10 +1,13 @@
 package fr.insee.arc.web.gui.norme.controller;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import fr.insee.arc.web.gui.norme.service.ServiceViewJeuxDeReglesCopie;
+
+import java.text.ParseException;
 
 @Controller
 public class ControllerViewJeuxDeReglesCopie extends ServiceViewJeuxDeReglesCopie {
@@ -72,6 +75,16 @@ public class ControllerViewJeuxDeReglesCopie extends ServiceViewJeuxDeReglesCopi
 	@RequestMapping("/secure/copieJeuxDeRegles")
 	public String copieJeuxDeReglesAction(Model model) {
 		return copieJeuxDeRegles(model);
+	}
+
+	@RequestMapping("/secure/selectJeuxDeReglesComparaison")
+	public String selectJeuxDeReglesComparaisonAction(Model model) {
+		return selectJeuxDeReglesComparaison(model);
+	}
+
+	@RequestMapping("/secure/compareJeuxDeRegles")
+	public String compareJeuxDeReglesAction(Model model, HttpServletResponse response) throws ParseException {
+		return compareJeuxDeReglesDownload(model, response);
 	}
 
 }

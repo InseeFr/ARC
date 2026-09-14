@@ -111,4 +111,41 @@ public class JeuDeRegleDao {
 		return listJdr;
 	}
 
+	public static ArcPreparedStatementBuilder buildJeuDeRegleCondition(JeuDeRegle jeuDeRegle) {
+
+		ArcPreparedStatementBuilder condition = new ArcPreparedStatementBuilder();
+
+		condition.append(" id_norme ");
+		condition.append(condition.sqlEqual(
+				jeuDeRegle.getIdNorme(),
+				"text"
+		));
+
+		condition.append(" AND periodicite ");
+		condition.append(condition.sqlEqual(
+				jeuDeRegle.getPeriodicite(),
+				"text"
+		));
+
+		condition.append(" AND validite_inf ");
+		condition.append(condition.sqlEqual(
+				jeuDeRegle.getValiditeInfString(),
+				"date"
+		));
+
+		condition.append(" AND validite_sup ");
+		condition.append(condition.sqlEqual(
+				jeuDeRegle.getValiditeSupString(),
+				"date"
+		));
+
+		condition.append(" AND version ");
+		condition.append(condition.sqlEqual(
+				jeuDeRegle.getVersion(),
+				"text"
+		));
+
+		return condition;
+	}
+
 }

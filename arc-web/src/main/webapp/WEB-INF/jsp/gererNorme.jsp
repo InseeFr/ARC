@@ -95,6 +95,15 @@ type="submit"
 doAction="downloadJeuxDeRegles"
 ajax="false"
 ><span class="fa fa-download">&nbsp;</span> <spring:message code="gui.button.downloadRuleset"/></button>
+    <button
+        class="btn btn-primary btn-sm"
+        id="viewJeuxDeRegles.compare"
+        type="submit"
+        doAction="selectJeuxDeReglesComparaison"
+        scope="viewJeuxDeRegles;viewJeuxDeReglesCopie;"
+    >
+        Comparer ce jeu de règles
+    </button>
 </c:param>
 </c:import>
 </div>
@@ -464,16 +473,90 @@ multipart="true"
 <c:param name="checkbox" value ="true" />
 <c:param name="checkboxVisible" value ="true" />
 <c:param name="otherButton">
-<input
-class="btn btn-primary btn-sm"
-id="viewJeuxDeReglesCopie.copie"
-type="submit"
-doAction="copieJeuxDeRegles"
-scope="-viewJeuxDeReglesCopie;${viewJeuxDeReglesCopie.customValues['SELECTED_RULESET_NAME']};"
-value="<spring:message code="gui.button.copy"/>"
-></input>
+<c:choose>
+
+    <c:when test="${viewJeuxDeReglesCopie.customValues['MODE'] == 'COMPARAISON'}">
+
+        <input
+            class="btn btn-primary btn-sm"
+            id="viewJeuxDeReglesCopie.compare"
+            type="submit"
+            doAction="compareJeuxDeRegles"
+            ajax="false"
+            value="Comparer"
+        />
+
+    </c:when>
+
+    <c:otherwise>
+
+        <input
+            class="btn btn-primary btn-sm"
+            id="viewJeuxDeReglesCopie.copie"
+            type="submit"
+            doAction="copieJeuxDeRegles"
+            scope="-viewJeuxDeReglesCopie;${viewJeuxDeReglesCopie.customValues['SELECTED_RULESET_NAME']};"
+            value="<spring:message code="gui.button.copy"/>"
+        />
+
+    </c:otherwise>
+
+</c:choose>
+
 </c:param>
 </c:import>
+
+<c:if test="${not empty differencesParType}">
+    <div class="row">
+        <div class="col-md-12">
+
+            <c:forEach items="${differencesParType}" var="entry">
+
+                <h4>${entry.key}</h4>
+
+                <c:forEach items="${entry.value}" var="difference">
+
+                    <c:choose>
+
+                        <c:when test="${entry.key == 'AJOUT'}">
+                            <c:forEach items="${difference.reglesComparees}" var="regle">
+                                <div>${regle}</div>
+                            </c:forEach>
+                        </c:when>
+
+                        <c:when test="${entry.key == 'SUPPRESSION'}">
+                            <c:forEach items="${difference.reglesReference}" var="regle">
+                                <div>${regle}</div>
+                            </c:forEach>
+                        </c:when>
+
+                        <c:when test="${entry.key == 'MODIFICATION'}">
+                            <c:forEach items="${difference.reglesReference}" var="regleReference" varStatus="status">
+                                <div>
+                                    ${regleReference}
+                                    →
+                                    ${difference.reglesComparees[status.index]}
+                                </div>
+                            </c:forEach>
+                        </c:when>
+
+                    </c:choose>
+
+                </c:forEach>
+
+            </c:forEach>
+
+        </div>
+    </div>
+</c:if>
+
+</div>
+</div>
+</div>
+
+</form>
+</body>
+</html>
 </div>
 </div>
 </div>
