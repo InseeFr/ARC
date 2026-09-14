@@ -26,20 +26,6 @@ public class DifferenceRegle<T> {
         return reglesComparees;
     }
 
-    @Override
-    public String toString() {
-        return switch (type) {
-            case AJOUT ->
-                    "AJOUT : " + reglesComparees;
-            case SUPPRESSION ->
-                    "SUPPRESSION : " + reglesReference;
-            case MODIFICATION ->
-                    "MODIFICATION : "
-                            + reglesReference
-                            + " -> "
-                            + reglesComparees;
-        };
-    }
 }
 
 
