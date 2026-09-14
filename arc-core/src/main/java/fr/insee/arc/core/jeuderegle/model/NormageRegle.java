@@ -95,16 +95,4 @@ public class NormageRegle implements RegleComparable <NormageRegle.CleComparaiso
                 idClasse
         );
     }
-
-    @Override
-    public String toString() {
-        return new ToStringBuilder(this)
-                .append("idRegle", idRegle)
-                .append("idClasse", idClasse)
-                .append("rubrique", rubrique)
-                .append("rubriqueNmcl", rubriqueNmcl)
-                .append("todo", todo)
-                .append("commentaire", commentaire)
-                .toString();
-    }
 }

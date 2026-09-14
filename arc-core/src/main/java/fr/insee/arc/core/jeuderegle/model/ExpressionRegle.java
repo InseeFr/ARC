@@ -37,16 +37,6 @@ public class ExpressionRegle
     public record ContenuComparaisonRegleExpression() {
     }
 
-    @Override
-    public String toString() {
-        return new ToStringBuilder(this)
-                .append("idRegle", idRegle)
-                .append("exprNom", exprNom)
-                .append("exprValeur", exprValeur)
-                .append("commentaire", commentaire)
-                .toString();
-    }
-
     public JeuDeRegle getJeuDeRegle() {
         return jeuDeRegle;
     }
