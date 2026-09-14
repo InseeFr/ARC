@@ -64,27 +64,6 @@ public class ControleRegle
     ) {
     }
 
-    @Override
-    public String toString() {
-        return new ToStringBuilder(this)
-                .append("idRegle", idRegle)
-                .append("idClasse", idClasse)
-                .append("rubriquePere", rubriquePere)
-                .append("rubriqueFils", rubriqueFils)
-                .append("borneInf", borneInf)
-                .append("borneSup", borneSup)
-                .append("condition", condition)
-                .append("preAction", preAction)
-                .append("todo", todo)
-                .append("commentaire", commentaire)
-                .append("xsdOrdre", xsdOrdre)
-                .append("xsdLabelFils", xsdLabelFils)
-                .append("xsdRole", xsdRole)
-                .append("blockingThreshold", blockingThreshold)
-                .append("errorRowProcessing", errorRowProcessing)
-                .toString();
-    }
-
     public JeuDeRegle getJeuDeRegle() {
         return jeuDeRegle;
     }

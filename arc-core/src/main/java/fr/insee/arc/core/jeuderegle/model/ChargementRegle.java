@@ -86,16 +86,4 @@ public class ChargementRegle
     public void setCommentaire(String commentaire) {
         this.commentaire = commentaire;
     }
-
-    @Override
-    public String toString() {
-        return new ToStringBuilder(this)
-                .append("jeuDeRegle", jeuDeRegle)
-                .append("idRegle", idRegle)
-                .append("typeFichier", typeFichier)
-                .append("delimiter", delimiter)
-                .append("format", format)
-                .append("commentaire", commentaire)
-                .toString();
-    }
 }

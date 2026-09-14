@@ -36,16 +36,6 @@ public class MappingRegle
     ) {
     }
 
-    @Override
-    public String toString() {
-        return new ToStringBuilder(this)
-                .append("idRegle", idRegle)
-                .append("variableSortie", variableSortie)
-                .append("exprRegleCol", exprRegleCol)
-                .append("commentaire", commentaire)
-                .toString();
-    }
-
     public JeuDeRegle getJeuDeRegle() {
         return jeuDeRegle;
     }
