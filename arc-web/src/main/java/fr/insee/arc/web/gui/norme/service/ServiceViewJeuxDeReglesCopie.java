@@ -1,19 +1,38 @@
 package fr.insee.arc.web.gui.norme.service;
 
+import java.io.IOException;
+import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
+import fr.insee.arc.core.jeuderegle.comparaison.ComparaisonRegleService;
+import fr.insee.arc.core.jeuderegle.comparaison.DifferenceRegle;
+import fr.insee.arc.core.jeuderegle.comparaison.TypeDifferenceEnum;
+import fr.insee.arc.core.jeuderegle.model.*;
+import fr.insee.arc.core.service.global.bo.JeuDeRegle;
+import fr.insee.arc.utils.exception.ArcExceptionMessage;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 
 import fr.insee.arc.utils.exception.ArcException;
+import tools.jackson.core.StreamWriteFeature;
+import tools.jackson.dataformat.csv.CsvMapper;
+import tools.jackson.dataformat.csv.CsvSchema;
 
 @Service
 public class ServiceViewJeuxDeReglesCopie extends InteractorNorme {
 
 	private static final Logger LOGGER = LogManager.getLogger(ServiceViewJeuxDeReglesCopie.class);
+
+	@Autowired
+	private ComparaisonRegleService comparaisonRegleService;
 
 	/**
 	 * Action trigger by requesting the load rules of the register rule set to copy
@@ -24,6 +43,9 @@ public class ServiceViewJeuxDeReglesCopie extends InteractorNorme {
 	public String selectJeuxDeReglesChargementCopie(Model model) {
 		this.views.getViewJeuxDeReglesCopie().setCustomValue(SELECTED_RULESET_TABLE, this.views.getViewChargement().getTable());
 		this.views.getViewJeuxDeReglesCopie().setCustomValue(SELECTED_RULESET_NAME, this.views.getViewChargement().getSessionName());
+		views.getViewJeuxDeReglesCopie()
+				.getCustomValues()
+				.put("MODE", "COPIE");
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
@@ -37,6 +59,9 @@ public class ServiceViewJeuxDeReglesCopie extends InteractorNorme {
 
 		this.views.getViewJeuxDeReglesCopie().setCustomValue(SELECTED_RULESET_TABLE, this.views.getViewNormage().getTable());
 		this.views.getViewJeuxDeReglesCopie().setCustomValue(SELECTED_RULESET_NAME, this.views.getViewNormage().getSessionName());
+		views.getViewJeuxDeReglesCopie()
+				.getCustomValues()
+				.put("MODE", "COPIE");
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
@@ -50,6 +75,9 @@ public class ServiceViewJeuxDeReglesCopie extends InteractorNorme {
 
 		this.views.getViewJeuxDeReglesCopie().setCustomValue(SELECTED_RULESET_TABLE, this.views.getViewControle().getTable());
 		this.views.getViewJeuxDeReglesCopie().setCustomValue(SELECTED_RULESET_NAME, this.views.getViewControle().getSessionName());
+		views.getViewJeuxDeReglesCopie()
+				.getCustomValues()
+				.put("MODE", "COPIE");
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
@@ -63,6 +91,9 @@ public class ServiceViewJeuxDeReglesCopie extends InteractorNorme {
 
 		this.views.getViewJeuxDeReglesCopie().setCustomValue(SELECTED_RULESET_TABLE, this.views.getViewMapping().getTable());
 		this.views.getViewJeuxDeReglesCopie().setCustomValue(SELECTED_RULESET_NAME, this.views.getViewMapping().getSessionName());
+		views.getViewJeuxDeReglesCopie()
+				.getCustomValues()
+				.put("MODE", "COPIE");
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
@@ -70,6 +101,9 @@ public class ServiceViewJeuxDeReglesCopie extends InteractorNorme {
 
 		this.views.getViewJeuxDeReglesCopie().setCustomValue(SELECTED_RULESET_TABLE, this.views.getViewExpression().getTable());
 		this.views.getViewJeuxDeReglesCopie().setCustomValue(SELECTED_RULESET_NAME, this.views.getViewExpression().getSessionName());
+		views.getViewJeuxDeReglesCopie()
+				.getCustomValues()
+				.put("MODE", "COPIE");
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
@@ -100,5 +134,252 @@ public class ServiceViewJeuxDeReglesCopie extends InteractorNorme {
 		}
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
+
+	public String selectJeuxDeReglesComparaison(Model model) {
+
+		this.views.getViewJeuxDeReglesCopie().setCustomValue(SELECTED_RULESET_TABLE, this.views.getViewNormage().getTable());
+		this.views.getViewJeuxDeReglesCopie().setCustomValue(SELECTED_RULESET_NAME, this.views.getViewNormage().getSessionName());
+
+		views.getViewJeuxDeReglesCopie()
+				.getCustomValues()
+				.put("MODE", "COMPARAISON");
+
+		return generateDisplay(model, RESULT_SUCCESS);
+	}
+
+	public String compareJeuxDeReglesDownload(Model model, HttpServletResponse response) throws ParseException {
+
+		Map<String, List<String>> reference =
+				views.getViewJeuxDeRegles().mapContentSelected();
+
+		Map<String, List<String>> compare =
+				views.getViewJeuxDeReglesCopie().mapContentSelected();
+
+		if (reference.isEmpty() || compare.isEmpty()) {
+			views.getViewJeuxDeReglesCopie()
+					.setMessage("general.noSelection");
+
+			return generateDisplay(model, RESULT_SUCCESS);
+		}
+
+		JeuDeRegle jdrReference = JeuDeRegle.fromMap(reference);
+		JeuDeRegle jdrCompare = JeuDeRegle.fromMap(compare);
+
+		try {
+			List<DifferenceRegle<?>> differences =
+					comparaisonRegleService.comparerJeuDeRegles(
+							null,
+							jdrReference,
+							jdrCompare);
+
+			downloadDifferences(response, differences);
+
+			return "none";
+
+		} catch (ArcException ex) {
+			loggerDispatcher.error(
+					"Error in compareJeuxDeRegles",
+					ex,
+					LOGGER
+			);
+		}
+		return generateDisplay(model, RESULT_SUCCESS);
+	}
+
+	//Methode pour affichage ihm actuellement remplacer par export fichier
+		public String compareJeuxDeRegles(Model model) throws ParseException {
+		loggerDispatcher.info("Mon action pour comparer 2 jeux de règles", LOGGER);
+
+		Map<String, List<String>> reference =
+				views.getViewJeuxDeRegles().mapContentSelected();
+
+		Map<String, List<String>> compare =
+				views.getViewJeuxDeReglesCopie().mapContentSelected();
+
+		if (!reference.isEmpty() && !compare.isEmpty()) {
+
+			JeuDeRegle jdrReference = JeuDeRegle.fromMap(reference);
+			JeuDeRegle jdrCompare = JeuDeRegle.fromMap(compare);
+
+			try {
+				List<DifferenceRegle<?>> differences =
+						comparaisonRegleService.comparerJeuDeRegles(
+								null,
+								jdrReference,
+								jdrCompare
+						);
+
+				Map<TypeDifferenceEnum, List<DifferenceRegle<?>>> differencesParType =
+						differences.stream()
+								.collect(Collectors.groupingBy(DifferenceRegle::getType));
+
+				model.addAttribute("differencesParType", differencesParType);
+				model.addAttribute("jdrReference", jdrReference);
+				model.addAttribute("jdrCompare", jdrCompare);
+
+			} catch (ArcException ex) {
+				loggerDispatcher.error(
+						"Error in compareJeuxDeRegles",
+						ex,
+						LOGGER
+				);
+			}
+
+		} else {
+			loggerDispatcher.info("No rule set chosen", LOGGER);
+
+			views.getViewJeuxDeRegles()
+					.setMessage("normManagement.copyRuleset.noSelection");
+		}
+
+		return generateDisplay(model, RESULT_SUCCESS);
+	}
+
+	// build csv
+
+
+
+	private void downloadDifferences (
+			HttpServletResponse response,
+			List<DifferenceRegle<?>> differences) throws ArcException{
+
+		response.reset();
+
+		response.setHeader(
+				"Content-Disposition",
+				"attachment; filename=differences_jeux_de_regles.zip");
+
+		try (ZipOutputStream zos =
+					 new ZipOutputStream(response.getOutputStream())) {
+
+			writeCsvIfNotEmpty(
+					zos,
+					"Rules_load.csv",
+					differences,
+					ChargementRegle.class);
+
+			writeCsvIfNotEmpty(
+					zos,
+					"Rules_structurize.csv",
+					differences,
+					NormageRegle.class);
+
+			writeCsvIfNotEmpty(
+					zos,
+					"Rules_control.csv",
+					differences,
+					ControleRegle.class);
+
+			writeCsvIfNotEmpty(
+					zos,
+					"Rules_mapping.csv",
+					differences,
+					MappingRegle.class);
+
+			writeCsvIfNotEmpty(
+					zos,
+					"Rules_expression.csv",
+					differences,
+					ExpressionRegle.class);
+
+			writeCsvIfNotEmpty(
+					zos,
+					"Norme.csv",
+					differences,
+					Norme.class);
+		} catch (IOException e) {
+			LOGGER.error(e.getMessage(), e);
+			throw new ArcException(ArcExceptionMessage.FILE_WRITE_FAILED);
+		}
+	}
+
+	private <T  extends RegleComparable<?>> void writeCsvIfNotEmpty(
+			ZipOutputStream zos,
+			String fileName,
+			List<DifferenceRegle<?>> differences,
+			Class<T> ruleClass) throws IOException {
+
+		List<DifferenceRegle<T>> differencesByRuleType =
+				getDifferencesByRuleType(differences, ruleClass);
+
+		if (!differencesByRuleType.isEmpty()) {
+			writeCsv(
+					zos,
+					fileName,
+					differencesByRuleType.stream()
+							.map(this::toDifferenceCsv)
+							.toList()
+			);
+		}
+	}
+
+
+	private <T extends RegleComparable<?>>
+	DifferenceCsv toDifferenceCsv(DifferenceRegle<T> difference) {
+
+		return new DifferenceCsv(
+				difference.getType().name(),
+				formatRegles(difference.getReglesReference()),
+				formatRegles(difference.getReglesComparees())
+		);
+	}
+
+	private String formatRegles(
+			List<? extends RegleComparable<?>> regles) {
+
+		return regles.stream()
+				.map(RegleComparable::formatPourExport)
+				.collect(Collectors.joining(" | "));
+	}
+
+
+	@SuppressWarnings("unchecked")
+	private <T extends RegleComparable<?>> List<DifferenceRegle<T>> getDifferencesByRuleType(
+			List<DifferenceRegle<?>> differences,
+			Class<T> ruleClass) {
+
+		return differences.stream()
+				.filter(difference -> {
+					if (!difference.getReglesReference().isEmpty()) {
+						return ruleClass.isInstance(
+								difference.getReglesReference().get(0));
+					}
+
+					return !difference.getReglesComparees().isEmpty()
+							&& ruleClass.isInstance(
+							difference.getReglesComparees().get(0));
+				})
+				.map(difference -> (DifferenceRegle<T>) difference)
+				.toList();
+	}
+
+	private void writeCsv(
+			ZipOutputStream zos,
+			String fileName,
+			List<DifferenceCsv> differences) throws IOException {
+
+		zos.putNextEntry(new ZipEntry(fileName));
+
+		CsvSchema schema = CSV_MAPPER
+				.schemaFor(DifferenceCsv.class)
+				.withHeader()
+				.withColumnSeparator(';');
+
+		CSV_MAPPER
+				.writer(schema)
+				.writeValue(zos, differences);
+
+		zos.closeEntry();
+	}
+
+	public record DifferenceCsv(
+			String type,
+			String reference,
+			String compare) {
+	}
+
+	private static final CsvMapper CSV_MAPPER = CsvMapper.builder()
+			.disable(StreamWriteFeature.AUTO_CLOSE_TARGET)
+			.build();
 
 }
