@@ -186,59 +186,6 @@ public class ServiceViewJeuxDeReglesCopie extends InteractorNorme {
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
-	//Methode pour affichage ihm actuellement remplacer par export fichier
-		public String compareJeuxDeRegles(Model model) throws ParseException {
-		loggerDispatcher.info("Mon action pour comparer 2 jeux de règles", LOGGER);
-
-		Map<String, List<String>> reference =
-				views.getViewJeuxDeRegles().mapContentSelected();
-
-		Map<String, List<String>> compare =
-				views.getViewJeuxDeReglesCopie().mapContentSelected();
-
-		if (!reference.isEmpty() && !compare.isEmpty()) {
-
-			JeuDeRegle jdrReference = JeuDeRegle.fromMap(reference);
-			JeuDeRegle jdrCompare = JeuDeRegle.fromMap(compare);
-
-			try {
-				List<DifferenceRegle<?>> differences =
-						comparaisonRegleService.comparerJeuDeRegles(
-								null,
-								jdrReference,
-								jdrCompare
-						);
-
-				Map<TypeDifferenceEnum, List<DifferenceRegle<?>>> differencesParType =
-						differences.stream()
-								.collect(Collectors.groupingBy(DifferenceRegle::getType));
-
-				model.addAttribute("differencesParType", differencesParType);
-				model.addAttribute("jdrReference", jdrReference);
-				model.addAttribute("jdrCompare", jdrCompare);
-
-			} catch (ArcException ex) {
-				loggerDispatcher.error(
-						"Error in compareJeuxDeRegles",
-						ex,
-						LOGGER
-				);
-			}
-
-		} else {
-			loggerDispatcher.info("No rule set chosen", LOGGER);
-
-			views.getViewJeuxDeRegles()
-					.setMessage("normManagement.copyRuleset.noSelection");
-		}
-
-		return generateDisplay(model, RESULT_SUCCESS);
-	}
-
-	// build csv
-
-
-
 	private void downloadDifferences (
 			HttpServletResponse response,
 			List<DifferenceRegle<?>> differences) throws ArcException{
