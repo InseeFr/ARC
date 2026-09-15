@@ -8,10 +8,9 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import fr.insee.arc.core.jeuderegle.comparaison.ComparaisonRegleService;
-import fr.insee.arc.core.jeuderegle.comparaison.DifferenceRegle;
-import fr.insee.arc.core.jeuderegle.comparaison.TypeDifferenceEnum;
-import fr.insee.arc.core.jeuderegle.model.*;
+import fr.insee.arc.core.famille.comparaison.ComparaisonRegleService;
+import fr.insee.arc.core.famille.comparaison.DifferenceRegle;
+import fr.insee.arc.core.famille.model.*;
 import fr.insee.arc.core.service.global.bo.JeuDeRegle;
 import fr.insee.arc.utils.exception.ArcExceptionMessage;
 import jakarta.servlet.http.HttpServletResponse;
@@ -234,6 +233,24 @@ public class ServiceViewJeuxDeReglesCopie extends InteractorNorme {
 					"Norme.csv",
 					differences,
 					Norme.class);
+
+			writeCsvIfNotEmpty(
+					zos,
+					"Tables_metiers.csv",
+					differences,
+					TableMetier.class);
+
+			writeCsvIfNotEmpty(
+					zos,
+					"Variables_metiers.csv",
+					differences,
+					VariableMetier.class);
+
+			writeCsvIfNotEmpty(
+					zos,
+					"Clients.csv",
+					differences,
+					Client.class);
 		} catch (IOException e) {
 			LOGGER.error(e.getMessage(), e);
 			throw new ArcException(ArcExceptionMessage.FILE_WRITE_FAILED);

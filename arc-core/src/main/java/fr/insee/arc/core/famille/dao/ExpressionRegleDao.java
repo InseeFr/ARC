@@ -1,4 +1,4 @@
-package fr.insee.arc.core.jeuderegle.dao;
+package fr.insee.arc.core.famille.dao;
 
 import java.sql.Connection;
 import java.util.ArrayList;
@@ -6,19 +6,19 @@ import java.util.List;
 import java.util.Map;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
-import fr.insee.arc.core.jeuderegle.model.MappingRegle;
+import fr.insee.arc.core.famille.model.ExpressionRegle;
 import fr.insee.arc.core.service.global.bo.JeuDeRegle;
 import fr.insee.arc.core.service.global.bo.JeuDeRegleDao;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.structure.GenericBean;
 
-public class MappingRegleDao {
+public class ExpressionRegleDao {
 
-    private MappingRegleDao() {
+    private ExpressionRegleDao() {
     }
 
-    public static List<MappingRegle> getByJeuDeRegle(
+    public static List<ExpressionRegle> getByJeuDeRegle(
             Connection connexion,
             JeuDeRegle jeuDeRegle) throws ArcException {
 
@@ -28,10 +28,10 @@ public class MappingRegleDao {
         requete.append("""
                 SELECT
                     id_regle,
-                    variable_sortie,
-                    expr_regle_col,
+                    expr_nom,
+                    expr_valeur,
                     commentaire
-                FROM arc.ihm_mapping_regle
+                FROM arc.ihm_expression
                 WHERE
                 """);
 
@@ -45,47 +45,44 @@ public class MappingRegleDao {
                                 .executeRequest(connexion, requete)
                 ).mapContent();
 
-        return extractMappingRegles(
+        return extractExpressionRegles(
                 result,
                 jeuDeRegle
         );
     }
 
-    private static List<MappingRegle> extractMappingRegles(
+    private static List<ExpressionRegle> extractExpressionRegles(
             Map<String, List<String>> result,
             JeuDeRegle jeuDeRegle) {
 
-        List<MappingRegle> regles = new ArrayList<>();
+        List<ExpressionRegle> regles = new ArrayList<>();
 
         if (result.isEmpty()) {
             return regles;
         }
 
-        List<String> variablesSortie =
-                result.get("variable_sortie");
+        List<String> idsRegle = result.get("id_regle");
 
-        if (variablesSortie == null) {
+        if (idsRegle == null) {
             return regles;
         }
 
-        for (int i = 0; i < variablesSortie.size(); i++) {
+        for (int i = 0; i < idsRegle.size(); i++) {
 
-            MappingRegle regle = new MappingRegle();
+            ExpressionRegle regle = new ExpressionRegle();
 
             regle.setJeuDeRegle(jeuDeRegle);
 
-            String idRegle = result.get("id_regle").get(i);
-
-            if (idRegle != null && !idRegle.isEmpty()) {
-                regle.setIdRegle(Long.valueOf(idRegle));
-            }
-
-            regle.setVariableSortie(
-                    variablesSortie.get(i)
+            regle.setIdRegle(
+                    Long.valueOf(idsRegle.get(i))
             );
 
-            regle.setExprRegleCol(
-                    result.get("expr_regle_col").get(i)
+            regle.setExprNom(
+                    result.get("expr_nom").get(i)
+            );
+
+            regle.setExprValeur(
+                    result.get("expr_valeur").get(i)
             );
 
             regle.setCommentaire(

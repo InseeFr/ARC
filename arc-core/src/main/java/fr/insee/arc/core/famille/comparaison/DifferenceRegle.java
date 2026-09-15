@@ -1,4 +1,4 @@
-package fr.insee.arc.core.jeuderegle.comparaison;
+package fr.insee.arc.core.famille.comparaison;
 
 import java.util.List;
 

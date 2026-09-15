@@ -1,4 +1,4 @@
-package fr.insee.arc.core.jeuderegle.dao;
+package fr.insee.arc.core.famille.dao;
 
 import java.sql.Connection;
 import java.util.ArrayList;
@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
-import fr.insee.arc.core.jeuderegle.model.ControleRegle;
+import fr.insee.arc.core.famille.model.ControleRegle;
 import fr.insee.arc.core.service.global.bo.JeuDeRegle;
 import fr.insee.arc.core.service.global.bo.JeuDeRegleDao;
 import fr.insee.arc.utils.dao.UtilitaireDao;

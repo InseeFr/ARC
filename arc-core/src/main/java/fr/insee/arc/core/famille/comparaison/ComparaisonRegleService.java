@@ -1,7 +1,9 @@
-package fr.insee.arc.core.jeuderegle.comparaison;
+package fr.insee.arc.core.famille.comparaison;
 
-import fr.insee.arc.core.jeuderegle.dao.*;
-import fr.insee.arc.core.jeuderegle.model.RegleComparable;
+import fr.insee.arc.core.famille.dao.*;
+import fr.insee.arc.core.famille.model.Norme;
+import fr.insee.arc.core.famille.model.RegleComparable;
+import fr.insee.arc.core.famille.model.TableMetier;
 import fr.insee.arc.core.service.global.bo.JeuDeRegle;
 import fr.insee.arc.utils.exception.ArcException;
 import org.apache.logging.log4j.LogManager;
@@ -26,17 +28,6 @@ public class ComparaisonRegleService {
         List<DifferenceRegle<?>> differences = new ArrayList<>();
 
         differences.addAll(comparerRegles(
-                NormeDao.getByJeuDeRegle(
-                        connexion,
-                        jeuDeRegleReference
-                ),
-                NormeDao.getByJeuDeRegle(
-                        connexion,
-                        jeuDeRegleCompare
-                )
-        ));
-
-        differences.addAll(comparerRegles(
                 ChargementRegleDao.getByJeuDeRegle(
                         connexion,
                         jeuDeRegleReference
@@ -88,6 +79,57 @@ public class ComparaisonRegleService {
                 ExpressionRegleDao.getByJeuDeRegle(
                         connexion,
                         jeuDeRegleCompare
+                )
+        ));
+
+        List<Norme> normeReference = NormeDao.getByJeuDeRegle(
+                connexion,
+                jeuDeRegleReference
+        );
+
+        List<Norme> normeCompare = NormeDao.getByJeuDeRegle(
+                connexion,
+                jeuDeRegleCompare
+        );
+
+        differences.addAll(comparerRegles(
+                normeReference,
+                normeCompare
+        ));
+
+        String idFamilleReference = normeReference.get(0).getIdFamille();
+        String idFamilleComparee = normeCompare.get(0).getIdFamille();
+
+        differences.addAll(comparerRegles(
+                TableMetierDao.getByFamille(
+                        connexion,
+                        idFamilleReference
+                ),
+                TableMetierDao.getByFamille(
+                        connexion,
+                        idFamilleComparee
+                )
+        ));
+
+        differences.addAll(comparerRegles(
+                VariableMetierDAO.getByFamille(
+                        connexion,
+                        idFamilleReference
+                ),
+                VariableMetierDAO.getByFamille(
+                        connexion,
+                        idFamilleComparee
+                )
+        ));
+
+        differences.addAll(comparerRegles(
+                ClientDao.getByFamille(
+                        connexion,
+                        idFamilleReference
+                ),
+                ClientDao.getByFamille(
+                        connexion,
+                        idFamilleComparee
                 )
         ));
 

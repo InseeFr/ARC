@@ -1,4 +1,4 @@
-package fr.insee.arc.core.jeuderegle.model;
+package fr.insee.arc.core.famille.model;
 
 public class Norme
         implements RegleComparable<

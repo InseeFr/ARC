@@ -1,7 +1,7 @@
-package fr.insee.arc.core.jeuderegle.dao;
+package fr.insee.arc.core.famille.dao;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
-import fr.insee.arc.core.jeuderegle.model.ChargementRegle;
+import fr.insee.arc.core.famille.model.NormageRegle;
 import fr.insee.arc.core.service.global.bo.JeuDeRegle;
 import fr.insee.arc.core.service.global.bo.JeuDeRegleDao;
 import fr.insee.arc.utils.dao.UtilitaireDao;
@@ -13,28 +13,29 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class ChargementRegleDao {
+public class NormageRegleDao {
 
-    private ChargementRegleDao() {
+    private NormageRegleDao() {
         throw new IllegalStateException("Utility class");
     }
 
-    public static List<ChargementRegle> getByJeuDeRegle(
+    public static List<NormageRegle> getByJeuDeRegle(
             Connection connexion,
             JeuDeRegle jeuDeRegle) throws ArcException {
 
         ArcPreparedStatementBuilder requete = new ArcPreparedStatementBuilder();
 
         requete.append("""
-                SELECT
-                    id_regle,
-                    type_fichier,
-                    delimiter,
-                    format,
-                    commentaire
-                FROM arc.ihm_chargement_regle
-                WHERE
-                """);
+        SELECT
+            id_regle,
+            id_classe,
+            rubrique,
+            rubrique_nmcl,
+            todo,
+            commentaire
+        FROM arc.ihm_normage_regle
+        WHERE
+        """);
 
         requete.append(JeuDeRegleDao.buildJeuDeRegleCondition(jeuDeRegle));
 
@@ -42,33 +43,29 @@ public class ChargementRegleDao {
                 UtilitaireDao.get(0).executeRequest(connexion, requete)
         ).mapContent();
 
-        return extractChargementRegles(result, jeuDeRegle);
+        return extractNormageRegles(result, jeuDeRegle);
     }
 
-    private static List<ChargementRegle> extractChargementRegles(
+    private static List<NormageRegle> extractNormageRegles(
             Map<String, List<String>> result,
             JeuDeRegle jeuDeRegle) {
 
-        List<ChargementRegle> regles = new ArrayList<>();
+        List<NormageRegle> regles = new ArrayList<>();
 
         if (result.isEmpty()) {
             return regles;
         }
 
-        List<String> idsRegle = result.get("id_regle");
+        for (int i = 0; i < result.get("id_regle").size(); i++) {
 
-        if (idsRegle == null) {
-            return regles;
-        }
-
-        for (int i = 0; i < idsRegle.size(); i++) {
-            ChargementRegle regle = new ChargementRegle();
+            NormageRegle regle = new NormageRegle();
 
             regle.setJeuDeRegle(jeuDeRegle);
-            regle.setIdRegle(Long.valueOf(idsRegle.get(i)));
-            regle.setTypeFichier(result.get("type_fichier").get(i));
-            regle.setDelimiter(result.get("delimiter").get(i));
-            regle.setFormat(result.get("format").get(i));
+            regle.setIdRegle(Integer.valueOf(result.get("id_regle").get(i)));
+            regle.setIdClasse(result.get("id_classe").get(i));
+            regle.setRubrique(result.get("rubrique").get(i));
+            regle.setRubriqueNmcl(result.get("rubrique_nmcl").get(i));
+            regle.setTodo(result.get("todo").get(i));
             regle.setCommentaire(result.get("commentaire").get(i));
 
             regles.add(regle);

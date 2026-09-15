@@ -1,4 +1,4 @@
-package fr.insee.arc.core.jeuderegle.model;
+package fr.insee.arc.core.famille.model;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;

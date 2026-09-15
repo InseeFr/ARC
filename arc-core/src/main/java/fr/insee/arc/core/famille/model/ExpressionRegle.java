@@ -1,6 +1,4 @@
-package fr.insee.arc.core.jeuderegle.model;
-
-import org.apache.commons.lang3.builder.ToStringBuilder;
+package fr.insee.arc.core.famille.model;
 
 import fr.insee.arc.core.service.global.bo.JeuDeRegle;
 
