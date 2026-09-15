@@ -13,6 +13,9 @@ import java.util.Map;
 
 public class VariableMetierDAO {
 
+    private VariableMetierDAO() {
+    }
+
     public static List<VariableMetier> getByFamille(
             Connection connexion,
             String idFamille) throws ArcException {

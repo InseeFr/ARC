@@ -16,7 +16,7 @@ public class ChargementRegle
 
     @Override
     public CleComparaisonRegleChargement getCleComparaison() {
-        return new CleComparaisonRegleChargement();
+        return CleComparaisonRegleChargement.PAS_DE_CRITERE_APPARIEMENT;
     }
 
     @Override
@@ -28,7 +28,8 @@ public class ChargementRegle
         );
     }
 
-    public record CleComparaisonRegleChargement() {
+    public enum CleComparaisonRegleChargement {
+        PAS_DE_CRITERE_APPARIEMENT
     }
 
     public record ContenuComparaisonRegleChargement(

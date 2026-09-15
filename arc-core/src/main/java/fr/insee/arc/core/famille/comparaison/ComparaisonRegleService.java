@@ -3,7 +3,6 @@ package fr.insee.arc.core.famille.comparaison;
 import fr.insee.arc.core.famille.dao.*;
 import fr.insee.arc.core.famille.model.Norme;
 import fr.insee.arc.core.famille.model.RegleComparable;
-import fr.insee.arc.core.famille.model.TableMetier;
 import fr.insee.arc.core.service.global.bo.JeuDeRegle;
 import fr.insee.arc.utils.exception.ArcException;
 import org.apache.logging.log4j.LogManager;
@@ -171,44 +170,42 @@ public class ComparaisonRegleService {
                         List.of(),
                         comparees
                 ));
-                continue;
-            }
 
-            /*
-             * La clé n'existe que dans le JDR de référence.
-             */
-            if (comparees.isEmpty()) {
+                /*
+                 * La clé n'existe que dans le JDR de référence.
+                 */
+            } else if (comparees.isEmpty()) {
                 differences.add(new DifferenceRegle<>(
                         TypeDifferenceEnum.SUPPRESSION,
                         reference,
                         List.of()
                 ));
-                continue;
-            }
 
-            /*
-             * La clé existe des deux côtés :
-             * on cherche ce qui est strictement identique.
-             */
-            List<T> referenceRestantes = new ArrayList<>(reference);
-            List<T> compareesRestantes = new ArrayList<>(comparees);
+                /*
+                 * La clé existe des deux côtés :
+                 * on cherche ce qui est strictement identique.
+                 */
+            } else {
+                List<T> referenceRestantes = new ArrayList<>(reference);
+                List<T> compareesRestantes = new ArrayList<>(comparees);
 
-            retirerReglesIdentiques(
-                    referenceRestantes,
-                    compareesRestantes
-            );
-
-            /*
-             * S'il reste quelque chose, c'est une modification.
-             */
-            if (!referenceRestantes.isEmpty()
-                    || !compareesRestantes.isEmpty()) {
-
-                differences.add(new DifferenceRegle<>(
-                        TypeDifferenceEnum.MODIFICATION,
+                retirerReglesIdentiques(
                         referenceRestantes,
                         compareesRestantes
-                ));
+                );
+
+                /*
+                 * S'il reste quelque chose, c'est une modification.
+                 */
+                if (!referenceRestantes.isEmpty()
+                        || !compareesRestantes.isEmpty()) {
+
+                    differences.add(new DifferenceRegle<>(
+                            TypeDifferenceEnum.MODIFICATION,
+                            referenceRestantes,
+                            compareesRestantes
+                    ));
+                }
             }
         }
 

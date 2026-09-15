@@ -16,7 +16,7 @@ public class Norme
 
     @Override
     public CleComparaisonNorme getCleComparaison() {
-        return new CleComparaisonNorme();
+        return CleComparaisonNorme.PAS_DE_CRITERE_APPARIEMENT;
     }
 
     @Override
@@ -29,7 +29,8 @@ public class Norme
         );
     }
 
-    public record CleComparaisonNorme() {
+    public enum CleComparaisonNorme {
+        PAS_DE_CRITERE_APPARIEMENT
     }
 
     public record ContenuComparaisonNorme(

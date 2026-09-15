@@ -12,14 +12,15 @@ public class Client implements RegleComparable<Client.CleComparaisonClient> {
 
     @Override
     public Object getContenuComparaison() {
-        return new ContenuComparaisonClient();
+        return ContenuComparaisonClient.PAS_DE_CONTENU_A_COMPARER;
     }
 
     public record CleComparaisonClient(
             String idApplication) {
     }
 
-    public record ContenuComparaisonClient() {
+    public enum ContenuComparaisonClient {
+        PAS_DE_CONTENU_A_COMPARER
     }
 
     public String getIdFamille() {

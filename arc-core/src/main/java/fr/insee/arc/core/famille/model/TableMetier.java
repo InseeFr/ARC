@@ -14,14 +14,15 @@ public class TableMetier
 
     @Override
     public Object getContenuComparaison() {
-        return new ContenuComparaisonTableMetier();
+        return ContenuComparaisonTableMetier.PAS_DE_CONTENU_A_COMPARER;
     }
 
     public record CleComparaisonTableMetier(
             String nomTableMetier) {
     }
 
-    public record ContenuComparaisonTableMetier() {
+    public enum ContenuComparaisonTableMetier {
+        PAS_DE_CONTENU_A_COMPARER
     }
 
     public String getIdFamille() {

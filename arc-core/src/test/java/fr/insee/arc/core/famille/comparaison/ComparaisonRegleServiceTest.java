@@ -1,23 +1,13 @@
 package fr.insee.arc.core.famille.comparaison;
 
-import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
-import fr.insee.arc.core.factory.ApiServiceFactory;
 import fr.insee.arc.core.famille.model.NormageRegle;
-import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.core.service.engine.initialisation.BddPatcherTest;
 import fr.insee.arc.core.service.global.bo.JeuDeRegle;
-import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.query.InitializeQueryTest;
-import fr.insee.arc.utils.query.TestDatabase;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 
-import java.io.File;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.text.ParseException;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;

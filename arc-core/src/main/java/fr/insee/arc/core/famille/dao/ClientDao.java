@@ -13,6 +13,8 @@ import java.util.Map;
 
 public class ClientDao {
 
+    private ClientDao() {}
+
     public static List<Client> getByFamille(
             Connection connexion,
             String idFamille) throws ArcException {

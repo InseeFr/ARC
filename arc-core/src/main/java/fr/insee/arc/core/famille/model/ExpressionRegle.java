@@ -23,7 +23,7 @@ public class ExpressionRegle
 
     @Override
     public ContenuComparaisonRegleExpression getContenuComparaison() {
-        return new ContenuComparaisonRegleExpression();
+        return ContenuComparaisonRegleExpression.PAS_DE_CONTENU_A_COMPARER;
     }
 
     public record CleComparaisonRegleExpression(
@@ -32,7 +32,8 @@ public class ExpressionRegle
     ) {
     }
 
-    public record ContenuComparaisonRegleExpression() {
+    public enum ContenuComparaisonRegleExpression {
+        PAS_DE_CONTENU_A_COMPARER
     }
 
     public JeuDeRegle getJeuDeRegle() {

@@ -30,8 +30,12 @@ public class ServiceViewJeuxDeReglesCopie extends InteractorNorme {
 
 	private static final Logger LOGGER = LogManager.getLogger(ServiceViewJeuxDeReglesCopie.class);
 
+	private final ComparaisonRegleService comparaisonRegleService;
+
 	@Autowired
-	private ComparaisonRegleService comparaisonRegleService;
+	public ServiceViewJeuxDeReglesCopie(ComparaisonRegleService comparaisonRegleService) {
+		this.comparaisonRegleService = comparaisonRegleService;
+	}
 
 	/**
 	 * Action trigger by requesting the load rules of the register rule set to copy

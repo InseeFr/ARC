@@ -2,7 +2,6 @@ package fr.insee.arc.core.famille.dao;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.famille.model.TableMetier;
-import fr.insee.arc.core.famille.model.VariableMetier;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.structure.GenericBean;
@@ -13,6 +12,8 @@ import java.util.List;
 import java.util.Map;
 
 public class TableMetierDao {
+
+    private TableMetierDao() {}
 
     public static List<TableMetier> getByFamille(
             Connection connexion,
