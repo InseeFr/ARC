@@ -1,26 +1,19 @@
 package fr.insee.arc.core.famille.comparaison;
 
-import fr.insee.arc.core.famille.model.NormageRegle;
+import fr.insee.arc.core.famille.model.*;
 import fr.insee.arc.core.service.engine.initialisation.BddPatcherTest;
 import fr.insee.arc.core.service.global.bo.JeuDeRegle;
-import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.query.InitializeQueryTest;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class ComparaisonRegleServiceTest extends InitializeQueryTest {
 
     private final ComparaisonRegleService service = new ComparaisonRegleService();
-
-    @BeforeAll
-    static void initDatabase() throws ArcException {
-        BddPatcherTest.createDatabase();
-        BddPatcherTest.insertTestDataLight();
-    }
 
     @Test
     void comparer_Regles_quandRegleAjoutee_retourneAjout() {
@@ -114,22 +107,25 @@ class ComparaisonRegleServiceTest extends InitializeQueryTest {
     }
 
     @Test
-    void comparerJeuxDeReglesLight() throws Exception {
+    void comparerJeuxDeReglesAvecTousTypesDeDifferences() throws Exception {
+
+        BddPatcherTest.createDatabase();
+        BddPatcherTest.insertTestComparaisonFamille();
 
         JeuDeRegle reference = new JeuDeRegle(
-                "v2008-11",
+                "TEST-REF",
                 "A",
                 "2020-01-01",
                 "2100-01-01",
-                "vConformite"
+                "v1"
         );
 
         JeuDeRegle compare = new JeuDeRegle(
-                "v2016-02",
+                "TEST-COMP",
                 "A",
                 "2020-01-01",
                 "2100-01-01",
-                "vConformite"
+                "v1"
         );
 
         List<DifferenceRegle<?>> differences =
@@ -139,7 +135,83 @@ class ComparaisonRegleServiceTest extends InitializeQueryTest {
                         compare
                 );
 
-        assertEquals(9, differences.size());
+        assertAll(
+                // Chargement
+                () -> assertEquals(1, compterDifferences(
+                        differences, ChargementRegle.class, TypeDifferenceEnum.MODIFICATION)),
+
+                // Normage
+                () -> assertEquals(1, compterDifferences(
+                        differences, NormageRegle.class, TypeDifferenceEnum.AJOUT)),
+                () -> assertEquals(1, compterDifferences(
+                        differences, NormageRegle.class, TypeDifferenceEnum.SUPPRESSION)),
+                () -> assertEquals(0, compterDifferences(
+                        differences, NormageRegle.class, TypeDifferenceEnum.MODIFICATION)),
+
+                // Controle
+                () -> assertEquals(1, compterDifferences(
+                        differences, ControleRegle.class, TypeDifferenceEnum.AJOUT)),
+                () -> assertEquals(1, compterDifferences(
+                        differences, ControleRegle.class, TypeDifferenceEnum.SUPPRESSION)),
+                () -> assertEquals(1, compterDifferences(
+                        differences, ControleRegle.class, TypeDifferenceEnum.MODIFICATION)),
+
+                // Mapping
+                () -> assertEquals(1, compterDifferences(
+                        differences, MappingRegle.class, TypeDifferenceEnum.AJOUT)),
+                () -> assertEquals(1, compterDifferences(
+                        differences, MappingRegle.class, TypeDifferenceEnum.SUPPRESSION)),
+                () -> assertEquals(1, compterDifferences(
+                        differences, MappingRegle.class, TypeDifferenceEnum.MODIFICATION)),
+
+                // Expression : jamais de MODIFICATION
+                () -> assertEquals(2, compterDifferences(
+                        differences, ExpressionRegle.class, TypeDifferenceEnum.AJOUT)),
+                () -> assertEquals(2, compterDifferences(
+                        differences, ExpressionRegle.class, TypeDifferenceEnum.SUPPRESSION)),
+                () -> assertEquals(0, compterDifferences(
+                        differences, ExpressionRegle.class, TypeDifferenceEnum.MODIFICATION)),
+
+                // Norme
+                () -> assertEquals(1, compterDifferences(
+                        differences, Norme.class, TypeDifferenceEnum.MODIFICATION)),
+
+                // Table métier
+                () -> assertEquals(1, compterDifferences(
+                        differences, TableMetier.class, TypeDifferenceEnum.AJOUT)),
+                () -> assertEquals(1, compterDifferences(
+                        differences, TableMetier.class, TypeDifferenceEnum.SUPPRESSION)),
+
+                // Variable métier
+                () -> assertEquals(1, compterDifferences(
+                        differences, VariableMetier.class, TypeDifferenceEnum.AJOUT)),
+                () -> assertEquals(1, compterDifferences(
+                        differences, VariableMetier.class, TypeDifferenceEnum.SUPPRESSION)),
+                () -> assertEquals(1, compterDifferences(
+                        differences, VariableMetier.class, TypeDifferenceEnum.MODIFICATION)),
+
+                // Client : jamais de MODIFICATION
+                () -> assertEquals(1, compterDifferences(
+                        differences, Client.class, TypeDifferenceEnum.AJOUT)),
+                () -> assertEquals(1, compterDifferences(
+                        differences, Client.class, TypeDifferenceEnum.SUPPRESSION)),
+                () -> assertEquals(0, compterDifferences(
+                        differences, Client.class, TypeDifferenceEnum.MODIFICATION))
+        );
+    }
+
+    private long compterDifferences(
+            List<DifferenceRegle<?>> differences,
+            Class<?> classe,
+            TypeDifferenceEnum type) {
+
+        return differences.stream()
+                .filter(d -> d.getType() == type)
+                .filter(d -> Stream.concat(
+                                d.getReglesReference().stream(),
+                                d.getReglesComparees().stream())
+                        .anyMatch(classe::isInstance))
+                .count();
     }
 
 }

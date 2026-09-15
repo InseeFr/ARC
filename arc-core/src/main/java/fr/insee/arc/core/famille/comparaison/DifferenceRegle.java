@@ -1,5 +1,7 @@
 package fr.insee.arc.core.famille.comparaison;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import java.util.List;
 
 public class DifferenceRegle<T> {
@@ -26,6 +28,14 @@ public class DifferenceRegle<T> {
         return reglesComparees;
     }
 
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .append("type", type)
+                .append("reglesReference", reglesReference)
+                .append("reglesComparees", reglesComparees)
+                .toString();
+    }
 }
 
 
