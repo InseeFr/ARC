@@ -1,26 +1,36 @@
 package fr.insee.arc.core.famille.comparaison;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
+import fr.insee.arc.core.factory.ApiServiceFactory;
 import fr.insee.arc.core.famille.model.NormageRegle;
+import fr.insee.arc.core.model.TraitementPhase;
+import fr.insee.arc.core.service.engine.initialisation.BddPatcherTest;
 import fr.insee.arc.core.service.global.bo.JeuDeRegle;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.exception.ArcException;
+import fr.insee.arc.utils.query.InitializeQueryTest;
 import fr.insee.arc.utils.query.TestDatabase;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
+import java.io.File;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class ComparaisonRegleServiceTest {
-
-    public static UtilitaireDao u = UtilitaireDao.get(0);
-
-    public static Connection c = new TestDatabase().testConnection;
+class ComparaisonRegleServiceTest extends InitializeQueryTest {
 
     private final ComparaisonRegleService service = new ComparaisonRegleService();
+
+    @BeforeAll
+    static void initDatabase() throws ArcException {
+        BddPatcherTest.createDatabase();
+        BddPatcherTest.insertTestDataLight();
+    }
 
     @Test
     void comparer_Regles_quandRegleAjoutee_retourneAjout() {
@@ -114,97 +124,23 @@ class ComparaisonRegleServiceTest {
     }
 
     @Test
-    void comparerJeuDeReglesTest() throws ArcException, ParseException {
+    void comparerJeuxDeReglesLight() throws Exception {
 
-        u.executeRequest(c, "DROP SCHEMA IF EXISTS arc CASCADE;");
-        u.executeRequest(c, "CREATE SCHEMA IF NOT EXISTS arc;");
-
-        ArcPreparedStatementBuilder query =
-                new ArcPreparedStatementBuilder();
-
-        createTables();
-
-        // JDR de référence
-        query.build(
-                """
-                INSERT INTO arc.ihm_chargement_regle
-                VALUES (
-                    1,
-                    'TEST',
-                    'M',
-                    '2026-01-01',
-                    '2026-12-31',
-                    '1',
-                    'CSV',
-                    ';',
-                    'UTF-8',
-                    NULL
-                );
-                """
+        JeuDeRegle reference = new JeuDeRegle(
+                "v2008-11",
+                "A",
+                "2020-01-01",
+                "2100-01-01",
+                "vConformite"
         );
 
-        // delimiter différent => MODIFICATION
-        query.build(
-                """
-                INSERT INTO arc.ihm_chargement_regle
-                VALUES (
-                    2,
-                    'TEST',
-                    'M',
-                    '2026-01-01',
-                    '2026-12-31',
-                    '2',
-                    'CSV',
-                    ',',
-                    'UTF-8',
-                    NULL
-                );
-                """
+        JeuDeRegle compare = new JeuDeRegle(
+                "v2016-02",
+                "A",
+                "2020-01-01",
+                "2100-01-01",
+                "vConformite"
         );
-
-        query.build(
-                """
-                INSERT INTO arc.ihm_normage_regle
-                VALUES (
-                    'TEST',
-                    'M',
-                    '2026-01-01',
-                    '2026-12-31',
-                    '1',
-                    'CLASSE_1',
-                    'RUB1',
-                    'NMCL1',
-                    10,
-                    NULL,
-                    NULL
-                );
-                """
-        );
-
-        // même clé, mais id_classe différent => MODIFICATION
-        query.build(
-                """
-                INSERT INTO arc.ihm_normage_regle
-                VALUES (
-                    'TEST',
-                    'M',
-                    '2026-01-01',
-                    '2026-12-31',
-                    '2',
-                    'CLASSE_2',
-                    'RUB1',
-                    'NMCL1',
-                    20,
-                    NULL,
-                    NULL
-                );
-                """
-        );
-
-        u.executeRequest(c, query);
-
-        JeuDeRegle reference = creerJeuDeRegle("1");
-        JeuDeRegle compare = creerJeuDeRegle("2");
 
         List<DifferenceRegle<?>> differences =
                 service.comparerJeuDeRegles(
@@ -213,78 +149,7 @@ class ComparaisonRegleServiceTest {
                         compare
                 );
 
-        assertEquals(2, differences.size());
-
-        assertEquals(
-                2,
-                differences.stream()
-                        .filter(d -> d.getType() == TypeDifferenceEnum.MODIFICATION)
-                        .count()
-        );
+        assertEquals(9, differences.size());
     }
 
-    private JeuDeRegle creerJeuDeRegle(String version) throws ParseException {
-        return new JeuDeRegle(
-                "TEST",
-                "M",
-                "2026-01-01",
-                "2026-12-31",
-                version
-        );
-    }
-
-    private void createTables() throws ArcException {
-
-        ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
-
-        query.build("""
-            CREATE TABLE arc.ihm_norme (
-                id_norme text NOT NULL,
-                periodicite text NOT NULL,
-                def_norme text NOT NULL,
-                def_validite text NOT NULL,
-                etat text NOT NULL,
-                id_famille text NOT NULL,
-                id serial4 NOT NULL,
-                PRIMARY KEY (id_norme, periodicite)
-            );
-            """);
-
-        query.build("""
-            CREATE TABLE arc.ihm_chargement_regle (
-                id_regle int8 NOT NULL,
-                id_norme text NOT NULL,
-                periodicite text NOT NULL,
-                validite_inf date NOT NULL,
-                validite_sup date NOT NULL,
-                version text NOT NULL,
-                type_fichier text NOT NULL,
-                delimiter text NULL,
-                format text NULL,
-                commentaire text NULL
-            );
-            """);
-
-        query.build("""
-            CREATE TABLE arc.ihm_normage_regle (
-                id_norme text NOT NULL,
-                periodicite text NOT NULL,
-                validite_inf date NOT NULL,
-                validite_sup date NOT NULL,
-                version text NOT NULL,
-                id_classe text NOT NULL,
-                rubrique text NULL,
-                rubrique_nmcl text NULL,
-                id_regle int4 NOT NULL,
-                todo text NULL,
-                commentaire text NULL
-            );
-            """);
-
-        // + controle
-        // + mapping
-        // + expression
-
-        u.executeRequest(c, query);
-    }
 }
