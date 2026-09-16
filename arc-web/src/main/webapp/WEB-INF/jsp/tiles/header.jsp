@@ -44,7 +44,7 @@
 			<li class="nav-item mt-1 mb-1 text-left">
 				<c:import url="tiles/template_header_link.jsp"><c:param name="linkRef" value="index"/><c:param name="linkId" value="home"/></c:import>
 			</li>
-			<li><h5 class="mt-4">Règles</h5></li>
+			<li><h5 class="mt-4">Rï¿½gles</h5></li>
 			<li class="nav-item mt-1 mb-1 text-left">
 				<c:import url="tiles/template_header_link.jsp"><c:param name="linkRef" value="selectFamilleNorme" /><c:param name="linkId" value="familyManagement" /></c:import>
 			</li>
@@ -61,7 +61,7 @@
     			<c:import url="tiles/template_header_link.jsp"><c:param name="linkRef" value="selectEntrepot" /><c:param name="linkId" value="entrepot" /></c:import>
     		</li>
 
-			<li><h5 class="mt-4">Bacs à sable</h5></li>
+			<li><h5 class="mt-4">Bacs ï¿½ sable</h5></li>
 			<li class="nobullet mt-1 mb-1 text-left">
 				<select id="environnementTravail" class="form-control mr-sm-2" name="bacASable" m="js" required>
 					<c:forEach items="${envMap.keySet()}" var="bas">
@@ -86,6 +86,11 @@
 			<li class="nav-item mt-1 mb-1 text-left">
 				<c:import url="tiles/template_header_link.jsp"><c:param name="linkRef" value="selectOperations" /><c:param name="linkId" value="operations" /></c:import>
 			</li>
+			<li class="nav-item mt-4 mb-1 text-left">
+                 <span class="nav-link">
+                    <spring:message code="header.accessibility"/>
+                </span>
+            </li>
     	</ul>
 </nav>
 
