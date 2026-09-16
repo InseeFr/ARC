@@ -102,7 +102,7 @@ ajax="false"
         doAction="selectJeuxDeReglesComparaison"
         scope="viewJeuxDeRegles;viewJeuxDeReglesCopie;"
     >
-        Comparer ce jeu de règles
+        <spring:message code="gui.button.compareRuleset"/>
     </button>
 </c:param>
 </c:import>
@@ -481,7 +481,7 @@ multipart="true"
             type="submit"
             doAction="compareJeuxDeRegles"
             ajax="false"
-            value="Comparer"
+            value="<spring:message code="gui.button.compare"/>"
         />
     </c:when>
     <c:otherwise>
