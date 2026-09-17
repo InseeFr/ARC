@@ -38,8 +38,8 @@
 
 <div class="mt-3-00"></div>
 
-<nav class="navbar vw-menu-bar menu-box-style navbar-expand-lg navbar-light collapse show pt-2 pb-0 pl-0 pr-0 align-items-baseline vh-menu-bar position-fixed left-navbar">
-		<ul class="navbar-nav flex-column ml-1 mr-0 mb-4">
+<nav class="navbar vw-menu-bar menu-box-style navbar-expand-lg navbar-light collapse show pt-2 pb-0 pl-0 pr-0 align-items-stretch vh-menu-bar position-fixed left-navbar">
+		<ul class="navbar-nav flex-column ml-1 mr-0 flex-grow-1">
 			<li><h4 class="">Menu</h4></li>
 			<li class="nav-item mt-1 mb-1 text-left">
 				<c:import url="tiles/template_header_link.jsp"><c:param name="linkRef" value="index"/><c:param name="linkId" value="home"/></c:import>
@@ -86,6 +86,11 @@
 			<li class="nav-item mt-1 mb-1 text-left">
 				<c:import url="tiles/template_header_link.jsp"><c:param name="linkRef" value="selectOperations" /><c:param name="linkId" value="operations" /></c:import>
 			</li>
+			<li class="mt-auto mb-2 pt-2 border-top">
+                <small>
+                    <spring:message code="header.accessibility"/>
+                </small>
+            </li>
     	</ul>
 </nav>
 
