@@ -5,6 +5,9 @@
 - enable tar compression for bigger files
 - select in processing pipeline a number of file at least equals to number of executor
 
+## version-94.2.97b
+- compare sandbox rules
+
 ## version-94.2.96
 - spring cve fix
 - fix database restoration error due to arc.parameter constraints
