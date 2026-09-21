@@ -100,7 +100,7 @@ ajax="false"
         id="viewJeuxDeRegles.compare"
         type="submit"
         doAction="selectJeuxDeReglesComparaison"
-        scope="viewJeuxDeRegles;viewJeuxDeReglesCopie;"
+        scope="viewJeuxDeRegles;viewJeuxDeReglesCompare;"
     >
         <spring:message code="gui.button.compareRuleset"/>
     </button>
@@ -473,62 +473,38 @@ multipart="true"
 <c:param name="checkbox" value ="true" />
 <c:param name="checkboxVisible" value ="true" />
 <c:param name="otherButton">
-<c:choose>
-    <c:when test="${viewJeuxDeReglesCopie.customValues['MODE'] == 'COMPARAISON'}">
+    <input class="btn btn-primary btn-sm"
+            id="viewJeuxDeReglesCopie.copie"
+            type="submit"
+            doAction="copieJeuxDeRegles"
+            scope="-viewJeuxDeReglesCopie;"
+            value="<spring:message code="gui.button.copy"/>"
+        />
+</c:param>
+</c:import>
+
+<%-- Modal to rule copy --%>
+<c:set var="view" value="${viewJeuxDeReglesCompare}"  scope="request"/>
+<c:import url="tiles/templateVObject.jsp">
+<c:param name="btnSee" value ="true" />
+<c:param name="btnSelect" value ="true" />
+<c:param name="btnSort" value ="true" />
+<c:param name="ligneFilter" value ="true" />
+<c:param name="checkbox" value ="true" />
+<c:param name="checkboxVisible" value ="true" />
+<c:param name="otherButton">
         <input
             class="btn btn-primary btn-sm"
-            id="viewJeuxDeReglesCopie.compare"
+            id="viewJeuxDeReglesCompare.compare"
             type="submit"
             doAction="compareJeuxDeRegles"
             ajax="false"
             value="<spring:message code="gui.button.compare"/>"
         />
-    </c:when>
-    <c:otherwise>
-        <input
-            class="btn btn-primary btn-sm"
-            id="viewJeuxDeReglesCopie.copie"
-            type="submit"
-            doAction="copieJeuxDeRegles"
-            scope="-viewJeuxDeReglesCopie;${viewJeuxDeReglesCopie.customValues['SELECTED_RULESET_NAME']};"
-            value="<spring:message code="gui.button.copy"/>"
-        />
-    </c:otherwise>
-</c:choose>
 </c:param>
 </c:import>
-<c:if test="${not empty differencesParType}">
-    <div class="row">
-        <div class="col-md-12">
-            <c:forEach items="${differencesParType}" var="entry">
-                <h4>${entry.key}</h4>
-                <c:forEach items="${entry.value}" var="difference">
-                    <c:choose>
-                        <c:when test="${entry.key == 'AJOUT'}">
-                            <c:forEach items="${difference.reglesComparees}" var="regle">
-                                <div>${regle}</div>
-                            </c:forEach>
-                        </c:when>
-                        <c:when test="${entry.key == 'SUPPRESSION'}">
-                            <c:forEach items="${difference.reglesReference}" var="regle">
-                                <div>${regle}</div>
-                            </c:forEach>
-                        </c:when>
-                        <c:when test="${entry.key == 'MODIFICATION'}">
-                            <c:forEach items="${difference.reglesReference}" var="regleReference" varStatus="status">
-                                <div>
-                                    ${regleReference}
-                                    →
-                                    ${difference.reglesComparees[status.index]}
-                                </div>
-                            </c:forEach>
-                        </c:when>
-                    </c:choose>
-                </c:forEach>
-            </c:forEach>
-        </div>
-    </div>
-</c:if>
+
+
 </div>
 </div>
 </div>

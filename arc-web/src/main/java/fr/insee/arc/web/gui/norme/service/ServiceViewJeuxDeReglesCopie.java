@@ -139,14 +139,6 @@ public class ServiceViewJeuxDeReglesCopie extends InteractorNorme {
 	}
 
 	public String selectJeuxDeReglesComparaison(Model model) {
-
-		this.views.getViewJeuxDeReglesCopie().setCustomValue(SELECTED_RULESET_TABLE, this.views.getViewNormage().getTable());
-		this.views.getViewJeuxDeReglesCopie().setCustomValue(SELECTED_RULESET_NAME, this.views.getViewNormage().getSessionName());
-
-		views.getViewJeuxDeReglesCopie()
-				.getCustomValues()
-				.put("MODE", "COMPARAISON");
-
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
@@ -156,10 +148,10 @@ public class ServiceViewJeuxDeReglesCopie extends InteractorNorme {
 				views.getViewJeuxDeRegles().mapContentSelected();
 
 		Map<String, List<String>> compare =
-				views.getViewJeuxDeReglesCopie().mapContentSelected();
+				views.getViewJeuxDeReglesCompare().mapContentSelected();
 
 		if (reference.isEmpty() || compare.isEmpty()) {
-			views.getViewJeuxDeReglesCopie()
+			views.getViewJeuxDeReglesCompare()
 					.setMessage("general.noSelection");
 
 			return generateDisplay(model, RESULT_SUCCESS);
@@ -192,8 +184,6 @@ public class ServiceViewJeuxDeReglesCopie extends InteractorNorme {
 	private void downloadDifferences (
 			HttpServletResponse response,
 			List<DifferenceRegle<?>> differences) throws ArcException{
-
-		response.reset();
 
 		response.setHeader(
 				"Content-Disposition",
