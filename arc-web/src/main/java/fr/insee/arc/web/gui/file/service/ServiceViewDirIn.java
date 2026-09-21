@@ -58,7 +58,7 @@ public class ServiceViewDirIn extends InteractorFile {
 
 	public String downloadDirIn(Model model, HttpServletResponse response) {
 		download(response, views.getViewDirIn(), views.getDirIn());
-        return "none";
+        return null;
 	}
 	
 }
