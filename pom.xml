@@ -177,7 +177,7 @@
 
 	</build>
 	<dependencies>
-		<!-- A supprimer apres maj minion -->
+		<!-- A supprimer apres maj minio -->
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcprov-jdk18on</artifactId>
