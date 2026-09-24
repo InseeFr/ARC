@@ -140,7 +140,7 @@ public class ServiceViewJeuxDeRegles extends InteractorNorme {
 									)
 							)
 					);
-			return "none";
+	        return null;
 		} else {
 			this.views.getViewJeuxDeRegles().setMessage("general.noSelection");
 			return generateDisplay(model, RESULT_SUCCESS);
