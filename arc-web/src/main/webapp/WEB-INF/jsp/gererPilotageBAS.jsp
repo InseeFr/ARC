@@ -35,6 +35,7 @@ accept-charset="UTF-8">
 <c:param name="ligneFilter" value ="true" />
 <c:param name="checkbox" value ="true" />
 <c:param name="checkboxVisible" value ="false" />
+<c:param name="extraScopeSelect" value ="viewRapportBAS;" />
 <c:param name="extraScopeSee" value ="viewRapportBAS;viewFichierBAS;-viewArchiveBAS;viewEntrepotBAS;" />
 </c:import>
 </div>

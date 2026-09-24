@@ -395,6 +395,10 @@ public class BddPatcherTest extends InitializeQueryTest {
 	public static void insertTestDataFamilleNorme() throws ArcException {
 		insertTestData("BdDTest/script_test_famille_norme.sql");
 	}
+
+	public static void insertTestComparaisonFamille() throws ArcException {
+		insertTestData("BdDTest/script_comparaison_famille.sql");
+	}
 	
 	/**
 	 * insert data for functional tests

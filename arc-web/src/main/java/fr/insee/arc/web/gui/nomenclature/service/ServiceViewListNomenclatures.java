@@ -106,7 +106,7 @@ public class ServiceViewListNomenclatures extends InteractorNomenclature {
 			this.vObjectService.download(views.getViewListNomenclatures(), response, Arrays.asList(selectedNomenclature)
 					, Arrays.asList(requeteNomenclature)
 					);
-			return "none";
+			return null;
 		} else {
 			this.views.getViewListNomenclatures().setMessage("general.noSelection");
 			return generateDisplay(model, RESULT_SUCCESS);
