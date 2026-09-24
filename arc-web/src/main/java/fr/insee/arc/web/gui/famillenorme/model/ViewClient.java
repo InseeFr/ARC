@@ -24,7 +24,7 @@ public class ViewClient extends VObject {
             {
                 put("id_famille", new ColumnRendering(false, "label.normFamily", "0%", "text", null, true));
                 put("id_application", new ColumnRendering(true, "label.client.software", "100%", "text", null, true));
-
+                put("jours_retention", new ColumnRendering(true, "label.client.software", "100%", "text", null, true));
             }
         }
 
