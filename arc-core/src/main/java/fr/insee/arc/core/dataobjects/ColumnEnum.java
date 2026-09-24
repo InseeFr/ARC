@@ -94,6 +94,7 @@ public enum ColumnEnum {
 	, XSD_LABEL_FILS("xsd_label_fils", TypeEnum.TEXT, "") // ihm_controle_regle
 	, XSD_ORDRE("xsd_ordre", TypeEnum.INTEGER, "") // ihm_controle_regle
 	, XSD_ROLE("xsd_role", TypeEnum.TEXT, "") // ihm_controle_regle
+	, JOURS_RETENTION("jours_retention", TypeEnum.INTEGER, "") // ihm_client
 
 	, TIMESTAMP_DIRECTORY("timestamp_directory", TypeEnum.TEXT, "") // export
 	, FILE_NAME("file_name", TypeEnum.TEXT, "") // export

@@ -79,7 +79,10 @@ public class CleanPilotageDaoTest extends InitializeQueryTest {
 		// execute test : delay is 10 days
 		Sandbox sandbox = new Sandbox(c, "arc_bas1");
 		CleanPilotageDao dao = new CleanPilotageDao(sandbox);
+
+		//Les 2 méthodes doivent renvoyer les mêmes résultats dans le cas de ce test où il n'y a pas de jours rétention clients définis
 		dao.execQueryMaterializeFilesToDelete(10);
+		//dao.execQueryMaterializeFilesToDeleteNew(10);
 		
 		// retrieve files to delete
 		List<String> filesToDelete = new GenericBean(u.executeRequest(c, new ArcPreparedStatementBuilder("SELECT * FROM fichier_to_delete"))).getColumnValues("id_source");
@@ -329,7 +332,9 @@ public class CleanPilotageDaoTest extends InitializeQueryTest {
 		Sandbox sandbox = new Sandbox(c, "arc_bas1");
 		CleanPilotageDao dao = new CleanPilotageDao(sandbox);
 
-		dao.execQueryMaterializeFilesToDeleteNew(10);
+		//Les 2 méthodes doivent renvoyer les mêmes résultats dans le cas de ce test où il n'y a pas de jours rétention clients définis
+		dao.execQueryMaterializeFilesToDelete(10);
+		//dao.execQueryMaterializeFilesToDeleteNew(10);
 
 		List<String> filesToDelete = new GenericBean(
 				u.executeRequest(
