@@ -51,6 +51,7 @@ public class CompressedUtils {
 		try (BufferedInputStream fis = new BufferedInputStream(new FileInputStream(fileIn), READ_BUFFER_SIZE);) {
 			try (TarArchiveOutputStream taos = new TarArchiveOutputStream(
 					new GZIPOutputStream(new FileOutputStream(fileOut)));) {
+				taos.setBigNumberMode(TarArchiveOutputStream.BIGNUMBER_POSIX);
 				TarArchiveEntry entry = new TarArchiveEntry(entryName);
 				entry.setSize(fileIn.length());
 				taos.putArchiveEntry(entry);

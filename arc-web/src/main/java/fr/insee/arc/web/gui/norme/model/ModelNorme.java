@@ -38,6 +38,9 @@ public class ModelNorme implements ArcModel {
 	// The on ruleset to copy rules
 	private VObject viewJeuxDeReglesCopie;
 
+	// The on ruleset to compare rules
+	private VObject viewJeuxDeReglesCompare;
+	
 	public ModelNorme() {
 		this.viewNorme = new ViewNorme();
 		this.viewCalendrier = new ViewCalendrier();
@@ -49,6 +52,7 @@ public class ModelNorme implements ArcModel {
 		this.viewMapping = new ViewMapping();
 		this.viewExpression = new ViewExpression();
 		this.viewJeuxDeReglesCopie = new ViewJeuxDeReglesCopie();
+		this.viewJeuxDeReglesCompare = new ViewJeuxDeReglesCompare();
 	}
 	
 	public VObject getViewNorme() {
@@ -130,4 +134,14 @@ public class ModelNorme implements ArcModel {
 		this.viewJeuxDeReglesCopie = viewJeuxDeReglesCopie;
 	}
 
+	public VObject getViewJeuxDeReglesCompare() {
+		return viewJeuxDeReglesCompare;
+	}
+
+	public void setViewJeuxDeReglesCompare(VObject viewJeuxDeReglesCompare) {
+		this.viewJeuxDeReglesCompare = viewJeuxDeReglesCompare;
+	}
+
+	
+	
 }

@@ -45,6 +45,7 @@ public class InteractorNorme extends ArcWebGenericService<ModelNorme, GererNorme
 		views.setViewMapping(vObjectService.preInitialize(model.getViewMapping()));
 		views.setViewExpression(vObjectService.preInitialize(model.getViewExpression()));
 		views.setViewJeuxDeReglesCopie(vObjectService.preInitialize(model.getViewJeuxDeReglesCopie()));
+		views.setViewJeuxDeReglesCompare(vObjectService.preInitialize(model.getViewJeuxDeReglesCompare()));
 		
 		putVObject(views.getViewNorme(), t -> initializeViewNorme(t));
 		//
@@ -65,6 +66,9 @@ public class InteractorNorme extends ArcWebGenericService<ModelNorme, GererNorme
 		putVObject(views.getViewExpression(), t -> initializeExpression(t, views.getViewJeuxDeRegles(), views.getViewModules()));
 		//
 		putVObject(views.getViewJeuxDeReglesCopie(), t -> initializeJeuxDeReglesCopie(t, getScope()));
+		//
+		putVObject(views.getViewJeuxDeReglesCompare(), t -> initializeJeuxDeReglesCompare(t, getScope()));
+
 	}
 
 	@Override
@@ -257,6 +261,24 @@ public class InteractorNorme extends ArcWebGenericService<ModelNorme, GererNorme
 		}
 
 	}
+	
+	
+	/**
+	 * Initialize the {@value InteractorNorme#viewJeuxDeReglesCopie}. Get in
+	 * database all the reccord the rule sets.
+	 * 
+	 * @param viewJeuxDeReglesCopie
+	 */
+	public void initializeJeuxDeReglesCompare(VObject viewJeuxDeReglesCompare, String scope) {
+		LoggerHelper.debug(LOGGER, "/* initializeJeuxDeReglesCopie */");
+		if (scope != null) {
+			dao.initializeJeuxDeReglesCompare(viewJeuxDeReglesCompare);
+		} else {
+			vObjectService.destroy(viewJeuxDeReglesCompare);
+		}
+
+	}
+	
 
 	/** Appends a where clause for rulesets. */
 	protected void whereRuleSetEquals(ArcPreparedStatementBuilder requete, Map<String, List<String>> selection,

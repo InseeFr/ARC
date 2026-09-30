@@ -63,7 +63,7 @@ public class ServiceViewDirOut extends InteractorFile {
 	
 	public String downloadDirOut(Model model, HttpServletResponse response) {
 		download(response, views.getViewDirOut(), views.getDirOut());
-        return "none";
+        return null;
 	}
 	
 	

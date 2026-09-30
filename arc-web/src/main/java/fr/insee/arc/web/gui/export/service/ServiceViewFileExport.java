@@ -100,7 +100,7 @@ public class ServiceViewFileExport extends InteractorExport {
 			this.vObjectService.downloadEnveloppe(views.getViewFileExport(), response, requete, dirOut, r);
 
 		}
-		return "none";
+		return null;
 
 	}
 

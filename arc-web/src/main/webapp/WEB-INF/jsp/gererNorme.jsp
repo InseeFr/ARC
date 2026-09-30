@@ -95,6 +95,15 @@ type="submit"
 doAction="downloadJeuxDeRegles"
 ajax="false"
 ><span class="fa fa-download">&nbsp;</span> <spring:message code="gui.button.downloadRuleset"/></button>
+    <button
+        class="btn btn-primary btn-sm"
+        id="viewJeuxDeRegles.compare"
+        type="submit"
+        doAction="selectJeuxDeReglesComparaison"
+        scope="viewJeuxDeRegles;viewJeuxDeReglesCompare;"
+    >
+        <spring:message code="gui.button.compareRuleset"/>
+    </button>
 </c:param>
 </c:import>
 </div>
@@ -464,20 +473,47 @@ multipart="true"
 <c:param name="checkbox" value ="true" />
 <c:param name="checkboxVisible" value ="true" />
 <c:param name="otherButton">
-<input
-class="btn btn-primary btn-sm"
-id="viewJeuxDeReglesCopie.copie"
-type="submit"
-doAction="copieJeuxDeRegles"
-scope="-viewJeuxDeReglesCopie;${viewJeuxDeReglesCopie.customValues['SELECTED_RULESET_NAME']};"
-value="<spring:message code="gui.button.copy"/>"
-></input>
+    <input class="btn btn-primary btn-sm"
+            id="viewJeuxDeReglesCopie.copie"
+            type="submit"
+            doAction="copieJeuxDeRegles"
+            scope="-viewJeuxDeReglesCopie;"
+            value="<spring:message code="gui.button.copy"/>"
+        />
 </c:param>
 </c:import>
+
+<%-- Modal to rule copy --%>
+<c:set var="view" value="${viewJeuxDeReglesCompare}"  scope="request"/>
+<c:import url="tiles/templateVObject.jsp">
+<c:param name="btnSee" value ="true" />
+<c:param name="btnSelect" value ="true" />
+<c:param name="btnSort" value ="true" />
+<c:param name="ligneFilter" value ="true" />
+<c:param name="checkbox" value ="true" />
+<c:param name="checkboxVisible" value ="true" />
+<c:param name="otherButton">
+        <input
+            class="btn btn-primary btn-sm"
+            id="viewJeuxDeReglesCompare.compare"
+            type="submit"
+            doAction="compareJeuxDeRegles"
+            ajax="false"
+            value="<spring:message code="gui.button.compare"/>"
+        />
+</c:param>
+</c:import>
+
+
 </div>
 </div>
 </div>
 </form>
-
+</body>
+</html>
+</div>
+</div>
+</div>
+</form>
 </body>
 </html>

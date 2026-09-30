@@ -385,6 +385,29 @@ public class GererNormeDao extends VObjectHelperDao {
 
 		vObjectService.initialize(viewJeuxDeReglesCopie, query, dataObjectService.getView(dataModelJeuxDeReglesCopie), defaultInputFields);
 	}
+	
+	
+	/**
+	 * Query to get ruleset view for compare
+	 * 
+	 * @param viewJeuxDeReglesCompare
+	 */
+	public void initializeJeuxDeReglesCompare(VObject viewJeuxDeReglesCompare) {
+
+		ViewEnum dataModelJeuxDeReglesCompare = ViewEnum.IHM_JEUDEREGLE;
+
+		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
+
+        query.append(SQL.SELECT);
+		query.append("id_norme, periodicite, validite_inf, validite_sup, version, etat");
+		query.append(SQL.FROM);
+		query.append(dataObjectService.getView(dataModelJeuxDeReglesCompare));
+
+		// build the default value when adding a record
+		Map<String, String> defaultInputFields = new HashMap<>();
+
+		vObjectService.initialize(viewJeuxDeReglesCompare, query, dataObjectService.getView(dataModelJeuxDeReglesCompare), defaultInputFields);
+	}
 
 	/**
 	 * generate a blank rules set for mapping based on variables declared in data

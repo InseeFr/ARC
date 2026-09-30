@@ -106,7 +106,7 @@ public class ServiceViewFamilleNorme extends InteractorFamilleNorme {
 			fileNames.add("modelVariables");
 
 			this.vObjectService.download(views.getViewFamilleNorme(), response, fileNames, queries);
-			return "none";
+			return null;
 		} else {
 			this.views.getViewFamilleNorme().setMessage("general.noSelection");
 			return generateDisplay(model, RESULT_SUCCESS);

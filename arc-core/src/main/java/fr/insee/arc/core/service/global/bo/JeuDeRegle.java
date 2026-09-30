@@ -2,10 +2,11 @@ package fr.insee.arc.core.service.global.bo;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
+import fr.insee.arc.core.dataobjects.ColumnEnum;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -24,12 +25,20 @@ public class JeuDeRegle {
     private Date validiteSup;
     private String version;
 
-    private List<RegleControleEntity> listRegleControle;
-
     private String etat;
 
     public JeuDeRegle(String idNorme, String periodicite, String validiteInf, String validiteSup, String version) throws ParseException {
         this(idNorme, periodicite, new SimpleDateFormat(ArcDateFormat.DATE_FORMAT_CONVERSION.getApplicationFormat()).parse(validiteInf), new SimpleDateFormat(ArcDateFormat.DATE_FORMAT_CONVERSION.getApplicationFormat()).parse(validiteSup), version);
+    }
+
+    public static JeuDeRegle fromMap(Map<String, List<String>> selection) throws ParseException {
+        return new JeuDeRegle(
+                selection.get(ColumnEnum.ID_NORME.getColumnName()).get(0),
+                selection.get(ColumnEnum.PERIODICITE.getColumnName()).get(0),
+                selection.get(ColumnEnum.VALIDITE_INF.getColumnName()).get(0),
+                selection.get(ColumnEnum.VALIDITE_SUP.getColumnName()).get(0),
+                selection.get(ColumnEnum.VERSION.getColumnName()).get(0)
+        );
     }
 
     public JeuDeRegle(String idNorme, String periodicite, Date validiteInf, Date validiteSup, String version) {
@@ -39,7 +48,6 @@ public class JeuDeRegle {
         this.validiteInf = validiteInf;
         this.validiteSup = validiteSup;
         this.version = version;
-        this.listRegleControle = new ArrayList<>();
     }
 
     // Getter et setter
@@ -105,14 +113,6 @@ public class JeuDeRegle {
         } catch (ParseException e) {
             LoggerHelper.errorAsComment(LOGGER, "JeuDeRegle.setValiditeSupString - the validité sup "+validiteSup+" isn't at date format "+format);
         }
-    }
-
-    public List<RegleControleEntity> getListRegleControle() {
-        return this.listRegleControle;
-    }
-
-    public void setListRegleControle(List<RegleControleEntity> listRegleControle) {
-        this.listRegleControle = listRegleControle;
     }
 
     public String getVersion() {
