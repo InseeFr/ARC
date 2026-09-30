@@ -5,8 +5,10 @@
 - enable tar compression for bigger files
 - select in processing pipeline a number of file at least equals to number of executor
 
-## version-94.2.97b
+## version-94.2.104
 - compare sandbox rules
+- minio CVE fix
+- fix an issue preventing files larger than 8 GB from being compressed 
 
 ## version-94.2.96
 - spring cve fix
