@@ -169,7 +169,7 @@ public class ServiceViewJeuxDeReglesCopie extends InteractorNorme {
 
 			downloadDifferences(response, differences);
 
-			return "none";
+	        return null;
 
 		} catch (ArcException ex) {
 			loggerDispatcher.error(
