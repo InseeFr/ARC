@@ -31,11 +31,11 @@ public class CleanPilotageDaoTest extends InitializeQueryTest {
 		
 		
 		query.build("CREATE TABLE arc.ihm_client AS ");
-		query.build("SELECT 'app_1' as id_application, 'DSN' as id_famille ");
+		query.build("SELECT 'app_1' as id_application, 'DSN' as id_famille, NULL::integer as jours_retention ");
 		query.build(SQL.UNION_ALL);
-		query.build("SELECT 'app_2' as id_application, 'DSN' as id_famille ");
+		query.build("SELECT 'app_2' as id_application, 'DSN' as id_famille, NULL::integer as jours_retention ");
 		query.build(SQL.UNION_ALL);
-		query.build("SELECT 'app_1' as id_application, 'RESIL' as id_famille ");
+		query.build("SELECT 'app_1' as id_application, 'RESIL' as id_famille, NULL::integer as jours_retention ");
 		query.build(SQL.END_QUERY);
 		
 		query.build("CREATE TABLE arc.ihm_norme AS ");

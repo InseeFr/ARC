@@ -453,27 +453,27 @@ VALUES
 -- Identique
 
 INSERT INTO arc.ihm_client
-(id_famille, id_application)
+(id_famille, id_application, jours_retention)
 VALUES
-    ('FAMILLETESTREF', 'CLIENT_IDENTIQUE');
+    ('FAMILLETESTREF', 'CLIENT_IDENTIQUE', null);
 
 INSERT INTO arc.ihm_client
-(id_famille, id_application)
+(id_famille, id_application, jours_retention)
 VALUES
-    ('FAMILLETESTCOMP', 'CLIENT_IDENTIQUE');
+    ('FAMILLETESTCOMP', 'CLIENT_IDENTIQUE', null);
 
 
 -- Suppression
 
 INSERT INTO arc.ihm_client
-(id_famille, id_application)
+(id_famille, id_application, jours_retention)
 VALUES
-    ('FAMILLETESTREF', 'CLIENT_SUPPR');
+    ('FAMILLETESTREF', 'CLIENT_SUPPR', null);
 
 
 -- Ajout
 
 INSERT INTO arc.ihm_client
-(id_famille, id_application)
+(id_famille, id_application, jours_retention)
 VALUES
-    ('FAMILLETESTCOMP', 'CLIENT_AJOUT');
+    ('FAMILLETESTCOMP', 'CLIENT_AJOUT', null);
