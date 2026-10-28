@@ -80,9 +80,7 @@ public class CleanPilotageDaoTest extends InitializeQueryTest {
 		Sandbox sandbox = new Sandbox(c, "arc_bas1");
 		CleanPilotageDao dao = new CleanPilotageDao(sandbox);
 
-		//Les 2 méthodes doivent renvoyer les mêmes résultats dans le cas de ce test où il n'y a pas de jours rétention clients définis
-		dao.execQueryMaterializeFilesToDelete(10);
-		//dao.execQueryMaterializeFilesToDeleteNew(10);
+		dao.execQueryMaterializeFilesToDeleteNew(10);
 		
 		// retrieve files to delete
 		List<String> filesToDelete = new GenericBean(u.executeRequest(c, new ArcPreparedStatementBuilder("SELECT * FROM fichier_to_delete"))).getColumnValues("id_source");
@@ -332,9 +330,7 @@ public class CleanPilotageDaoTest extends InitializeQueryTest {
 		Sandbox sandbox = new Sandbox(c, "arc_bas1");
 		CleanPilotageDao dao = new CleanPilotageDao(sandbox);
 
-		//Les 2 méthodes doivent renvoyer les mêmes résultats dans le cas de ce test où il n'y a pas de jours rétention clients définis
-		dao.execQueryMaterializeFilesToDelete(10);
-		//dao.execQueryMaterializeFilesToDeleteNew(10);
+		dao.execQueryMaterializeFilesToDeleteNew(10);
 
 		List<String> filesToDelete = new GenericBean(
 				u.executeRequest(
@@ -510,6 +506,31 @@ public class CleanPilotageDaoTest extends InitializeQueryTest {
          2, 'CHARGEMENT', '{KO}', null, null)
         """);
 
+		query.appendNewLine(",");
+		// Ordre inversé des clients : app_1 atteint exactement son échéance de 90 jours.
+		query.build("""
+        ('fichier_9', 'archive_9', 'DSN_2024', 'M', current_date - 90,
+         2, 'MAPPING', '{OK}', '{app_2, app_1}',
+         array[current_date::timestamp, (current_date - 90)::timestamp])
+        """);
+
+		query.appendNewLine(",");
+		// Même ordre inversé : app_1 ne doit pas être supprimé un jour trop tôt.
+		query.build("""
+        ('fichier_10', 'archive_10', 'DSN_2024', 'M', current_date - 89,
+         2, 'MAPPING', '{OK}', '{app_2, app_1}',
+         array[current_date::timestamp, (current_date - 89)::timestamp])
+        """);
+
+		query.appendNewLine(",");
+		// Une nouvelle récupération du même client repousse son échéance.
+		query.build("""
+        ('fichier_11', 'archive_11', 'DSN_2024', 'M', current_date - 100,
+         2, 'MAPPING', '{OK}', '{app_1, app_2, app_1}',
+         array[(current_date - 100)::timestamp, current_date::timestamp,
+               (current_date - 80)::timestamp])
+        """);
+
 		query.build(SQL.END_QUERY);
 
 		u.executeRequest(c, query);
@@ -535,6 +556,7 @@ public class CleanPilotageDaoTest extends InitializeQueryTest {
 		expectedFilesToDelete.add("fichier_3");
 		expectedFilesToDelete.add("fichier_5");
 		expectedFilesToDelete.add("fichier_7");
+		expectedFilesToDelete.add("fichier_9");
 
 		assertTrue(
 				expectedFilesToDelete.size() == filesToDelete.size()
