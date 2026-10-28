@@ -140,7 +140,7 @@ public class CleanPilotageOperation {
 	private Map<String, List<String>> deleteOldArchivesFromDatabase() throws ArcException {
 
 		// materialized the file to be deleted
-		cleanPilotageDao.execQueryMaterializeFilesToDelete(numberOfDaysToKeepData);
+		cleanPilotageDao.execQueryMaterializeFilesToDeleteNew(numberOfDaysToKeepData);
 
 		// initialisation de la liste contenant les archives à déplacer
 		Map<String, List<String>> recordedArchives = new HashMap<>();
