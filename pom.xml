@@ -177,13 +177,6 @@
 
 	</build>
 	<dependencies>
-		<!-- A supprimer apres maj minio -->
-		<dependency>
-			<groupId>org.bouncycastle</groupId>
-			<artifactId>bcprov-jdk18on</artifactId>
-			<version>1.85</version>
-		</dependency>
-
 		<dependency>
 		    <groupId>org.junit.jupiter</groupId>
 		    <artifactId>junit-jupiter-engine</artifactId>
@@ -319,7 +312,7 @@
 		<dependency>
 		    <groupId>io.minio</groupId>
 		    <artifactId>minio</artifactId>
-		    <version>9.0.1</version>
+		    <version>9.0.4</version>
 		</dependency>
 		
 		<!-- https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp-jvm -->
