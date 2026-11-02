@@ -81,6 +81,88 @@ public class CleanPilotageDao {
 		UtilitaireDao.get(0).executeRequest(sandbox.getConnection(), query);
 	}
 
+	public void execQueryMaterializeFilesToDeleteNew(int numberOfDaysToKeepFiles) throws ArcException {
+		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
+
+		query.append("""
+DROP TABLE IF EXISTS fichier_to_delete;
+
+CREATE TEMPORARY TABLE fichier_to_delete AS
+WITH clients_par_famille AS (
+    SELECT array_agg(id_application) AS client,
+           id_famille
+    FROM arc.ihm_client
+    GROUP BY id_famille
+),
+
+fichiers_recuperes_clients AS (
+    SELECT a.id_source,
+           a.container,
+           dc.date_client,
+           COALESCE(ic.jours_retention, %d) AS periode_retention
+    FROM %s a
+    JOIN arc.ihm_norme b
+      ON a.id_norme = b.id_norme
+     AND a.periodicite = b.periodicite
+    JOIN clients_par_famille cpf
+      ON b.id_famille = cpf.id_famille
+    CROSS JOIN LATERAL unnest(a.client, a.date_client)
+        AS dc(client, date_client)
+    JOIN arc.ihm_client ic
+      ON ic.id_application = dc.client
+     AND ic.id_famille = b.id_famille
+    WHERE a.phase_traitement = '%s'
+      AND a.etat_traitement = '{%s}'
+      AND a.client IS NOT NULL
+      AND cpf.client <@ a.client
+),
+
+fichiers_ko AS (
+    SELECT a.id_source,
+           a.container,
+           a.date_traitement AS date_action
+    FROM %s a
+    JOIN arc.ihm_norme b
+      ON a.id_norme = b.id_norme
+     AND a.periodicite = b.periodicite
+    JOIN clients_par_famille cpf
+      ON b.id_famille = cpf.id_famille
+    WHERE a.etape = 2
+      AND a.etat_traitement = '{%s}'
+)
+
+SELECT id_source,
+       container
+FROM (
+    -- Fichiers récupérés : rétention propre à chaque client
+    SELECT id_source,
+           container,
+           date_client::date + periode_retention AS date_suppression
+    FROM fichiers_recuperes_clients
+
+    UNION ALL
+
+    -- Fichiers KO : conservation de la rétention globale actuelle
+    SELECT id_source,
+           container,
+           date_action::date + %d AS date_suppression
+    FROM fichiers_ko
+) fichiers_a_analyser
+GROUP BY id_source, container
+HAVING current_date >= max(date_suppression);
+        """.formatted(
+				numberOfDaysToKeepFiles,
+				ViewEnum.PILOTAGE_FICHIER.getFullName(sandbox.getSchema()),
+				TraitementPhase.MAPPING,
+				TraitementEtat.OK,
+				ViewEnum.PILOTAGE_FICHIER.getFullName(sandbox.getSchema()),
+				TraitementEtat.KO,
+				numberOfDaysToKeepFiles
+		));
+
+		UtilitaireDao.get(0).executeRequest(sandbox.getConnection(), query);
+	}
+
 	
 	/**
 	 * delete from pilotage table and archive table the files

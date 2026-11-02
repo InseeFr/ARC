@@ -30,7 +30,7 @@ public enum ViewEnum {
 	, IHM_CHARGEMENT_REGLE("ihm_chargement_regle", SchemaEnum.ARC_METADATA, ColumnEnum.ID_REGLE, ColumnEnum.ID_NORME,
 			ColumnEnum.VALIDITE_INF, ColumnEnum.VALIDITE_SUP, ColumnEnum.VERSION, ColumnEnum.PERIODICITE,
 			ColumnEnum.TYPE_FICHIER, ColumnEnum.DELIMITER, ColumnEnum.FORMAT, ColumnEnum.COMMENTAIRE) //
-	, IHM_CLIENT("ihm_client", SchemaEnum.ARC_METADATA, ColumnEnum.ID_FAMILLE, ColumnEnum.ID_APPLICATION) //
+	, IHM_CLIENT("ihm_client", SchemaEnum.ARC_METADATA, ColumnEnum.ID_FAMILLE, ColumnEnum.ID_APPLICATION, ColumnEnum.JOURS_RETENTION) //
 	, IHM_CONTROLE_REGLE("ihm_controle_regle", SchemaEnum.ARC_METADATA, ColumnEnum.ID_REGLE_INT, ColumnEnum.ID_NORME,
 			ColumnEnum.PERIODICITE, ColumnEnum.VALIDITE_INF, ColumnEnum.VALIDITE_SUP, ColumnEnum.VERSION,
 			ColumnEnum.ID_CLASSE, ColumnEnum.RUBRIQUE_PERE, ColumnEnum.RUBRIQUE_FILS, ColumnEnum.BORNE_INF,

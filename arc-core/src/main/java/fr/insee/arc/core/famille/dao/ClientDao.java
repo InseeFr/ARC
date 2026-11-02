@@ -25,7 +25,8 @@ public class ClientDao {
         requete.append("""
                 SELECT
                     id_famille,
-                    id_application
+                    id_application,
+                    jours_retention
                 FROM arc.ihm_client
                 WHERE id_famille
                 """);
@@ -67,6 +68,15 @@ public class ClientDao {
             client.setIdFamille(idsFamille.get(i));
             client.setIdApplication(
                     result.get("id_application").get(i));
+
+            String joursRetention =
+                    result.get("jours_retention").get(i);
+
+            if (joursRetention != null && !joursRetention.isEmpty()) {
+                client.setJoursRetention(
+                        Integer.valueOf(joursRetention)
+                );
+            }
 
             clients.add(client);
         }
