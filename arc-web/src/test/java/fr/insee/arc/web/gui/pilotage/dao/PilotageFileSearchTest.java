@@ -29,6 +29,7 @@ import fr.insee.arc.web.gui.pilotage.model.ViewFichierBAS;
 import fr.insee.arc.web.gui.pilotage.model.ViewPilotageBAS;
 import fr.insee.arc.web.gui.pilotage.model.ViewRapportBAS;
 import io.zonky.test.db.postgres.embedded.EmbeddedPostgres;
+import org.postgresql.PGConnection;
 
 /** Own embedded database only: no application DB, S3 or engine invocation. */
 class PilotageFileSearchTest {
@@ -43,6 +44,7 @@ class PilotageFileSearchTest {
 	static void createDatabase() throws Exception {
 		database = EmbeddedPostgres.start();
 		connection = database.getPostgresDatabase().getConnection();
+		connection.unwrap(PGConnection.class).setPrepareThreshold(0);
 		try (var statement = connection.createStatement()) {
 			statement.execute("CREATE SCHEMA file_search_test");
 			statement.execute("CREATE TABLE file_search_test.pilotage_fichier ("
@@ -89,7 +91,7 @@ class PilotageFileSearchTest {
 			insert(phase, phase + "_FIP6_mixed.xml", "mixed", "original.zip", "2026-10-27", "{OK,KO}");
 		}
 		for (TraitementPhase phase : TraitementPhase.getListPhaseReportedInBas()) {
-			search(phase.toString(), "%FiP6%");
+			search(phase.toString(), "%FIP6%");
 			assertEquals(3, files.getContent().size(), phase.toString());
 			assertEquals(List.of(phase.toString(), phase.toString(), phase.toString()),
 					files.mapContent().get("phase_traitement"));
@@ -98,10 +100,24 @@ class PilotageFileSearchTest {
 	}
 
 	@Test
+	void sourceSearchLimitAlsoRestrictsActions() throws Exception {
+		for (int i = 0; i < 120; i++) {
+			insert(TraitementPhase.MAPPING, "LIMIT_" + i + ".xml", "archive",
+					"original.zip", "2026-01-01", "{OK}");
+		}
+		search("MAPPING", "LIMIT_");
+		assertEquals(100, rows(files.getMainQuery()).get("id_source").size());
+		UtilitaireDao.get(0).executeRequest(connection, dao.queryUpdateToDelete(files, "R"));
+		assertEquals(100, markedCount("R"));
+	}
+
+	@Test
 	void acceptsPlainTextWildcardsAndBoundApostrophes() throws Exception {
 		insert(TraitementPhase.MAPPING, "FIP6_a.xml", "a", "archive.zip", "2026-01-01", "{OK}");
 		insert(TraitementPhase.MAPPING, "l'archive_FIP7.xml", "b", "archive.zip", "2026-02-01", "{OK}");
 		search("MAPPING", "fip6");
+		assertEquals(0, files.getContent().size());
+		search("MAPPING", "FIP6");
 		assertEquals(List.of("FIP6_a.xml"), files.mapContent().get("id_source"));
 		search("MAPPING", "%FIP_%.xml");
 		assertEquals(2, files.getContent().size());

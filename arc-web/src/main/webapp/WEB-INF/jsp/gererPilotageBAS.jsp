@@ -40,8 +40,8 @@ accept-charset="UTF-8">
 <c:param name="checkbox" value ="true" />
 <c:param name="checkboxVisible" value ="false" />
 <c:param name="extraScopeSelect" value ="viewRapportBAS;" />
-<%-- otherButton uses | as a separator; preserve it in user-entered patterns. --%>
-<%--<c:param name="otherButton" value="${fn:replace(fileSearchControls, '|', '&#124;')}" />--%>
+<%-- cas des | dans la chaine de caractère --%>
+<c:param name="otherButton" value="${fn:replace(fileSearchControls, '|', '&#124;')}" />
 <c:param name="extraScopeSee" value ="viewRapportBAS;viewFichierBAS;-viewArchiveBAS;viewEntrepotBAS;" />
 </c:import>
 </div>
