@@ -7,7 +7,7 @@ import org.springframework.ui.Model;
 public class ServiceViewRapportBAS extends InteractorPilotage {
 
 	public String selectRapportBAS(Model model) {
-
+		clearFileSearch();
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 

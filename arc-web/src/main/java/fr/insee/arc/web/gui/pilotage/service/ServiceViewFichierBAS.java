@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
-import fr.insee.arc.core.dataobjects.ColumnEnum;
 import fr.insee.arc.core.factory.ApiServiceFactory;
 import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
@@ -25,6 +24,7 @@ import fr.insee.arc.utils.database.Delimiters;
 import fr.insee.arc.utils.exception.ArcException;
 import fr.insee.arc.utils.minio.S3Template;
 import fr.insee.arc.utils.utils.ManipString;
+import fr.insee.arc.web.gui.pilotage.model.PilotageFileSearch;
 
 @Service
 public class ServiceViewFichierBAS extends InteractorPilotage {
@@ -61,11 +61,18 @@ public class ServiceViewFichierBAS extends InteractorPilotage {
 		Map<String, List<String>> selectionLigne = views.getViewPilotageBAS().mapContentSelected();
 		List<String> selectionColonne = views.getViewPilotageBAS().listHeadersSelected();
 	
-		TraitementPhase phase = TraitementPhase.valueOf(selectionColonne.get(0).split("_")[0].toUpperCase());
-		TraitementEtat etat = TraitementEtat.valueOf(selectionColonne.get(0).split("_")[1].toUpperCase());
-		
-		
-		String date = selectionLigne.get(ColumnEnum.DATE_ENTREE.toString()).get(0);
+		TraitementPhase phase;
+		TraitementEtat etat;
+		if (PilotageFileSearch.isActive(views.getViewFichierBAS())) {
+			phase = PilotageFileSearch.getPhase(views.getViewFichierBAS());
+			etat = TraitementEtat.OK;
+		} else if (!selectionColonne.isEmpty() && !selectionLigne.isEmpty()) {
+			phase = TraitementPhase.valueOf(selectionColonne.get(0).split("_")[0].toUpperCase());
+			etat = TraitementEtat.valueOf(selectionColonne.get(0).split("_")[1].toUpperCase());
+		} else {
+			views.getViewFichierBAS().setMessage("managementSandbox.download.ko");
+			return generateDisplay(model, RESULT_SUCCESS);
+		}
 	
 		// Sélection des table métiers en fonction de la phase sélectionner (5 pour
 		// mapping 1 sinon)
@@ -93,7 +100,7 @@ public class ServiceViewFichierBAS extends InteractorPilotage {
 		}
 		
 		try {
-			File fOut = dao.downloadBdBAS(this.views.getViewFichierBAS(), initDownloadDir(), tableDownload, phase, etat, date);	
+			File fOut = dao.downloadBdBAS(this.views.getViewFichierBAS(), initDownloadDir(), tableDownload, phase);
 			this.views.getViewFichierBAS().setMessage("managementSandbox.download.ok");
 			copyDownloadedFileToS3(fOut);
 		} catch (ArcException e) {
