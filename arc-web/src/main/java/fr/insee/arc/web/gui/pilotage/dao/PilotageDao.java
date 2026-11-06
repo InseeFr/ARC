@@ -159,7 +159,7 @@ public class PilotageDao extends VObjectHelperDao {
 
 	public void initializeFichierBAS(VObject viewFichierBAS, VObject viewPilotageBAS, VObject viewRapportBAS) {
 		if (PilotageFileSearch.isActive(viewFichierBAS)) {
-			vObjectService.initialize(viewFichierBAS, rechercheParNomFichier(viewFichierBAS), null, new HashMap<>());
+			vObjectService.initialize(viewFichierBAS, rechercheParNomFichier(viewFichierBAS, true), null, new HashMap<>());
 			return;
 		}
 		Map<String, List<String>> selectionLigne = viewPilotageBAS.mapContentSelected();
@@ -209,7 +209,7 @@ public class PilotageDao extends VObjectHelperDao {
 	}
 
 	
-	private ArcPreparedStatementBuilder rechercheParNomFichier(VObject viewFichierBAS) {
+	private ArcPreparedStatementBuilder rechercheParNomFichier(VObject viewFichierBAS, boolean limite) {
 		String pattern = PilotageFileSearch.getPattern(viewFichierBAS);
 		if (!pattern.contains("%")) {
 			pattern = "%" + pattern + "%";
@@ -227,7 +227,9 @@ public class PilotageDao extends VObjectHelperDao {
 		query.append(" AND a.id_source IN (");
 		query.append("   SELECT b.id_source FROM " + table + " b");
 		query.append("   WHERE b.id_source LIKE ").appendText(pattern);
-		query.append("   LIMIT 100");
+		if (limite) {
+			query.append("   LIMIT 100");
+		}
 		query.append(" )");
 		query.append("), tmp_container AS MATERIALIZED (");
 		query.append(" SELECT * FROM " + table + " a");
@@ -236,7 +238,9 @@ public class PilotageDao extends VObjectHelperDao {
 		query.append(" AND a.o_container IN (");
 		query.append("   SELECT b.o_container FROM " + table + " b");
 		query.append("   WHERE b.o_container LIKE ").appendText(pattern);
-		query.append("   LIMIT 100");
+		if (limite) {
+			query.append("   LIMIT 100");
+		}
 		query.append(" )");
 		query.append(")");
 		query.append(" SELECT container, id_source, id_norme, validite, periodicite, phase_traitement,");
@@ -250,6 +254,11 @@ public class PilotageDao extends VObjectHelperDao {
 		query.append(" FROM tmp_container");
 
 		return query;
+	}
+
+	/** The display sample must never restrict an action. */
+	private ArcPreparedStatementBuilder rechercheParFichierPourAction(VObject files) {
+		return PilotageFileSearch.isActive(files) ? rechercheParNomFichier(files, false) : files.getMainQuery();
 	}
 
 	/**
@@ -295,11 +304,13 @@ public class PilotageDao extends VObjectHelperDao {
 			String dirIn, String bacASable) throws ArcException {
 		// récupération de la liste des id_source
 		Map<String, List<String>> selection = viewFichierBAS.mapContentSelected();
-		ArcPreparedStatementBuilder query = vObjectService.queryView(viewFichierBAS);
+		ArcPreparedStatementBuilder query = PilotageFileSearch.isActive(viewFichierBAS)
+				? requestSelectForAction(viewFichierBAS, selection, "alias_de_table.*")
+				: vObjectService.queryView(viewFichierBAS);
 		// si la selection de fichiers n'est pas vide, on se restreint aux fichiers
 		// sélectionner
 		//
-		if (!selection.isEmpty()) {
+		if (!PilotageFileSearch.isActive(viewFichierBAS) && !selection.isEmpty()) {
 			query.build(SQL.AND, ColumnEnum.ID_SOURCE, SQL.IN, "(", query.sqlListeOfValues(selection.get(ColumnEnum.ID_SOURCE.getColumnName())), ") ");
 		}
 
@@ -376,7 +387,7 @@ public class PilotageDao extends VObjectHelperDao {
 		Map<String, List<String>> selection = viewFichierBAS.mapContentSelected();
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		query.append("select distinct alias_de_table.container as nom_fichier from (");
-		query.append(viewFichierBAS.getMainQuery());
+		query.append(rechercheParFichierPourAction(viewFichierBAS));
 		query.append(") alias_de_table ");
 		query.append(vObjectService.buildFilter(viewFichierBAS.getFilterFields(), viewFichierBAS.getHeadersDLabel(), viewFichierBAS.getHeadersDType()));
 		if (!selection.isEmpty()) {
@@ -412,9 +423,14 @@ public class PilotageDao extends VObjectHelperDao {
 	 * deletion/replay.
 	 */
 	private ArcPreparedStatementBuilder requestSelectToMark(VObject viewFichierBAS, Map<String, List<String>> selection) {
+		return requestSelectForAction(viewFichierBAS, selection, "distinct container, id_source");
+	}
+
+	private ArcPreparedStatementBuilder requestSelectForAction(VObject viewFichierBAS,
+			Map<String, List<String>> selection, String columns) {
 		ArcPreparedStatementBuilder querySelection = new ArcPreparedStatementBuilder();
-		querySelection.append("select distinct container, id_source from (");
-		querySelection.append(viewFichierBAS.getMainQuery());
+		querySelection.append("select " + columns + " from (");
+		querySelection.append(rechercheParFichierPourAction(viewFichierBAS));
 		querySelection.append(") alias_de_table ");
 		querySelection.append(this.vObjectService.buildFilter(viewFichierBAS.getFilterFields(),
 				viewFichierBAS.getHeadersDLabel(), viewFichierBAS.getHeadersDType()));
