@@ -32,6 +32,7 @@ import fr.insee.arc.utils.utils.ManipString;
 import fr.insee.arc.web.gui.all.util.VObject;
 import fr.insee.arc.web.gui.all.util.VObjectHelperDao;
 import fr.insee.arc.web.gui.all.util.VObjectService;
+import fr.insee.arc.web.gui.pilotage.model.PilotageFileSearch;
 import jakarta.servlet.http.HttpServletResponse;
 
 @Component
@@ -157,6 +158,10 @@ public class PilotageDao extends VObjectHelperDao {
 	}
 
 	public void initializeFichierBAS(VObject viewFichierBAS, VObject viewPilotageBAS, VObject viewRapportBAS) {
+		if (PilotageFileSearch.isActive(viewFichierBAS)) {
+			vObjectService.initialize(viewFichierBAS, rechercheParNomFichier(viewFichierBAS, true), null, new HashMap<>());
+			return;
+		}
 		Map<String, List<String>> selectionLigne = viewPilotageBAS.mapContentSelected();
 		List<String> selectionColonne = viewPilotageBAS.listHeadersSelected();
 		Map<String, List<String>> selectionLigneRapport = viewRapportBAS.mapContentSelected();
@@ -204,6 +209,58 @@ public class PilotageDao extends VObjectHelperDao {
 	}
 
 	
+	private ArcPreparedStatementBuilder rechercheParNomFichier(VObject viewFichierBAS, boolean limite) {
+		String pattern = PilotageFileSearch.getPattern(viewFichierBAS);
+		if (!pattern.contains("%")) {
+			pattern = "%" + pattern + "%";
+		}
+
+		String table = dataObjectService.getView(ViewEnum.PILOTAGE_FICHIER);
+		String phase = PilotageFileSearch.getPhase(viewFichierBAS).toString();
+
+		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
+
+		query.append("WITH tmp_source AS MATERIALIZED (");
+		query.append(" SELECT * FROM " + table + " a");
+		query.append(" WHERE a.phase_traitement = ").appendText(phase);
+		query.append(" AND a.etat_traitement = '{OK}'::text[]");
+		query.append(" AND a.id_source IN (");
+		query.append("   SELECT b.id_source FROM " + table + " b");
+		query.append("   WHERE b.id_source LIKE ").appendText(pattern);
+		if (limite) {
+			query.append("   LIMIT 100");
+		}
+		query.append(" )");
+		query.append("), tmp_container AS MATERIALIZED (");
+		query.append(" SELECT * FROM " + table + " a");
+		query.append(" WHERE a.phase_traitement = ").appendText(phase);
+		query.append(" AND a.etat_traitement = '{OK}'::text[]");
+		query.append(" AND a.o_container IN (");
+		query.append("   SELECT b.o_container FROM " + table + " b");
+		query.append("   WHERE b.o_container LIKE ").appendText(pattern);
+		if (limite) {
+			query.append("   LIMIT 100");
+		}
+		query.append(" )");
+		query.append(")");
+		query.append(" SELECT container, id_source, id_norme, validite, periodicite, phase_traitement,");
+		query.append(" array_to_string(etat_traitement,'_') AS etat_traitement, date_traitement,");
+		query.append(" rapport, nb_enr, to_delete, client::text, date_client::text, jointure");
+		query.append(" FROM tmp_source");
+		query.append(" UNION");
+		query.append(" SELECT container, id_source, id_norme, validite, periodicite, phase_traitement,");
+		query.append(" array_to_string(etat_traitement,'_') AS etat_traitement, date_traitement,");
+		query.append(" rapport, nb_enr, to_delete, client::text, date_client::text, jointure");
+		query.append(" FROM tmp_container");
+
+		return query;
+	}
+
+	/** The display sample must never restrict an action. */
+	private ArcPreparedStatementBuilder rechercheParFichierPourAction(VObject files) {
+		return PilotageFileSearch.isActive(files) ? rechercheParNomFichier(files, false) : files.getMainQuery();
+	}
+
 	/**
 	 * build query to return download stream 
 	 * @param response
@@ -247,11 +304,13 @@ public class PilotageDao extends VObjectHelperDao {
 			String dirIn, String bacASable) throws ArcException {
 		// récupération de la liste des id_source
 		Map<String, List<String>> selection = viewFichierBAS.mapContentSelected();
-		ArcPreparedStatementBuilder query = vObjectService.queryView(viewFichierBAS);
+		ArcPreparedStatementBuilder query = PilotageFileSearch.isActive(viewFichierBAS)
+				? requestSelectForAction(viewFichierBAS, selection, "alias_de_table.*")
+				: vObjectService.queryView(viewFichierBAS);
 		// si la selection de fichiers n'est pas vide, on se restreint aux fichiers
 		// sélectionner
 		//
-		if (!selection.isEmpty()) {
+		if (!PilotageFileSearch.isActive(viewFichierBAS) && !selection.isEmpty()) {
 			query.build(SQL.AND, ColumnEnum.ID_SOURCE, SQL.IN, "(", query.sqlListeOfValues(selection.get(ColumnEnum.ID_SOURCE.getColumnName())), ") ");
 		}
 
@@ -273,7 +332,7 @@ public class PilotageDao extends VObjectHelperDao {
 	}
 	
 	public File downloadBdBAS(VObject viewFichierBAS, String dirOut,
-			List<String> tableDownload, TraitementPhase phase, TraitementEtat etat, String date) throws ArcException {
+			List<String> tableDownload, TraitementPhase phase) throws ArcException {
 		
 		// List of queries that will be executed to download
 		List<ArcPreparedStatementBuilder> tableauRequete = new ArrayList<>();
@@ -283,22 +342,11 @@ public class PilotageDao extends VObjectHelperDao {
 		
 		ArcPreparedStatementBuilder requete;
 		
-		requete = new ArcPreparedStatementBuilder();
-		requete.append("SELECT id_source FROM " + dataObjectService.getView(ViewEnum.PILOTAGE_FICHIER));
-		requete.append("\n WHERE phase_traitement=" + requete.quoteText(phase.toString()) + " ");
-		requete.append("\n AND etat_traitement=" + requete.quoteText(etat.getSqlArrayExpression()) + "::text[] ");
-		requete.append("\n AND date_entree=" + requete.quoteText(date) + " ");
-
-		// Si des fichiers ont été selectionnés, on ajoute a la requete la liste des
-		// fichiers
-		if (!viewFichierBAS.mapContentSelected().isEmpty()) {
-			requete.append("AND id_source IN (");
-			requete.append(requete.sqlListeOfValues(viewFichierBAS.mapContentSelected().get("id_source")));
-			requete.append(")");
-		}
-
-		List<String> idSources = new GenericBean(UtilitaireDao.get(0).executeRequest(null, requete))
-				.mapContent().get("id_source");
+		requete = new ArcPreparedStatementBuilder("SELECT DISTINCT id_source FROM (");
+		requete.append(requestSelectToMark(viewFichierBAS, viewFichierBAS.mapContentSelected()));
+		requete.append(") selected_files");
+		List<String> idSources = new GenericBean(UtilitaireDao.get(0).executeRequest(vObjectService.getConnection(), requete))
+				.getColumnValues("id_source");
 		
 		
 		for (String t : tableDownload) {
@@ -306,9 +354,13 @@ public class PilotageDao extends VObjectHelperDao {
 			{
 				requete = new ArcPreparedStatementBuilder();
 				requete.append("\n SELECT * FROM " + t + " a ");
-				requete.append("\n WHERE id_source IN ( ");
-				requete.append(requete.sqlListeOfValues(idSources));
-				requete.append(")");
+				if (idSources.isEmpty()) {
+					requete.append(" WHERE false");
+				} else {
+					requete.append("\n WHERE id_source IN ( ");
+					requete.append(requete.sqlListeOfValues(idSources));
+					requete.append(")");
+				}
 
 				tableauRequete.add(requete);
 				fileNames.add(t);
@@ -335,7 +387,7 @@ public class PilotageDao extends VObjectHelperDao {
 		Map<String, List<String>> selection = viewFichierBAS.mapContentSelected();
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 		query.append("select distinct alias_de_table.container as nom_fichier from (");
-		query.append(viewFichierBAS.getMainQuery());
+		query.append(rechercheParFichierPourAction(viewFichierBAS));
 		query.append(") alias_de_table ");
 		query.append(vObjectService.buildFilter(viewFichierBAS.getFilterFields(), viewFichierBAS.getHeadersDLabel(), viewFichierBAS.getHeadersDType()));
 		if (!selection.isEmpty()) {
@@ -371,9 +423,14 @@ public class PilotageDao extends VObjectHelperDao {
 	 * deletion/replay.
 	 */
 	private ArcPreparedStatementBuilder requestSelectToMark(VObject viewFichierBAS, Map<String, List<String>> selection) {
+		return requestSelectForAction(viewFichierBAS, selection, "distinct container, id_source");
+	}
+
+	private ArcPreparedStatementBuilder requestSelectForAction(VObject viewFichierBAS,
+			Map<String, List<String>> selection, String columns) {
 		ArcPreparedStatementBuilder querySelection = new ArcPreparedStatementBuilder();
-		querySelection.append("select distinct container, id_source from (");
-		querySelection.append(viewFichierBAS.getMainQuery());
+		querySelection.append("select " + columns + " from (");
+		querySelection.append(rechercheParFichierPourAction(viewFichierBAS));
 		querySelection.append(") alias_de_table ");
 		querySelection.append(this.vObjectService.buildFilter(viewFichierBAS.getFilterFields(),
 				viewFichierBAS.getHeadersDLabel(), viewFichierBAS.getHeadersDType()));

@@ -46,6 +46,9 @@ public class ServiceViewJeuxDeReglesCopie extends InteractorNorme {
 	public String selectJeuxDeReglesChargementCopie(Model model) {
 		this.views.getViewJeuxDeReglesCopie().setCustomValue(SELECTED_RULESET_TABLE, this.views.getViewChargement().getTable());
 		this.views.getViewJeuxDeReglesCopie().setCustomValue(SELECTED_RULESET_NAME, this.views.getViewChargement().getSessionName());
+		views.getViewJeuxDeReglesCopie()
+				.getCustomValues()
+				.put("MODE", "COPIE");
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
@@ -59,6 +62,9 @@ public class ServiceViewJeuxDeReglesCopie extends InteractorNorme {
 
 		this.views.getViewJeuxDeReglesCopie().setCustomValue(SELECTED_RULESET_TABLE, this.views.getViewNormage().getTable());
 		this.views.getViewJeuxDeReglesCopie().setCustomValue(SELECTED_RULESET_NAME, this.views.getViewNormage().getSessionName());
+		views.getViewJeuxDeReglesCopie()
+				.getCustomValues()
+				.put("MODE", "COPIE");
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
@@ -72,6 +78,9 @@ public class ServiceViewJeuxDeReglesCopie extends InteractorNorme {
 
 		this.views.getViewJeuxDeReglesCopie().setCustomValue(SELECTED_RULESET_TABLE, this.views.getViewControle().getTable());
 		this.views.getViewJeuxDeReglesCopie().setCustomValue(SELECTED_RULESET_NAME, this.views.getViewControle().getSessionName());
+		views.getViewJeuxDeReglesCopie()
+				.getCustomValues()
+				.put("MODE", "COPIE");
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
@@ -85,6 +94,9 @@ public class ServiceViewJeuxDeReglesCopie extends InteractorNorme {
 
 		this.views.getViewJeuxDeReglesCopie().setCustomValue(SELECTED_RULESET_TABLE, this.views.getViewMapping().getTable());
 		this.views.getViewJeuxDeReglesCopie().setCustomValue(SELECTED_RULESET_NAME, this.views.getViewMapping().getSessionName());
+		views.getViewJeuxDeReglesCopie()
+				.getCustomValues()
+				.put("MODE", "COPIE");
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
@@ -92,6 +104,9 @@ public class ServiceViewJeuxDeReglesCopie extends InteractorNorme {
 
 		this.views.getViewJeuxDeReglesCopie().setCustomValue(SELECTED_RULESET_TABLE, this.views.getViewExpression().getTable());
 		this.views.getViewJeuxDeReglesCopie().setCustomValue(SELECTED_RULESET_NAME, this.views.getViewExpression().getSessionName());
+		views.getViewJeuxDeReglesCopie()
+				.getCustomValues()
+				.put("MODE", "COPIE");
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
