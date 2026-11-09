@@ -87,10 +87,8 @@
 				<c:import url="tiles/template_header_link.jsp"><c:param name="linkRef" value="selectOperations" /><c:param name="linkId" value="operations" /></c:import>
 			</li>
 			<li class="mt-auto mb-2 pt-2 border-top">
-                <small>
-                    <spring:message code="header.accessibility"/>
-                </small>
-            </li>
+            	<c:import url="tiles/template_header_link.jsp"><c:param name="linkRef" value="accessibility" /><c:param name="linkId" value="accessibility" /></c:import>
+          	</li>
     	</ul>
 </nav>
 
