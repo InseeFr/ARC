@@ -224,24 +224,18 @@ public class PilotageDao extends VObjectHelperDao {
 		query.append(" SELECT * FROM " + table + " a");
 		query.append(" WHERE a.phase_traitement = ").appendText(phase);
 		query.append(" AND a.etat_traitement = '{OK}'::text[]");
-		query.append(" AND a.id_source IN (");
-		query.append("   SELECT b.id_source FROM " + table + " b");
-		query.append("   WHERE b.id_source LIKE ").appendText(pattern);
+		query.append(" AND a.id_source LIKE ").appendText(pattern);
 		if (limite) {
-			query.append("   LIMIT 100");
+			query.append(" LIMIT 100");
 		}
-		query.append(" )");
 		query.append("), tmp_container AS MATERIALIZED (");
 		query.append(" SELECT * FROM " + table + " a");
 		query.append(" WHERE a.phase_traitement = ").appendText(phase);
 		query.append(" AND a.etat_traitement = '{OK}'::text[]");
-		query.append(" AND a.o_container IN (");
-		query.append("   SELECT b.o_container FROM " + table + " b");
-		query.append("   WHERE b.o_container LIKE ").appendText(pattern);
+		query.append(" AND a.o_container LIKE ").appendText(pattern);
 		if (limite) {
-			query.append("   LIMIT 100");
+			query.append(" LIMIT 100");
 		}
-		query.append(" )");
 		query.append(")");
 		query.append(" SELECT container, id_source, id_norme, validite, periodicite, phase_traitement,");
 		query.append(" array_to_string(etat_traitement,'_') AS etat_traitement, date_traitement,");
