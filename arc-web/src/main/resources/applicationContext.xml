@@ -66,8 +66,12 @@
 		<property name="s3OutputSecret" value="#{systemEnvironment['S3_OUTPUT_SECRET'] ?: '${fr.insee.arc.s3.output.secret}' }"></property>	
 		<property name="s3OutputParquetKey" value="#{systemEnvironment['S3_OUTPUT_PARQUET_KEY'] ?: '${fr.insee.arc.s3.output.parquet.key}' }"></property>	
 
-		<property name="filesRetentionDays" value="#{systemEnvironment['FILES_RETENTION_DAYS'] ?: '${fr.insee.arc.files.retention.days:}' }"></property>	
+		<property name="filesRetentionDays" value="#{systemEnvironment['FILES_RETENTION_DAYS'] ?: '${fr.insee.arc.files.retention.days:}' }"></property>
 
+        <property name="accessibilityMail" value="#{systemEnvironment['ACCESSIBILITY_MAIL'] ?: '${fr.insee.arc.accessibility.mail:boite-arc@insee.fr}' }"></property>
+        <property name="accessibilitySiteUrl" value="#{systemEnvironment['ACCESSIBILITY_SITE_URL'] ?: '${fr.insee.arc.accessibility.site.url:}' }"></property>
+        <property name="accessibilitySchemaPeriod" value="#{systemEnvironment['ACCESSIBILITY_SCHEMA_PERIOD'] ?: '${fr.insee.arc.accessibility.schema.period:2026-2028}' }"></property>
+        <property name="accessibilityRaniMail" value="#{systemEnvironment['ACCESSIBILITY_RANI_MAIL'] ?: '${fr.insee.arc.accessibility.rani.mail:dg75-rani@insee.fr}' }"></property>
 	</bean>
 
 	<bean id="springApplicationContext" class="fr.insee.arc.utils.ressourceUtils.SpringApplicationContext"/>
