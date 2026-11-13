@@ -99,7 +99,6 @@ public abstract class ArcWebGenericService<T extends ArcModel, D extends IDao> i
 	/** Selected environment.*/
 	private String bacASable;
 
-
 	/** Is the current environment a production environment?*/
 	private boolean isEnvProd;
 	/** Is the current environment must be executed as a batch ? What is the batch mode ? */

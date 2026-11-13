@@ -100,12 +100,6 @@ public class PropertiesHandler {
 	private String keycloakCredential;
 	
 	private Integer filesRetentionDays;
-
-    /* Accessibility */
-    private String accessibilityMail;
-    private String accessibilitySiteUrl;
-    private String accessibilitySchemaPeriod;
-    private String accessibilityRaniMail;
 	
 	private static PropertiesHandler instanceOfPropertiesHandler;
 
@@ -564,23 +558,7 @@ public class PropertiesHandler {
 		this.s3OutputParquetKey = s3OutputParquetKey;
 	}
 
-    public String getAccessibilityMail() { return accessibilityMail; }
-
-    public void setAccessibilityMail(String accessibilityMail) { this.accessibilityMail = accessibilityMail; }
-
-    public String getAccessibilitySiteUrl() { return accessibilitySiteUrl; }
-
-    public void setAccessibilitySiteUrl(String accessibilitySiteUrl) { this.accessibilitySiteUrl = accessibilitySiteUrl; }
-
-    public String getAccessibilitySchemaPeriod() { return accessibilitySchemaPeriod; }
-
-    public void setAccessibilitySchemaPeriod(String accessibilitySchemaPeriod) { this.accessibilitySchemaPeriod = accessibilitySchemaPeriod; }
-
-    public String getAccessibilityRaniMail() {return accessibilityRaniMail;}
-
-    public void setAccessibilityRaniMail(String accessibilityRaniMail) {this.accessibilityRaniMail = accessibilityRaniMail;}
-
-    public Map<String, String> fullVersionInformation() {
+	public Map<String, String> fullVersionInformation() {
 		Map<String, String> map = new LinkedHashMap<>();
 		map.put("version", getVersion());
 		map.put("buildDate", getVersionDate());
