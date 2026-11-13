@@ -32,6 +32,17 @@ function pilotageReady() {
 
 }
 
+function preparePilotageFileSearch(button) {
+	var input = $(button).closest('.pilotage-file-search').find('.pilotage-search-input');
+	if (!input.val().trim()) {
+		input.trigger('focus');
+		return false;
+	}
+	$('#fileSearchPhase').attr('m', 'js');
+	$('#fileSearchPattern').val(input.val()).attr('m', 'js');
+	return true;
+}
+
 $(document).ready(pilotageReady);
 $(document).on('readyAgain', pilotageReady);
 

@@ -27,6 +27,7 @@ import fr.insee.arc.web.gui.all.util.LineObject;
 import fr.insee.arc.web.gui.all.util.VObject;
 import fr.insee.arc.web.gui.pilotage.dao.PilotageDao;
 import fr.insee.arc.web.gui.pilotage.model.ModelPilotage;
+import fr.insee.arc.web.gui.pilotage.model.PilotageFileSearch;
 
 public class InteractorPilotage extends ArcWebGenericService<ModelPilotage, PilotageDao> {
 
@@ -68,6 +69,10 @@ public class InteractorPilotage extends ArcWebGenericService<ModelPilotage, Pilo
 		views.setViewArchiveBAS(vObjectService.preInitialize(arcModel.getViewArchiveBAS()));
 		views.setViewEntrepotBAS(vObjectService.preInitialize(arcModel.getViewEntrepotBAS()));
 		views.setViewFichierBAS(vObjectService.preInitialize(arcModel.getViewFichierBAS()));
+		if (PilotageFileSearch.clearIfEnvironmentChanged(views.getViewFichierBAS(), getBacASable())) {
+			clearPilotageSelection();
+			vObjectService.destroy(views.getViewFichierBAS());
+		}
 
 		putVObject(views.getViewPilotageBAS(), t -> initializePilotageBAS(t));
 		putVObject(views.getViewRapportBAS(), t -> initializeRapportBAS(t));
@@ -88,9 +93,9 @@ public class InteractorPilotage extends ArcWebGenericService<ModelPilotage, Pilo
 		List<String> columns = viewPilotageBAS.getHeadersDLabel();
 		Map<String, ColumnRendering> columnRendering = viewPilotageBAS.getConstantVObject().getColumnRender();
 
-		// for all columns, set rendering visibility to false
+		// Keep the five OK columns available for searches across all entry dates.
 		for (int i = 1; i < columns.size(); i++) {
-			ColumnRendering renderAttributes = new ColumnRendering(false, ManipString.translateAscii(columns.get(i)),
+			ColumnRendering renderAttributes = new ColumnRendering(columns.get(i).endsWith("_ok"), ManipString.translateAscii(columns.get(i)),
 					null, "text", null, false);
 			columnRendering.put(columns.get(i), renderAttributes);
 		}
@@ -151,6 +156,23 @@ public class InteractorPilotage extends ArcWebGenericService<ModelPilotage, Pilo
 	public void initializeFichierBAS(VObject viewFichierBAS, VObject viewPilotageBAS, VObject viewRapportBAS) {
 		LoggerHelper.debug(LOGGER, "initializeFichierBAS");
 		dao.initializeFichierBAS(viewFichierBAS, viewPilotageBAS, viewRapportBAS);
+	}
+
+	protected void clearPilotageSelection() {
+		for (VObject view : List.of(views.getViewPilotageBAS(), views.getViewRapportBAS())) {
+			view.setSelectedLines(new ArrayList<>());
+			view.setSelectedColumns(new ArrayList<>());
+			vObjectService.saveInSession(view);
+		}
+	}
+
+	protected void clearFileSearch() {
+		// Filtering/paging the grids must not discard a search still displayed below.
+		boolean refreshesFiles = getScope() == null || Arrays.asList(getScope().split(";")).contains("viewFichierBAS");
+		if (refreshesFiles && PilotageFileSearch.isActive(views.getViewFichierBAS())) {
+			PilotageFileSearch.clear(views.getViewFichierBAS());
+			vObjectService.destroy(views.getViewFichierBAS());
+		}
 	}
 	
 	public String initDownloadDir()

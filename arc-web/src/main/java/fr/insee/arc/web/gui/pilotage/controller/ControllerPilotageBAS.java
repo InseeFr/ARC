@@ -4,6 +4,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.utils.exception.ArcException;
@@ -26,6 +27,18 @@ public class ControllerPilotageBAS extends ServiceViewPilotageBAS {
 	@PostMapping("/secure/selectPilotageBAS")
 	public String selectPilotageBASAction(Model model) {
 		return selectPilotageBAS(model);
+	}
+
+	@PostMapping("/secure/searchPilotageBAS")
+	public String searchPilotageBASAction(Model model,
+			@RequestParam(required = false) String fileSearchPhase,
+			@RequestParam(required = false) String fileSearchPattern) {
+		return searchPilotageBAS(model, fileSearchPhase, fileSearchPattern);
+	}
+
+	@PostMapping("/secure/clearPilotageSearchBAS")
+	public String clearPilotageSearchBASAction(Model model) {
+		return clearPilotageSearchBAS(model);
 	}
 	
 	@PostMapping("/secure/updateEnvDescription")
