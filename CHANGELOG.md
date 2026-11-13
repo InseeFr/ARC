@@ -5,6 +5,13 @@
 - enable tar compression for bigger files
 - select in processing pipeline a number of file at least equals to number of executor
 
+## version-94.2.116
+- minio CVE fix
+- json CVE fix
+- Allow per-client configuration of file retention periods.
+  - Set the Retention days column in Client Applications to configure a specific retention period for a client.
+  - If left unset, the default ApiInitialisationService.Nb_Jour_A_Conserver parameter continues to apply. Otherwise, the client-specific value overrides it.
+
 ## version-94.2.109
 - tomcat:jre25 CVE fix
 
