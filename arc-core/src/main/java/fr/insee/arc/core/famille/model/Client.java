@@ -4,6 +4,7 @@ public class Client implements RegleComparable<Client.CleComparaisonClient> {
 
     private String idFamille;
     private String idApplication;
+    private Integer joursRetention;
 
     @Override
     public CleComparaisonClient getCleComparaison() {
@@ -12,16 +13,17 @@ public class Client implements RegleComparable<Client.CleComparaisonClient> {
 
     @Override
     public Object getContenuComparaison() {
-        return ContenuComparaisonClient.PAS_DE_CONTENU_A_COMPARER;
+        return new ContenuComparaisonClient(joursRetention);
     }
 
     public record CleComparaisonClient(
             String idApplication) {
     }
 
-    public enum ContenuComparaisonClient {
-        PAS_DE_CONTENU_A_COMPARER
+    public record ContenuComparaisonClient
+        (Integer joursRetention) {
     }
+
 
     public String getIdFamille() {
         return idFamille;
@@ -37,5 +39,13 @@ public class Client implements RegleComparable<Client.CleComparaisonClient> {
 
     public void setIdApplication(String idApplication) {
         this.idApplication = idApplication;
+    }
+
+    public Integer getJoursRetention() {
+        return joursRetention;
+    }
+
+    public void setJoursRetention(Integer joursRetention) {
+        this.joursRetention = joursRetention;
     }
 }

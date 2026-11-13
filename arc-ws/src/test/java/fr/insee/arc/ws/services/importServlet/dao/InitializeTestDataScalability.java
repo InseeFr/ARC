@@ -31,9 +31,9 @@ public class InitializeTestDataScalability {
 		
 		// family and client tables
 		query.append("CREATE TABLE arc.ihm_client AS ");
-		query.append("SELECT 'DSN' as id_famille,'ARTEMIS' as id_application");
+		query.append("SELECT 'DSN' as id_famille,'ARTEMIS' as id_application, NULL::integer as jours_retention");
 		query.append(SQL.UNION_ALL);
-		query.append("SELECT 'DSN' as id_famille,'DSNFLASH' as id_application");
+		query.append("SELECT 'DSN' as id_famille,'DSNFLASH' as id_application, NULL::integer as jours_retention");
 		query.append(SQL.END_QUERY);
 		
 		query.append("CREATE TABLE arc.ihm_famille AS SELECT 'DSN' as id_famille");

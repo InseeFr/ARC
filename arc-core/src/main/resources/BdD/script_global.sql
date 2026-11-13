@@ -205,12 +205,15 @@ CREATE TABLE IF NOT EXISTS arc.ihm_famille
 -- client names for the data retrieval webservice 
 CREATE TABLE IF NOT EXISTS arc.ihm_client 
 (id_famille text NOT NULL, 
-id_application text NOT NULL, 
-CONSTRAINT pk_ihm_client PRIMARY KEY (id_famille, id_application), 
+id_application text NOT NULL,
+ jours_retention integer,
+ CONSTRAINT pk_ihm_client PRIMARY KEY (id_famille, id_application),
 CONSTRAINT fk_client_famille FOREIGN KEY (id_famille) 
 REFERENCES arc.ihm_famille (id_famille) MATCH SIMPLE 
 ON UPDATE NO ACTION ON DELETE NO ACTION 
-);        
+);
+
+ALTER TABLE arc.ihm_client ADD COLUMN IF NOT EXISTS jours_retention integer;
 
 -- define the white list for hosts accessing the data retrieval webservice
 CREATE TABLE IF NOT EXISTS arc.ihm_webservice_whitelist
