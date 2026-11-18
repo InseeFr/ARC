@@ -5,7 +5,7 @@
 - enable tar compression for bigger files
 - select in processing pipeline a number of file at least equals to number of executor
 
-## version-94.2.117
+## version-94.2.118
 - add the legal accessibility information page
 
 ## version-94.2.116
