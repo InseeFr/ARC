@@ -5,6 +5,9 @@
 - enable tar compression for bigger files
 - select in processing pipeline a number of file at least equals to number of executor
 
+## version-94.2.117
+- add the legal accessibility information page
+
 ## version-94.2.116
 - minio CVE fix
 - json CVE fix
