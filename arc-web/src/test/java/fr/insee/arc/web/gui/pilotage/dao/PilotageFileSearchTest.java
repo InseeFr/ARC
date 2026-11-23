@@ -89,12 +89,20 @@ class PilotageFileSearchTest {
 			insert(phase, phase + "_FIP6_ko.xml", "ko", "original.zip", "2026-10-27", "{KO}");
 			insert(phase, phase + "_FIP6_mixed.xml", "mixed", "original.zip", "2026-10-27", "{OK,KO}");
 		}
+		// recherche OK doit inclure {OK} et {OK,KO} (filtre contient &&)
 		for (TraitementPhase phase : TraitementPhase.getListPhaseReportedInBas()) {
-			search(phase.toString(), "%FIP6%");
+			search(phase.toString(), "OK", "%FIP6%");
+			// FIP6_a.xml, fip6_b.xml, FIP6_mixed.xml = 3 fichiers (OK et OK,KO)
 			assertEquals(3, files.getContent().size(), phase.toString());
 			assertEquals(List.of(phase.toString(), phase.toString(), phase.toString()),
 					files.mapContent().get("phase_traitement"));
 			assertEquals(3, rows(files.getMainQuery()).get("id_source").size());
+		}
+		// recherche KO doit inclure {KO} et {OK,KO}
+		for (TraitementPhase phase : TraitementPhase.getListPhaseReportedInBas()) {
+			search(phase.toString(), "KO", "%FIP6%");
+			// FIP6_ko.xml, FIP6_mixed.xml = 2 fichiers (KO et OK,KO)
+			assertEquals(2, files.getContent().size(), phase.toString());
 		}
 	}
 
@@ -258,7 +266,7 @@ class PilotageFileSearchTest {
 		files.setSelectedLines(new ArrayList<>(List.of(true)));
 		files.setFilterFields(new ArrayList<>(List.of("unwanted")));
 		files.setIdPage("8");
-		assertTrue(PilotageFileSearch.start(files, "MAPPING", "FIP6", "file_search_test"));
+		assertTrue(PilotageFileSearch.start(files, "MAPPING", "OK", "FIP6", "file_search_test"));
 		assertTrue(files.mapContentSelected().isEmpty());
 		assertTrue(files.getFilterFields().isEmpty());
 		assertEquals("1", files.getIdPage());
@@ -276,16 +284,21 @@ class PilotageFileSearchTest {
 
 	@Test
 	void blankAndInvalidSearchesNeverOpenAllFiles() {
-		assertFalse(PilotageFileSearch.start(files, "MAPPING", " ", "file_search_test"));
+		assertFalse(PilotageFileSearch.start(files, "MAPPING", "OK", " ", "file_search_test"));
 		refresh();
 		assertFalse(files.getIsInitialized());
-		assertFalse(PilotageFileSearch.start(files, "EXPORT", "%", "file_search_test"));
-		assertFalse(PilotageFileSearch.start(files, "unknown", "FIP6", "file_search_test"));
+		assertFalse(PilotageFileSearch.start(files, "EXPORT", "OK", "%", "file_search_test"));
+		assertFalse(PilotageFileSearch.start(files, "unknown", "OK", "FIP6", "file_search_test"));
+		assertFalse(PilotageFileSearch.start(files, "MAPPING", "INVALID", "FIP6", "file_search_test"));
 		assertFalse(PilotageFileSearch.isActive(files));
 	}
 
 	private void search(String phase, String pattern) {
-		assertTrue(PilotageFileSearch.start(files, phase, pattern, "file_search_test"));
+		search(phase, "OK", pattern);
+	}
+
+	private void search(String phase, String etat, String pattern) {
+		assertTrue(PilotageFileSearch.start(files, phase, etat, pattern, "file_search_test"));
 		refresh();
 		assertNotNull(files.getMainQuery());
 	}

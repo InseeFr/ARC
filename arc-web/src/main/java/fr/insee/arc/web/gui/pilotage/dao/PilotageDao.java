@@ -211,19 +211,19 @@ public class PilotageDao extends VObjectHelperDao {
 	
 	private ArcPreparedStatementBuilder rechercheParNomFichier(VObject viewFichierBAS, boolean limite) {
 		String pattern = PilotageFileSearch.getPattern(viewFichierBAS);
-		if (!pattern.contains("%")) {
-			pattern = "%" + pattern + "%";
-		}
 
 		String table = dataObjectService.getView(ViewEnum.PILOTAGE_FICHIER);
 		String phase = PilotageFileSearch.getPhase(viewFichierBAS).toString();
+		TraitementEtat etat = PilotageFileSearch.getEtat(viewFichierBAS);
+		String etatSql = etat.getSqlArrayExpression();
 
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder();
 
 		query.append("WITH tmp_source AS MATERIALIZED (");
 		query.append(" SELECT * FROM " + table + " a");
 		query.append(" WHERE a.phase_traitement = ").appendText(phase);
-		query.append(" AND a.etat_traitement = '{OK}'::text[]");
+		// (&&) pour inclure {OK,KO} quand on cherche OK ou KO
+		query.append(" AND a.etat_traitement && ").appendText(etatSql).append("::text[]");
 		query.append(" AND a.id_source LIKE ").appendText(pattern);
 		if (limite) {
 			query.append(" LIMIT 100");
@@ -231,7 +231,7 @@ public class PilotageDao extends VObjectHelperDao {
 		query.append("), tmp_container AS MATERIALIZED (");
 		query.append(" SELECT * FROM " + table + " a");
 		query.append(" WHERE a.phase_traitement = ").appendText(phase);
-		query.append(" AND a.etat_traitement = '{OK}'::text[]");
+		query.append(" AND a.etat_traitement && ").appendText(etatSql).append("::text[]");
 		query.append(" AND a.o_container LIKE ").appendText(pattern);
 		if (limite) {
 			query.append(" LIMIT 100");
@@ -254,6 +254,24 @@ public class PilotageDao extends VObjectHelperDao {
 	private ArcPreparedStatementBuilder rechercheParFichierPourAction(VObject files) {
 		return PilotageFileSearch.isActive(files) ? rechercheParNomFichier(files, false) : files.getMainQuery();
 	}
+
+	/**
+	 * Comptage du nombre de fichiers impactés par une action (marquage, rejouage, etc.)
+	 * sur le périmètre courant (recherche par nom OU sélection case/rapport + filtres + lignes cochées).
+	 * Utilisé pour afficher le comptage dans la boite de dailogue avant l'action.
+	 */
+	public int countFilesForAction(VObject viewFichierBAS) throws ArcException {
+		Map<String, List<String>> selection = viewFichierBAS.mapContentSelected();
+		ArcPreparedStatementBuilder querySelection = requestSelectForAction(viewFichierBAS, selection, "count(*) as nb");
+		GenericBean result = new GenericBean(UtilitaireDao.get(0).executeRequest(vObjectService.getConnection(), querySelection));
+		Map<String, List<String>> contentMap = result.mapContent();
+		List<String> nbList = contentMap.get("nb");
+		if (nbList == null || nbList.isEmpty()) {
+			return 0;
+		}
+		return Integer.parseInt(nbList.get(0));
+	}
+
 
 	/**
 	 * build query to return download stream 

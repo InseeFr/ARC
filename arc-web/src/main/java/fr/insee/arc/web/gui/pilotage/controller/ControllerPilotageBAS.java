@@ -32,8 +32,9 @@ public class ControllerPilotageBAS extends ServiceViewPilotageBAS {
 	@PostMapping("/secure/searchPilotageBAS")
 	public String searchPilotageBASAction(Model model,
 			@RequestParam(required = false) String fileSearchPhase,
+			@RequestParam(required = false) String fileSearchEtat,
 			@RequestParam(required = false) String fileSearchPattern) {
-		return searchPilotageBAS(model, fileSearchPhase, fileSearchPattern);
+		return searchPilotageBAS(model, fileSearchPhase, fileSearchEtat, fileSearchPattern);
 	}
 
 	@PostMapping("/secure/clearPilotageSearchBAS")

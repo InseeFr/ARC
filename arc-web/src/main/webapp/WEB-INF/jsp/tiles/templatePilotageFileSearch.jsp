@@ -13,16 +13,22 @@
                value="<c:out value="${viewFichierBAS.customValues['fileSearchPattern']}"/>" />
         <select id="fileSearchPhase" name="fileSearchPhase" m="js"
                 class="form-control form-control-sm"
-                style="flex: 0 0 160px; width: 160px;"
+                style="flex: 0 0 120px; width: 120px;"
                 aria-label="<spring:message code='managementSandbox.search.phase' htmlEscape='true'/>">
-            <c:forEach items="${viewPilotageBAS.headersDLabel}" var="column">
-                <c:if test="${column.endsWith('_ok')}">
-                    <c:set var="searchPhase" value="${column.substring(0, column.length() - 3).toUpperCase()}" />
-                    <option value="${searchPhase}" ${viewFichierBAS.customValues['fileSearchPhase'] == searchPhase ? 'selected' : ''}>
-                        <spring:message code="${searchPhase}"/> OK
-                    </option>
-                </c:if>
+            <option value=""><spring:message code="managementSandbox.search.phase"/></option>
+            <c:forEach items="${listePhaseRecherche}" var="phase">
+                <option value="${phase}" ${viewFichierBAS.customValues['fileSearchPhase'] == phase.toString() ? 'selected' : ''}>
+                    <spring:message code="${phase}"/>
+                </option>
             </c:forEach>
+        </select>
+        <select id="fileSearchEtat" name="fileSearchEtat" m="js"
+                class="form-control form-control-sm"
+                style="flex: 0 0 80px; width: 80px;"
+                aria-label="<spring:message code='managementSandbox.search.etat' htmlEscape='true'/>">
+            <option value=""><spring:message code="managementSandbox.search.etat"/></option>
+            <option value="OK" ${viewFichierBAS.customValues['fileSearchEtat'] == 'OK' ? 'selected' : ''}><spring:message code="managementSandbox.search.etat.ok"/></option>
+            <option value="KO" ${viewFichierBAS.customValues['fileSearchEtat'] == 'KO' ? 'selected' : ''}><spring:message code="managementSandbox.search.etat.ko"/></option>
         </select>
         <button type="submit" class="btn btn-primary btn-sm pilotage-search-button"
                 doAction="searchPilotageBAS" ajax="true"

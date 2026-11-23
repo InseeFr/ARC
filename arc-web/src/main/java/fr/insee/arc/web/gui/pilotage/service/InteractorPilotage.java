@@ -58,6 +58,7 @@ public class InteractorPilotage extends ArcWebGenericService<ModelPilotage, Pilo
 	@ModelAttribute
 	public void specificModelAttributes(Model model) {
 		model.addAttribute("listePhase", listePhase);
+		model.addAttribute("listePhaseRecherche", TraitementPhase.getListPhaseReportedInBas());
 	}
 
 	@Override

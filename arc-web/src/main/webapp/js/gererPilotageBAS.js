@@ -39,6 +39,7 @@ function preparePilotageFileSearch(button) {
 		return false;
 	}
 	$('#fileSearchPhase').attr('m', 'js');
+	$('#fileSearchEtat').attr('m', 'js');
 	$('#fileSearchPattern').val(input.val()).attr('m', 'js');
 	return true;
 }

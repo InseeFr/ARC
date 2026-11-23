@@ -40,29 +40,29 @@ class PilotageFileSearchServiceTest {
 		views.getViewPilotageBAS().setSelectedLines(new ArrayList<>(List.of(true)));
 		views.getViewPilotageBAS().setSelectedColumns(new ArrayList<>(List.of(true)));
 		views.getViewRapportBAS().setSelectedLines(new ArrayList<>(List.of(true)));
-		pilotage.searchPilotageBAS(new ExtendedModelMap(), "MAPPING", "FIP6");
+		pilotage.searchPilotageBAS(new ExtendedModelMap(), "MAPPING", "OK", "FIP6");
 		assertTrue(views.getViewPilotageBAS().getSelectedLines().isEmpty());
 		assertTrue(views.getViewPilotageBAS().getSelectedColumns().isEmpty());
 		assertTrue(views.getViewRapportBAS().getSelectedLines().isEmpty());
 		assertTrue(PilotageFileSearch.isActive(views.getViewFichierBAS()));
-		pilotage.searchPilotageBAS(new ExtendedModelMap(), "CHARGEMENT", "FIP7");
+		pilotage.searchPilotageBAS(new ExtendedModelMap(), "CHARGEMENT", "OK", "FIP7");
 		assertEquals("CHARGEMENT", PilotageFileSearch.getPhase(views.getViewFichierBAS()).toString());
 		assertEquals("FIP7", PilotageFileSearch.getPattern(views.getViewFichierBAS()));
 	}
 
 	@Test
 	void selectingACellOrReportLeavesSearchMode() {
-		pilotage.searchPilotageBAS(new ExtendedModelMap(), "MAPPING", "FIP6");
+		pilotage.searchPilotageBAS(new ExtendedModelMap(), "MAPPING", "OK", "FIP6");
 		pilotage.selectPilotageBAS(new ExtendedModelMap());
 		assertFalse(PilotageFileSearch.isActive(views.getViewFichierBAS()));
-		pilotage.searchPilotageBAS(new ExtendedModelMap(), "MAPPING", "FIP6");
+		pilotage.searchPilotageBAS(new ExtendedModelMap(), "MAPPING", "OK", "FIP6");
 		rapport.selectRapportBAS(new ExtendedModelMap());
 		assertFalse(PilotageFileSearch.isActive(views.getViewFichierBAS()));
 	}
 
 	@Test
 	void filteringTheGridsKeepsTheSearchDisplayedInTheDetail() {
-		pilotage.searchPilotageBAS(new ExtendedModelMap(), "MAPPING", "FIP6");
+		pilotage.searchPilotageBAS(new ExtendedModelMap(), "MAPPING", "OK", "FIP6");
 		pilotage.setScope("viewPilotageBAS;viewRapportBAS;");
 		pilotage.selectPilotageBAS(new ExtendedModelMap());
 		assertTrue(PilotageFileSearch.isActive(views.getViewFichierBAS()));
@@ -76,11 +76,11 @@ class PilotageFileSearchServiceTest {
 
 	@Test
 	void clearingOrSubmittingAnInvalidSearchRemovesThePreviousResultContext() {
-		pilotage.searchPilotageBAS(new ExtendedModelMap(), "MAPPING", "FIP6");
+		pilotage.searchPilotageBAS(new ExtendedModelMap(), "MAPPING", "OK", "FIP6");
 		pilotage.clearPilotageSearchBAS(new ExtendedModelMap());
 		assertFalse(PilotageFileSearch.isActive(views.getViewFichierBAS()));
-		pilotage.searchPilotageBAS(new ExtendedModelMap(), "MAPPING", "FIP6");
-		pilotage.searchPilotageBAS(new ExtendedModelMap(), "EXPORT", "%");
+		pilotage.searchPilotageBAS(new ExtendedModelMap(), "MAPPING", "OK", "FIP6");
+		pilotage.searchPilotageBAS(new ExtendedModelMap(), "EXPORT", "OK", "%");
 		assertFalse(PilotageFileSearch.isActive(views.getViewFichierBAS()));
 		assertEquals("managementSandbox.search.invalid", views.getViewPilotageBAS().getMessage());
 		assertFalse(views.getViewFichierBAS().getIsInitialized());

@@ -47,9 +47,9 @@ public class ServiceViewPilotageBAS extends InteractorPilotage {
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
-	public String searchPilotageBAS(Model model, String phase, String pattern) {
+	public String searchPilotageBAS(Model model, String phase, String etat, String pattern) {
 		clearPilotageSelection();
-		if (!PilotageFileSearch.start(views.getViewFichierBAS(), phase, pattern, getBacASable())) {
+		if (!PilotageFileSearch.start(views.getViewFichierBAS(), phase, etat, pattern, getBacASable())) {
 			views.getViewPilotageBAS().setMessage("managementSandbox.search.invalid");
 			vObjectService.destroy(views.getViewFichierBAS());
 		}

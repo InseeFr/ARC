@@ -4,7 +4,15 @@
 
 <c:if test="${not empty viewFichierBAS.customValues['fileSearchPhase']}">
     <div class="p-2 border-bottom">
-        <strong><spring:message code="${viewFichierBAS.customValues['fileSearchPhase']}"/> OK</strong>
+        <strong><spring:message code="${viewFichierBAS.customValues['fileSearchPhase']}"/></strong>
+        <c:choose>
+            <c:when test="${not empty viewFichierBAS.customValues['fileSearchEtat']}">
+                — <spring:message code="${viewFichierBAS.customValues['fileSearchEtat']}"/>
+            </c:when>
+            <c:otherwise>
+                — <spring:message code="managementSandbox.search.etat.ok"/>
+            </c:otherwise>
+        </c:choose>
         — <spring:message code="managementSandbox.search.context"/>
         <c:out value="${viewFichierBAS.customValues['fileSearchPattern']}"/>
         <button type="submit" class="btn btn-secondary btn-sm ml-2"

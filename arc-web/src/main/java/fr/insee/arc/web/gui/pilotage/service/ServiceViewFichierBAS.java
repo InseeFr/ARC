@@ -65,7 +65,7 @@ public class ServiceViewFichierBAS extends InteractorPilotage {
 		TraitementEtat etat;
 		if (PilotageFileSearch.isActive(views.getViewFichierBAS())) {
 			phase = PilotageFileSearch.getPhase(views.getViewFichierBAS());
-			etat = TraitementEtat.OK;
+			etat = PilotageFileSearch.getEtat(views.getViewFichierBAS());
 		} else if (!selectionColonne.isEmpty() && !selectionLigne.isEmpty()) {
 			phase = TraitementPhase.valueOf(selectionColonne.get(0).split("_")[0].toUpperCase());
 			etat = TraitementEtat.valueOf(selectionColonne.get(0).split("_")[1].toUpperCase());
@@ -134,11 +134,20 @@ public class ServiceViewFichierBAS extends InteractorPilotage {
 		ArcPreparedStatementBuilder updateToDelete = dao.queryUpdateToDelete(views.getViewFichierBAS(), code);
 		String message;
 		try {
+			// comptage avant action pour la boite de dialogue
+			int count = dao.countFilesForAction(views.getViewFichierBAS());
+			views.getViewPilotageBAS().setMessage("managementSandbox.search.actions.count");
+			views.getViewPilotageBAS().setMessageArgs(count);
+
 			dao.execQueryUpdateToDelete(updateToDelete);
 			message = messageOk;
+			// Effacer le message de comptage pour ne pas le réafficher
+			views.getViewPilotageBAS().setMessage(null);
 		} catch (ArcException e) {
 			loggerDispatcher.error("Error in PilotageBASAction.restore", LOGGER);
 			message = "managementSandbox.batch.replay.error";
+			// Effacer le message de comptage en cas d'erreur
+			views.getViewPilotageBAS().setMessage(null);
 		}
 
 		// Attention bout de code spécifique aux bacs à sable, ne surtout pas copier en
@@ -150,7 +159,8 @@ public class ServiceViewFichierBAS extends InteractorPilotage {
 					.getService(TraitementPhase.RECEPTION, getBacASable(), TraitementPhase.RECEPTION.getNbLigneATraiter(), null)
 					.invokeApi();
 		}
-		this.views.getViewPilotageBAS().setMessage(message);
+		// Résultat sur viewFichierBAS pour la 2e boîte
+		this.views.getViewFichierBAS().setMessage(message);
 
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
@@ -202,11 +212,20 @@ public class ServiceViewFichierBAS extends InteractorPilotage {
 		ArcPreparedStatementBuilder updateToDelete = dao.queryUpdateToDelete(views.getViewFichierBAS(), "1");
 		String message;
 		try {
+			// comptage avant action pour la boite de dialogue
+			int count = dao.countFilesForAction(views.getViewFichierBAS());
+			views.getViewPilotageBAS().setMessage("managementSandbox.search.actions.count");
+			views.getViewPilotageBAS().setMessageArgs(count);
+
 			dao.execQueryUpdateToDelete(updateToDelete);
 			message = "managementSandbox.batch.delete.ok";
+			// Effacer le message de comptage pour ne pas le réafficher
+			views.getViewPilotageBAS().setMessage(null);
 		} catch (ArcException e) {
 			loggerDispatcher.error("Error in PilotageBASAction.toDeleteBAS", LOGGER);
 			message = "managementSandbox.batch.delete.error";
+			// Effacer le message de comptage en cas d'erreur
+			views.getViewPilotageBAS().setMessage(null);
 		}
 
 		// Attention bout de code spécifique aux bacs à sable, ne surtout pas copier en
@@ -222,7 +241,8 @@ public class ServiceViewFichierBAS extends InteractorPilotage {
 			}
 		}
 
-		this.views.getViewPilotageBAS().setMessage(message);
+		// Résultat sur viewFichierBAS pour la 2e boîte
+		this.views.getViewFichierBAS().setMessage(message);
 
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
@@ -237,14 +257,27 @@ public class ServiceViewFichierBAS extends InteractorPilotage {
 
 		loggerDispatcher.trace("*** Suppression du marquage de fichier à supprimer ***", LOGGER);
 		ArcPreparedStatementBuilder updateToDelete = dao.queryUpdateToDelete(views.getViewFichierBAS(), null);
+		String message = "managementSandbox.batch.delete.ok";
 		try {
+			// comptage avant action pour la boite de dialogue
+			int count = dao.countFilesForAction(views.getViewFichierBAS());
+			views.getViewPilotageBAS().setMessage("managementSandbox.search.actions.count");
+			views.getViewPilotageBAS().setMessageArgs(count);
+
 			dao.execQueryUpdateToDelete(updateToDelete);
+			// Effacer le message de comptage pour ne pas le réafficher
+			views.getViewPilotageBAS().setMessage(null);
 		} catch (ArcException e) {
 			loggerDispatcher
 					.info("Problème lors de la mise à jour de to_delete dans la table pilotage_fichier, requete :  "
 							+ updateToDelete, LOGGER);
 			loggerDispatcher.error("Error in PilotageBASAction.undoActionBAS", LOGGER);
+			message = "managementSandbox.batch.delete.error";
+			// Effacer le message de comptage en cas d'erreur
+			views.getViewPilotageBAS().setMessage(null);
 		}
+		// Résultat sur viewFichierBAS pour la 2e boîte
+		this.views.getViewFichierBAS().setMessage(message);
 		return generateDisplay(model, RESULT_SUCCESS);
 	}
 
