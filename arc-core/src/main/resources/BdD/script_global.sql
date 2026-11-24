@@ -106,6 +106,12 @@ DELETE FROM arc.parameter where key='ApiFiltrageService.MAX_PARALLEL_WORKERS';
 INSERT INTO arc.parameter VALUES ('ApiService.MAX_PARALLEL_WORKERS','4');
 UPDATE arc.parameter set description='parameter.parallel.numberOfThread' where key='ApiService.MAX_PARALLEL_WORKERS';
 
+-- accessibility parameters
+INSERT INTO arc.parameter (key,val,description) VALUES ('ACCESSIBILITY_MAIL_MAINTENANCE',NULL, 'Functional mailbox of the ARC maintenance team');
+INSERT INTO arc.parameter (key,val,description) VALUES ('ACCESSIBILITY_MAIL_REFERENT',NULL, 'Functional mailbox of Digital Accessibility Network');
+INSERT INTO arc.parameter (key,val,description) VALUES ('ACCESSIBILITY_STRATEGY_URL', 'https://www.insee.fr/fr/information/7621795', 'Url to the accessibility plan');
+INSERT INTO arc.parameter (key,val,description) VALUES ('ACCESSIBILITY_STRATEGY_PERIOD','2026-2028', 'Validity period of the accessibility plan');
+
 -- patch 23/06/2023
 -- remove deprecated parameters
 DELETE FROM arc.parameter WHERE key='LanceurARC.MAX_PARALLEL_RUNNER_PER_PHASE';

@@ -36,9 +36,11 @@ public class RunImport {
 		JSONObject clientJsonInputStep1 = new JSONObject(
 				"{\"familleNorme\":\"DSN\",\"periodicite\":\"M\",\"service\":\"arcClient\",\"validiteSup\":\"2500-03-01\",\"format\":\"csv_gzip\",\"reprise\":false,\"client\":\"ARTEMIS\",\"environnement\":\"arc_bas1\"}");
 
+		System.out.println("§§ invokeStep1 request : " + clientJsonInputStep1);
 		// response token will be used by client to invoke step2
 		String arcResponseStep1 = ExecuteStep.executeImportStep1(clientJsonInputStep1);
-
+		System.out.println("§§ invokeStep1 response : "+ arcResponseStep1);
+		
 		testCreateAndDropWsPending();
 		testCreateTableNmcl();
 		testCreateTableVarMetier();
@@ -81,6 +83,10 @@ public class RunImport {
 
 		do {
 			String arcResponseStep2 = invokeStep2(arcResponseStep1);
+
+			System.out.println("§§ invokeStep2 response : " +  arcResponseStep2);
+			System.out.println("§§ invokeStep2 response isBlank() ? : " + arcResponseStep2.isBlank());
+			
 			// arcResponse2 return table,ame and DDL of the table
 			// tablename is the first token from the arcResponse2
 			String tableBucket = ManipString.substringBeforeFirst(arcResponseStep2, " ");
@@ -92,6 +98,10 @@ public class RunImport {
 			}
 
 			ByteArrayOutputStream arcResponseStep3 = invokeStep3(tableBucket);
+			
+			System.out.println("§§ invokeStep3 response : file stream content");
+
+			
 			String outputStep3 = "";
 
 			try (InputStream is = new ByteArrayInputStream(arcResponseStep3.toByteArray());
@@ -107,7 +117,7 @@ public class RunImport {
 			}
 
 			first = false;
-
+			
 		} while (!sortie);
 
 	}
@@ -117,6 +127,9 @@ public class RunImport {
 		JSONObject clientJsonInputStep3 = new JSONObject(
 				"{\"familleNorme\":\"DSN\",\"periodicite\":\"M\",\"service\":\"tableName\",\"validiteSup\":\"2500-03-01\",\"format\":\"csv_gzip\",\"reprise\":false,\"client\":\""
 						+ tableResponseStep2 + "\",\"environnement\":\"arc_bas1\",\"type\":\"jsonwsp/request\"}");
+		
+		System.out.println("§§ invokeStep3 request : " +  clientJsonInputStep3);
+		
 		return ExecuteStep.executeImportStep3(clientJsonInputStep3);
 	}
 
@@ -127,6 +140,8 @@ public class RunImport {
 				"{\"familleNorme\":\"DSN\",\"periodicite\":\"M\",\"service\":\"tableName\",\"validiteSup\":\"2500-03-01\",\"format\":\"csv_gzip\",\"reprise\":false,\"client\":\""
 						+ arcResponseStep1 + "\",\"environnement\":\"arc_bas1\",\"type\":\"jsonwsp/request\"}");
 
+		System.out.println("§§ invokeStep3 request : " +  clientJsonInputStep2);
+	
 		return ExecuteStep.executeImportStep2(clientJsonInputStep2);
 	}
 

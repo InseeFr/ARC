@@ -22,7 +22,7 @@
 		<project.jakarta.version>6.1.0-M1</project.jakarta.version>
 		<project.maven.compiler.version>3.14.0</project.maven.compiler.version>
 		<project.maven.jar.plugin>3.3.0</project.maven.jar.plugin>
-		<project.org.json.version>20231013</project.org.json.version>
+		<project.org.json.version>20260719</project.org.json.version>
 		<project.commons.compress.version>1.26.0</project.commons.compress.version>
 		<project.commons.fileupload.version>1.6.0</project.commons.fileupload.version>
 		<project.hamcrest.version>3.0</project.hamcrest.version>

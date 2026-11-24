@@ -36,7 +36,7 @@ public class BDParameters {
 		this.targetDatabase = targetDatabase;
 	}
 
-	private String getString(Connection c, String key) {
+	public String getString(Connection c, String key) {
 		String r = null;
 		try {
 			r = UtilitaireDao.get(targetDatabase.getIndex()).getString(c, parameterQuery(key));
