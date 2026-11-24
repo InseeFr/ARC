@@ -4,6 +4,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import fr.insee.arc.utils.exception.ArcException;
@@ -14,8 +15,8 @@ public class ControllerFichierBAS extends ServiceViewFichierBAS {
 
 	@PostMapping("/secure/countPilotageFilesForAction")
 	@ResponseBody
-	public String countPilotageFilesForAction() throws ArcException {
-		return Long.toString(dao.countFilesForAction(views.getViewFichierBAS()));
+	public String countPilotageFilesForAction(@RequestParam(required = false) String pilotageFileAction) throws ArcException {
+		return Long.toString(dao.countFilesForAction(views.getViewFichierBAS(), pilotageFileAction));
 	}
 
 	@RequestMapping("/secure/selectFichierBAS")

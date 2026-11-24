@@ -279,6 +279,25 @@ class PilotageFileSearchTest {
 	}
 
 	@Test
+	void countsArchivesForArchiveActionAndFilesForFileActions() throws Exception {
+		// 3 fichiers dans une archive, 2 fichiers dans une autre archive
+		insert(TraitementPhase.MAPPING, "file1.xml", "container1", "archiveA.zip", "2026-01-01", "{OK}");
+		insert(TraitementPhase.MAPPING, "file2.xml", "container1", "archiveA.zip", "2026-01-01", "{OK}");
+		insert(TraitementPhase.MAPPING, "file3.xml", "container1", "archiveA.zip", "2026-01-01", "{OK}");
+		insert(TraitementPhase.MAPPING, "file4.xml", "container2", "archiveB.zip", "2026-01-01", "{OK}");
+		insert(TraitementPhase.MAPPING, "file5.xml", "container2", "archiveB.zip", "2026-01-01", "{OK}");
+		search("MAPPING", "%");
+		// Pour une action fichier (rejouer/supprimer), on compte les fichiers (couples container+id_source)
+		assertEquals(5, dao.countFilesForAction(files, "toRestoreBAS"));
+		assertEquals(5, dao.countFilesForAction(files, "toDeleteBAS"));
+		assertEquals(5, dao.countFilesForAction(files, "undoActionBAS"));
+		// Pour l'action archive (rejouer archives), on compte les archives (containers distincts)
+		assertEquals(2, dao.countFilesForAction(files, "toRestoreArchiveBAS"));
+		// La surcharge sans action compte par défaut les fichiers
+		assertEquals(5, dao.countFilesForAction(files));
+	}
+
+	@Test
 	void databaseDownloadUsesSearchAndDetailFiltersWithoutADateSelection() throws Exception {
 		insert(TraitementPhase.MAPPING, "FIP6_a.xml", "a", "archive.zip", "2026-01-01", "{OK}");
 		insert(TraitementPhase.MAPPING, "FIP6_b.xml", "b", "archive.zip", "2026-02-01", "{OK}");

@@ -256,16 +256,26 @@ public class PilotageDao extends VObjectHelperDao {
 	}
 
 	/**
-	 * Compte les couples conteneur/fichier que l'action marquerait.
+	 * Compte les couples conteneur/fichier, ou les conteneurs seuls pour le rejeu d'archives,
+	 * que l'action marquerait.
+	 * Pour l'action "toRestoreArchiveBAS" (rejeu d'archives), on compte les archives (distinct container).
+	 * Pour les autres actions, on compte les fichiers (distinct container, id_source).
 	 */
-	public long countFilesForAction(VObject viewFichierBAS) throws ArcException {
+	public long countFilesForAction(VObject viewFichierBAS, String pilotageFileAction) throws ArcException {
 		if (viewFichierBAS.getMainQuery() == null && !PilotageFileSearch.isActive(viewFichierBAS)) {
 			return 0;
 		}
+		// Pour le rejeu d'archives, on compte les archives (containers) et non les fichiers
+		boolean isArchiveAction = "toRestoreArchiveBAS".equals(pilotageFileAction);
+		String columns = isArchiveAction ? "distinct container" : "distinct container, id_source";
 		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder("SELECT count(*) FROM (");
-		query.append(requestSelectToMark(viewFichierBAS, viewFichierBAS.mapContentSelected()));
+		query.append(requestSelectForAction(viewFichierBAS, viewFichierBAS.mapContentSelected(), columns));
 		query.append(") selected_files");
 		return Long.parseLong(UtilitaireDao.get(0).getString(vObjectService.getConnection(), query));
+	}
+
+	public long countFilesForAction(VObject viewFichierBAS) throws ArcException {
+		return countFilesForAction(viewFichierBAS, null);
 	}
 
 

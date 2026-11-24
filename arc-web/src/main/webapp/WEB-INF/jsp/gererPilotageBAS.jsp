@@ -19,6 +19,8 @@ method="post"
 data-file-action-confirm="<spring:message code='managementSandbox.search.actions.count' arguments='__COUNT__' htmlEscape='true'/>"
 data-file-action-empty="<spring:message code='managementSandbox.search.actions.empty' htmlEscape='true'/>"
 data-file-action-count-error="<spring:message code='managementSandbox.search.actions.count.error' htmlEscape='true'/>"
+data-archive-action-confirm="<spring:message code='managementSandbox.search.actions.count.archive' arguments='__COUNT__' htmlEscape='true'/>"
+data-archive-action-empty="<spring:message code='managementSandbox.search.actions.empty.archive' htmlEscape='true'/>"
 accept-charset="UTF-8">
 
 <input type="hidden" id="fileSearchPattern" name="fileSearchPattern" />

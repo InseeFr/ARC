@@ -55,7 +55,7 @@ $(document).on('click', '[data-pilotage-file-action]', function(event) {
 	var form = button.closest('form');
 	var action = button.attr('data-pilotage-file-action');
 	var scope = button.attr('scope');
-	var requestData = form.serialize2() + '&scope=' + splitAndEval(scope);
+	var requestData = form.serialize2() + '&scope=' + splitAndEval(scope) + '&pilotageFileAction=' + encodeURIComponent(action);
 	var hourglass = $('<div id="hourglass"></div>').appendTo('body');
 
 	$.ajax({
@@ -75,10 +75,13 @@ $(document).on('click', '[data-pilotage-file-action]', function(event) {
 			return;
 		}
 		if (count === '0') {
-			window.alert(form.attr('data-file-action-empty'));
+			var emptyMessage = action === 'toRestoreArchiveBAS' ? form.attr('data-archive-action-empty') : form.attr('data-file-action-empty');
+			window.alert(emptyMessage || form.attr('data-file-action-empty'));
 			return;
 		}
-		var message = form.attr('data-file-action-confirm').replace('__COUNT__', count);
+		var isArchiveAction = action === 'toRestoreArchiveBAS';
+		var message = (isArchiveAction ? form.attr('data-archive-action-confirm') : form.attr('data-file-action-confirm'))
+			.replace('__COUNT__', count);
 		if (window.confirm(message)) {
 			form.attr({action: action, scope: scope});
 			ajaxConfigurationCallNoMultipart(event, form, requestData);
