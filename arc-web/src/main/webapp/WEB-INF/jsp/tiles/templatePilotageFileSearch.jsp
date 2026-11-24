@@ -2,6 +2,8 @@
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <%@taglib prefix="c" uri="jakarta.tags.core" %>
 
+<c:set var="fileSearchDisabled" value="${empty viewFichierBAS.customValues['fileSearchPattern'] or empty viewFichierBAS.customValues['fileSearchPhase'] or empty viewFichierBAS.customValues['fileSearchEtat']}" />
+
 <div class="pilotage-file-search border-top pt-2 mt-2">
     <div class="font-weight-bold mb-2"><spring:message code="managementSandbox.search.label"/></div>
     <div class="d-flex align-items-center flex-wrap" style="gap: 8px;">

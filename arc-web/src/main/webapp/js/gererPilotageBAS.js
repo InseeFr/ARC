@@ -47,3 +47,45 @@ function preparePilotageFileSearch(button) {
 $(document).ready(pilotageReady);
 $(document).on('readyAgain', pilotageReady);
 
+$(document).on('click', '[data-pilotage-file-action]', function(event) {
+	if ($('#hourglass').length) {
+		return;
+	}
+	var button = $(this);
+	var form = button.closest('form');
+	var action = button.attr('data-pilotage-file-action');
+	var scope = button.attr('scope');
+	var requestData = form.serialize2() + '&scope=' + splitAndEval(scope);
+	var hourglass = $('<div id="hourglass"></div>').appendTo('body');
+
+	$.ajax({
+		url: 'countPilotageFilesForAction',
+		type: 'POST',
+		data: requestData,
+		dataType: 'text',
+		beforeSend: function(xhr) {
+			if ($("meta[name='_csrf']").length) {
+				xhr.setRequestHeader($("meta[name='_csrf_header']").attr('content'), $("meta[name='_csrf']").attr('content'));
+			}
+		}
+	}).done(function(count) {
+		hourglass.remove();
+		if (!/^\d+$/.test(count)) {
+			window.alert(form.attr('data-file-action-count-error'));
+			return;
+		}
+		if (count === '0') {
+			window.alert(form.attr('data-file-action-empty'));
+			return;
+		}
+		var message = form.attr('data-file-action-confirm').replace('__COUNT__', count);
+		if (window.confirm(message)) {
+			form.attr({action: action, scope: scope});
+			ajaxConfigurationCallNoMultipart(event, form, requestData);
+		}
+	}).fail(function() {
+		hourglass.remove();
+		window.alert(form.attr('data-file-action-count-error'));
+	});
+});
+

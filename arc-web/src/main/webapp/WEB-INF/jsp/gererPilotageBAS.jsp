@@ -16,6 +16,9 @@
 
 <form spellcheck="false" id="selectPilotageBAS" action="selectPilotageBAS.action"
 method="post"
+data-file-action-confirm="<spring:message code='managementSandbox.search.actions.count' arguments='__COUNT__' htmlEscape='true'/>"
+data-file-action-empty="<spring:message code='managementSandbox.search.actions.empty' htmlEscape='true'/>"
+data-file-action-count-error="<spring:message code='managementSandbox.search.actions.count.error' htmlEscape='true'/>"
 accept-charset="UTF-8">
 
 <input type="hidden" id="fileSearchPattern" name="fileSearchPattern" />
@@ -241,22 +244,22 @@ doAction="downloadFichierBAS" ajax="false" />
 id="viewFichierBAS.downloadEnveloppe"
 value="<spring:message code="gui.button.downloadEnveloppe"/>" doAction="downloadEnveloppeBAS"
 ajax="false" />
-<input class="btn btn-primary btn-sm" type="submit"
+<input class="btn btn-primary btn-sm" type="button"
 id="viewFichierBAS.toDelete" value="<spring:message code="gui.button.deleteFiles"/>"
 scope="viewPilotageBAS;viewRapportBAS;viewFichierBAS;-viewArchiveBAS;viewEntrepotBAS;"
-doAction="toDeleteBAS" />
-<input class="btn btn-primary btn-sm" type="submit"
+data-pilotage-file-action="toDeleteBAS" />
+<input class="btn btn-primary btn-sm" type="button"
 id="viewFichierBAS.toRestore" value="<spring:message code="gui.button.replayFiles"/>"
 scope="viewPilotageBAS;viewRapportBAS;viewFichierBAS;-viewArchiveBAS;viewEntrepotBAS;"
-doAction="toRestoreBAS" />
-<input class="btn btn-primary btn-sm" type="submit"
+data-pilotage-file-action="toRestoreBAS" />
+<input class="btn btn-primary btn-sm" type="button"
 id="viewFichierBAS.toRestoreArchive" value="<spring:message code="gui.button.replayArchives"/>"
 scope="viewPilotageBAS;viewRapportBAS;viewFichierBAS;-viewArchiveBAS;viewEntrepotBAS;"
-doAction="toRestoreArchiveBAS" />
-<input class="btn btn-primary btn-sm" type="submit"
+data-pilotage-file-action="toRestoreArchiveBAS" />
+<input class="btn btn-primary btn-sm" type="button"
 id="viewFichierBAS.undoAction" value="<spring:message code="gui.button.cancelTodo"/>"
 scope="viewPilotageBAS;viewRapportBAS;viewFichierBAS;-viewArchiveBAS;viewEntrepotBAS;"
-doAction="undoActionBAS" />
+data-pilotage-file-action="undoActionBAS" />
 </c:param>
 </c:import>
 </div>

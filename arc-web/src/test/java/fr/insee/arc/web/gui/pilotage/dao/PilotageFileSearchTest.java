@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
 
 import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
 import fr.insee.arc.core.dataobjects.DataObjectService;
+import fr.insee.arc.core.model.TraitementEtat;
 import fr.insee.arc.core.model.TraitementPhase;
 import fr.insee.arc.utils.dao.UtilitaireDao;
 import fr.insee.arc.utils.structure.GenericBean;
@@ -81,28 +82,26 @@ class PilotageFileSearchTest {
 	}
 
 	@Test
-	void searchesEveryOkPhaseAcrossDatesAndOriginalArchives() throws Exception {
+	void searchesEveryPhaseAndStatusAcrossDatesAndOriginalArchives() throws Exception {
 		for (TraitementPhase phase : TraitementPhase.getListPhaseReportedInBas()) {
 			insert(phase, phase + "_FIP6_a.xml", "first", "original.zip", "2026-01-01", "{OK}");
 			insert(phase, phase + "_fip6_b.xml", "second", "FIP6.zip", "2026-10-27", "{OK}");
 			insert(phase, phase + "_other.xml", "renamed", "FIP6-original.zip", "2026-10-27", "{OK}");
-			insert(phase, phase + "_FIP6_ko.xml", "ko", "original.zip", "2026-10-27", "{KO}");
+			insert(phase, phase + "_error.xml", "ko", "FIP6.zip", "2026-10-27", "{KO}");
 			insert(phase, phase + "_FIP6_mixed.xml", "mixed", "original.zip", "2026-10-27", "{OK,KO}");
 		}
-		// recherche OK doit inclure {OK} et {OK,KO} (filtre contient &&)
 		for (TraitementPhase phase : TraitementPhase.getListPhaseReportedInBas()) {
 			search(phase.toString(), "OK", "%FIP6%");
-			// FIP6_a.xml, fip6_b.xml, FIP6_mixed.xml = 3 fichiers (OK et OK,KO)
-			assertEquals(3, files.getContent().size(), phase.toString());
-			assertEquals(List.of(phase.toString(), phase.toString(), phase.toString()),
-					files.mapContent().get("phase_traitement"));
-			assertEquals(3, rows(files.getMainQuery()).get("id_source").size());
-		}
-		// recherche KO doit inclure {KO} et {OK,KO}
-		for (TraitementPhase phase : TraitementPhase.getListPhaseReportedInBas()) {
+			List<String> expectedOk = List.of(phase + "_FIP6_a.xml", phase + "_FIP6_mixed.xml",
+					phase + "_fip6_b.xml", phase + "_other.xml");
+			assertEquals(expectedOk, files.mapContent().get("id_source").stream().sorted().toList());
+			assertEquals(expectedOk, rows(files.getMainQuery()).get("id_source").stream().sorted().toList());
+			assertEquals(4, dao.countFilesForAction(files));
+
 			search(phase.toString(), "KO", "%FIP6%");
-			// FIP6_ko.xml, FIP6_mixed.xml = 2 fichiers (KO et OK,KO)
-			assertEquals(2, files.getContent().size(), phase.toString());
+			assertEquals(List.of(phase + "_FIP6_mixed.xml", phase + "_error.xml"),
+					files.mapContent().get("id_source").stream().sorted().toList());
+			assertEquals(2, dao.countFilesForAction(files));
 		}
 	}
 
@@ -112,8 +111,10 @@ class PilotageFileSearchTest {
 			insert(TraitementPhase.MAPPING, "LIMIT_" + i + ".xml", "archive",
 					"original.zip", "2026-01-01", "{OK}");
 		}
-		search("MAPPING", "LIMIT_");
+		search("MAPPING", "LIMIT_%");
 		assertEquals(100, rows(files.getMainQuery()).get("id_source").size());
+		assertEquals(120, dao.countFilesForAction(files));
+		assertEquals(0, markedCount("R"));
 		for (String code : List.of("R", "1", "RA")) {
 			UtilitaireDao.get(0).executeRequest(connection, dao.queryUpdateToDelete(files, code));
 			assertEquals(120, markedCount(code));
@@ -133,6 +134,7 @@ class PilotageFileSearchTest {
 		assertNotNull(hidden);
 		files.setFilterFields(new ArrayList<>(List.of("", "%" + hidden)));
 		refresh();
+		assertEquals(1, dao.countFilesForAction(files));
 		UtilitaireDao.get(0).executeRequest(connection, dao.queryUpdateToDelete(files, "R"));
 		assertEquals(1, markedCount("R"));
 		assertEquals(hidden, rows(new ArcPreparedStatementBuilder(
@@ -146,7 +148,7 @@ class PilotageFileSearchTest {
 					"SEARCH_" + i + ".zip", "2026-01-01", "{OK}");
 		}
 		insert(TraitementPhase.MAPPING, "outside.xml", "outside", "unrelated.zip", "2026-01-01", "{OK}");
-		search("MAPPING", "SEARCH_");
+		search("MAPPING", "SEARCH_%");
 		assertEquals(100, rows(files.getMainQuery()).get("id_source").size());
 		try (var statement = connection.createStatement()) {
 			statement.execute("CREATE TEMP TABLE mapping_complete_ok AS SELECT id_source FROM file_search_test.pilotage_fichier");
@@ -174,28 +176,35 @@ class PilotageFileSearchTest {
 	@Test
 	void filteredActionMarksAllPhasesOfTheMatchingFile() throws Exception {
 		insert(TraitementPhase.MAPPING, "MATCH_a.xml", "first", "first.zip", "2026-01-01", "{OK}");
+		insert(TraitementPhase.MAPPING, "MATCH_a.xml", "first", "first.zip", "2026-01-01", "{OK,KO}");
 		insert(TraitementPhase.CHARGEMENT, "MATCH_a.xml", "first", "first.zip", "2026-01-01", "{OK}");
 		insert(TraitementPhase.MAPPING, "other.xml", "first", "first.zip", "2026-01-01", "{KO}");
 		insert(TraitementPhase.MAPPING, "MATCH_b.xml", "second", "second.zip", "2026-01-02", "{OK}");
-		search("MAPPING", "MATCH_");
+		search("MAPPING", "MATCH_%");
 		files.setFilterFields(new ArrayList<>(List.of("", "%_a.xml")));
 		refresh();
+		assertEquals(1, dao.countFilesForAction(files)); // One file, several pilotage rows.
 		UtilitaireDao.get(0).executeRequest(connection, dao.queryUpdateToDelete(files, "R"));
-		assertEquals(2, markedCount("R")); // One file, two phase rows.
+		assertEquals(3, markedCount("R"));
 		PilotageFileSearch.clear(files);
 	}
 
 	@Test
-	void acceptsPlainTextWildcardsAndBoundApostrophes() throws Exception {
+	void matchesFullNamesWithCaseAndAcceptsExplicitWildcardsAndApostrophes() throws Exception {
 		insert(TraitementPhase.MAPPING, "FIP6_a.xml", "a", "archive.zip", "2026-01-01", "{OK}");
 		insert(TraitementPhase.MAPPING, "l'archive_FIP7.xml", "b", "archive.zip", "2026-02-01", "{OK}");
-		search("MAPPING", "fip6");
+		search("MAPPING", "fip6%.xml");
 		assertEquals(0, files.getContent().size());
 		search("MAPPING", "FIP6");
+		assertEquals(0, files.getContent().size());
+		assertEquals(0, dao.countFilesForAction(files));
+		search("MAPPING", "FIP6_a.xml");
 		assertEquals(List.of("FIP6_a.xml"), files.mapContent().get("id_source"));
+		search("MAPPING", "archive.zip");
+		assertEquals(2, files.getContent().size());
 		search("MAPPING", "%FIP_%.xml");
 		assertEquals(2, files.getContent().size());
-		search("MAPPING", "l'archive");
+		search("MAPPING", "l'archive%");
 		assertEquals(List.of("l'archive_FIP7.xml"), files.mapContent().get("id_source"));
 		search("MAPPING", "' OR true --");
 		assertEquals(0, files.getContent().size());
@@ -209,12 +218,13 @@ class PilotageFileSearchTest {
 					"archive", "original.zip", "2026-01-" + (i + 1), "{OK}");
 		}
 		insert(TraitementPhase.MAPPING, "unrelated.xml", "archive", "original.zip", "2026-01-01", "{OK}");
-		search("MAPPING", "PAGINATE");
+		search("MAPPING", "PAGINATE%");
 		assertEquals(10, files.getContent().size());
 		assertEquals(2, files.getNbPages());
 		files.setIdPage("2");
 		refresh();
 		assertEquals(2, files.getContent().size());
+		assertEquals(12, dao.countFilesForAction(files));
 		UtilitaireDao.get(0).executeRequest(connection, dao.queryUpdateToDelete(files, "R"));
 		assertEquals(12, markedCount("R"));
 
@@ -223,6 +233,7 @@ class PilotageFileSearchTest {
 		refresh();
 		assertEquals(List.of("PAGINATE_11.xml"), files.mapContent().get("id_source"));
 		files.setSelectedLines(new ArrayList<>(List.of(true)));
+		assertEquals(1, dao.countFilesForAction(files));
 		UtilitaireDao.get(0).executeRequest(connection, dao.queryUpdateToDelete(files, "1"));
 		assertEquals(1, markedCount("1"));
 		assertEquals(11, markedCount("R"));
@@ -232,10 +243,39 @@ class PilotageFileSearchTest {
 	void checkedFilesRestrictActionsWithoutSecondaryFilters() throws Exception {
 		insert(TraitementPhase.MAPPING, "FIP6_a.xml", "a", "archive.zip", "2026-01-01", "{OK}");
 		insert(TraitementPhase.MAPPING, "FIP6_b.xml", "b", "archive.zip", "2026-02-01", "{OK}");
-		search("MAPPING", "FIP6");
+		search("MAPPING", "FIP6%");
 		files.setSelectedLines(new ArrayList<>(List.of(true, false)));
+		assertEquals(1, dao.countFilesForAction(files));
 		UtilitaireDao.get(0).executeRequest(connection, dao.queryUpdateToDelete(files, "RA"));
 		assertEquals(1, markedCount("RA"));
+	}
+
+	@Test
+	void countsFilesForPilotageCellAndReportSelections() throws Exception {
+		insert(TraitementPhase.MAPPING, "first.xml", "archive", "original.zip", "2026-01-01", "{OK}");
+		insert(TraitementPhase.MAPPING, "second.xml", "archive", "original.zip", "2026-01-01", "{OK}");
+		insert(TraitementPhase.MAPPING, "another-date.xml", "archive", "original.zip", "2026-01-02", "{OK}");
+		try (var statement = connection.createStatement()) {
+			statement.execute("UPDATE file_search_test.pilotage_fichier SET rapport = 'report A' WHERE id_source = 'first.xml'");
+		}
+
+		ViewPilotageBAS pilotage = new ViewPilotageBAS();
+		ViewRapportBAS report = new ViewRapportBAS();
+		service.initialize(pilotage, new ArcPreparedStatementBuilder(
+				"SELECT '2026-01-01'::text AS date_entree, 2 AS mapping_ok"), null, Map.of());
+		pilotage.setSelectedLines(new ArrayList<>(List.of(true)));
+		pilotage.setSelectedColumns(new ArrayList<>(List.of(false, true)));
+		dao.initializeFichierBAS(files, pilotage, report);
+		assertEquals(2, dao.countFilesForAction(files));
+
+		pilotage.setSelectedLines(new ArrayList<>());
+		service.initialize(report, new ArcPreparedStatementBuilder(
+				"SELECT '2026-01-01'::text AS date_entree, 'MAPPING'::text AS phase_traitement,"
+						+ " 'OK'::text AS etat_traitement, 'report A'::text AS rapport"), null, Map.of());
+		report.setSelectedLines(new ArrayList<>(List.of(true)));
+		dao.initializeFichierBAS(files, pilotage, report);
+		assertEquals(1, dao.countFilesForAction(files));
+		assertEquals(0, markedCount("R"));
 	}
 
 	@Test
@@ -247,7 +287,7 @@ class PilotageFileSearchTest {
 			statement.execute("CREATE TEMP TABLE mapping_search_ok AS "
 					+ "SELECT id_source FROM file_search_test.pilotage_fichier");
 		}
-		search("MAPPING", "FIP6");
+		search("MAPPING", "FIP6%");
 		dao.downloadBdBAS(files, "unused", List.of("mapping_search_ok"), TraitementPhase.MAPPING);
 		assertEquals(2, rows(service.downloadQueries.get(0)).get("id_source").size());
 		files.setFilterFields(new ArrayList<>(List.of("", "%_b.xml")));
@@ -262,18 +302,19 @@ class PilotageFileSearchTest {
 	@Test
 	void newSearchResetsSelectionFiltersAndPageAndSurvivesSessionCopy() throws Exception {
 		insert(TraitementPhase.MAPPING, "FIP6_a.xml", "a", "archive.zip", "2026-01-01", "{OK}");
-		search("MAPPING", "FIP6");
+		search("MAPPING", "FIP6%");
 		files.setSelectedLines(new ArrayList<>(List.of(true)));
 		files.setFilterFields(new ArrayList<>(List.of("unwanted")));
 		files.setIdPage("8");
-		assertTrue(PilotageFileSearch.start(files, "MAPPING", "OK", "FIP6", "file_search_test"));
+		assertTrue(PilotageFileSearch.start(files, "MAPPING", "KO", "FIP6%", "file_search_test"));
 		assertTrue(files.mapContentSelected().isEmpty());
 		assertTrue(files.getFilterFields().isEmpty());
 		assertEquals("1", files.getIdPage());
 		refresh();
 		VObject restored = service.preInitialize(new ViewFichierBAS());
 		assertTrue(PilotageFileSearch.isActive(restored));
-		assertEquals("FIP6", PilotageFileSearch.getPattern(restored));
+		assertEquals("FIP6%", PilotageFileSearch.getPattern(restored));
+		assertEquals(TraitementEtat.KO, PilotageFileSearch.getEtat(restored));
 		assertFalse(PilotageFileSearch.clearIfEnvironmentChanged(restored, "file_search_test"));
 		assertTrue(PilotageFileSearch.clearIfEnvironmentChanged(restored, "another_environment"));
 		assertFalse(PilotageFileSearch.isActive(restored));

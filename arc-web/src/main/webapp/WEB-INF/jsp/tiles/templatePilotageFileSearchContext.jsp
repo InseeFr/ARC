@@ -6,8 +6,8 @@
     <div class="p-2 border-bottom">
         <strong><spring:message code="${viewFichierBAS.customValues['fileSearchPhase']}"/></strong>
         <c:choose>
-            <c:when test="${not empty viewFichierBAS.customValues['fileSearchEtat']}">
-                — <spring:message code="${viewFichierBAS.customValues['fileSearchEtat']}"/>
+            <c:when test="${viewFichierBAS.customValues['fileSearchEtat'] == 'KO'}">
+                — <spring:message code="managementSandbox.search.etat.ko"/>
             </c:when>
             <c:otherwise>
                 — <spring:message code="managementSandbox.search.etat.ok"/>

@@ -428,7 +428,7 @@ input[type='text']:focus {
 	word-break: break-word;
 }
 
-input[type='button'] {
+input[type='button']:not(.btn) {
 	position: relative;
 	height: 18px;
 	background-color: #CCDDFF;

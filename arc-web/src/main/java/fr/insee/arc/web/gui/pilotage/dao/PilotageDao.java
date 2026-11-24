@@ -256,20 +256,16 @@ public class PilotageDao extends VObjectHelperDao {
 	}
 
 	/**
-	 * Comptage du nombre de fichiers impactés par une action (marquage, rejouage, etc.)
-	 * sur le périmètre courant (recherche par nom OU sélection case/rapport + filtres + lignes cochées).
-	 * Utilisé pour afficher le comptage dans la boite de dailogue avant l'action.
+	 * Compte les couples conteneur/fichier que l'action marquerait.
 	 */
-	public int countFilesForAction(VObject viewFichierBAS) throws ArcException {
-		Map<String, List<String>> selection = viewFichierBAS.mapContentSelected();
-		ArcPreparedStatementBuilder querySelection = requestSelectForAction(viewFichierBAS, selection, "count(*) as nb");
-		GenericBean result = new GenericBean(UtilitaireDao.get(0).executeRequest(vObjectService.getConnection(), querySelection));
-		Map<String, List<String>> contentMap = result.mapContent();
-		List<String> nbList = contentMap.get("nb");
-		if (nbList == null || nbList.isEmpty()) {
+	public long countFilesForAction(VObject viewFichierBAS) throws ArcException {
+		if (viewFichierBAS.getMainQuery() == null && !PilotageFileSearch.isActive(viewFichierBAS)) {
 			return 0;
 		}
-		return Integer.parseInt(nbList.get(0));
+		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder("SELECT count(*) FROM (");
+		query.append(requestSelectToMark(viewFichierBAS, viewFichierBAS.mapContentSelected()));
+		query.append(") selected_files");
+		return Long.parseLong(UtilitaireDao.get(0).getString(vObjectService.getConnection(), query));
 	}
 
 
