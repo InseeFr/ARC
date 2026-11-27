@@ -1,6 +1,7 @@
 ﻿﻿<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" trimDirectiveWhitespaces="true"%>
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <%@taglib prefix="c" uri="jakarta.tags.core"%>
+<%@taglib prefix="fn" uri="jakarta.tags.functions"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html lang="${pageContext.response.locale}">
 <head>
@@ -15,7 +16,14 @@
 
 <form spellcheck="false" id="selectPilotageBAS" action="selectPilotageBAS.action"
 method="post"
+data-file-action-confirm="<spring:message code='managementSandbox.search.actions.count' arguments='__COUNT__' htmlEscape='true'/>"
+data-file-action-empty="<spring:message code='managementSandbox.search.actions.empty' htmlEscape='true'/>"
+data-file-action-count-error="<spring:message code='managementSandbox.search.actions.count.error' htmlEscape='true'/>"
+data-archive-action-confirm="<spring:message code='managementSandbox.search.actions.count.archive' arguments='__COUNT__' htmlEscape='true'/>"
+data-archive-action-empty="<spring:message code='managementSandbox.search.actions.empty.archive' htmlEscape='true'/>"
 accept-charset="UTF-8">
+
+<input type="hidden" id="fileSearchPattern" name="fileSearchPattern" />
 
 <c:import url="tiles/header.jsp">
 <c:param name="currentPage" value="envManagement" />
@@ -27,6 +35,7 @@ accept-charset="UTF-8">
 <div class="col-md-7">
 <div class="row">
 <c:set var="view" value="${viewPilotageBAS}" scope="request"/>
+<c:import url="tiles/templatePilotageFileSearch.jsp" var="fileSearchControls" />
 <c:import url="tiles/templateVObject.jsp">
 <c:param name="taille" value ="col-md" />
 <c:param name="btnSelect" value ="true" />
@@ -36,6 +45,8 @@ accept-charset="UTF-8">
 <c:param name="checkbox" value ="true" />
 <c:param name="checkboxVisible" value ="false" />
 <c:param name="extraScopeSelect" value ="viewRapportBAS;" />
+<%-- cas des | dans la chaine de caractère --%>
+<c:param name="otherButton" value="${fn:replace(fileSearchControls, '|', '&#124;')}" />
 <c:param name="extraScopeSee" value ="viewRapportBAS;viewFichierBAS;-viewArchiveBAS;viewEntrepotBAS;" />
 </c:import>
 </div>
@@ -235,22 +246,22 @@ doAction="downloadFichierBAS" ajax="false" />
 id="viewFichierBAS.downloadEnveloppe"
 value="<spring:message code="gui.button.downloadEnveloppe"/>" doAction="downloadEnveloppeBAS"
 ajax="false" />
-<input class="btn btn-primary btn-sm" type="submit"
+<input class="btn btn-primary btn-sm" type="button"
 id="viewFichierBAS.toDelete" value="<spring:message code="gui.button.deleteFiles"/>"
 scope="viewPilotageBAS;viewRapportBAS;viewFichierBAS;-viewArchiveBAS;viewEntrepotBAS;"
-doAction="toDeleteBAS" />
-<input class="btn btn-primary btn-sm" type="submit"
+data-pilotage-file-action="toDeleteBAS" />
+<input class="btn btn-primary btn-sm" type="button"
 id="viewFichierBAS.toRestore" value="<spring:message code="gui.button.replayFiles"/>"
 scope="viewPilotageBAS;viewRapportBAS;viewFichierBAS;-viewArchiveBAS;viewEntrepotBAS;"
-doAction="toRestoreBAS" />
-<input class="btn btn-primary btn-sm" type="submit"
+data-pilotage-file-action="toRestoreBAS" />
+<input class="btn btn-primary btn-sm" type="button"
 id="viewFichierBAS.toRestoreArchive" value="<spring:message code="gui.button.replayArchives"/>"
 scope="viewPilotageBAS;viewRapportBAS;viewFichierBAS;-viewArchiveBAS;viewEntrepotBAS;"
-doAction="toRestoreArchiveBAS" />
-<input class="btn btn-primary btn-sm" type="submit"
+data-pilotage-file-action="toRestoreArchiveBAS" />
+<input class="btn btn-primary btn-sm" type="button"
 id="viewFichierBAS.undoAction" value="<spring:message code="gui.button.cancelTodo"/>"
 scope="viewPilotageBAS;viewRapportBAS;viewFichierBAS;-viewArchiveBAS;viewEntrepotBAS;"
-doAction="undoActionBAS" />
+data-pilotage-file-action="undoActionBAS" />
 </c:param>
 </c:import>
 </div>

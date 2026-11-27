@@ -879,8 +879,10 @@ function ajaxConfigurationCallMultipart(e,$this)
 
 /**
  * prepare an ajax request without multipart inputs
+ * @param {string} [requestData] Pre-serialized form data, including scope.
+ * If omitted, the method serializes the current form and appends its scope.
  */
-function ajaxConfigurationCallNoMultipart(e,$this)
+function ajaxConfigurationCallNoMultipart(e,$this,requestData)
 {
 
 	$("body").append("<div id='hourglass'></div>");	
@@ -896,7 +898,7 @@ function ajaxConfigurationCallNoMultipart(e,$this)
 	        	xhr.setRequestHeader(header, token);
 	        }
 	    },
-		data: $this.serialize2()+"&scope="+splitAndEval($this.attr('scope')),
+		data: requestData ?? ($this.serialize2()+"&scope="+splitAndEval($this.attr('scope'))),
 		dataType: 'text',
 		success: function(xml) {
 			

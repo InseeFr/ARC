@@ -32,6 +32,63 @@ function pilotageReady() {
 
 }
 
+function preparePilotageFileSearch(button) {
+	var input = $(button).closest('.pilotage-file-search').find('.pilotage-search-input');
+	if (!input.val().trim()) {
+		input.trigger('focus');
+		return false;
+	}
+	$('#fileSearchPhase').attr('m', 'js');
+	$('#fileSearchEtat').attr('m', 'js');
+	$('#fileSearchPattern').val(input.val()).attr('m', 'js');
+	return true;
+}
+
 $(document).ready(pilotageReady);
 $(document).on('readyAgain', pilotageReady);
+
+$(document).on('click', '[data-pilotage-file-action]', function(event) {
+	if ($('#hourglass').length) {
+		return;
+	}
+	var button = $(this);
+	var form = button.closest('form');
+	var action = button.attr('data-pilotage-file-action');
+	var scope = button.attr('scope');
+	var requestData = form.serialize2() + '&scope=' + splitAndEval(scope) + '&pilotageFileAction=' + encodeURIComponent(action);
+	var hourglass = $('<div id="hourglass"></div>').appendTo('body');
+
+	$.ajax({
+		url: 'countPilotageFilesForAction',
+		type: 'POST',
+		data: requestData,
+		dataType: 'text',
+		beforeSend: function(xhr) {
+			if ($("meta[name='_csrf']").length) {
+				xhr.setRequestHeader($("meta[name='_csrf_header']").attr('content'), $("meta[name='_csrf']").attr('content'));
+			}
+		}
+	}).done(function(count) {
+		hourglass.remove();
+		if (!/^\d+$/.test(count)) {
+			window.alert(form.attr('data-file-action-count-error'));
+			return;
+		}
+		if (count === '0') {
+			var emptyMessage = action === 'toRestoreArchiveBAS' ? form.attr('data-archive-action-empty') : form.attr('data-file-action-empty');
+			window.alert(emptyMessage || form.attr('data-file-action-empty'));
+			return;
+		}
+		var isArchiveAction = action === 'toRestoreArchiveBAS';
+		var message = (isArchiveAction ? form.attr('data-archive-action-confirm') : form.attr('data-file-action-confirm'))
+			.replace('__COUNT__', count);
+		if (window.confirm(message)) {
+			form.attr({action: action, scope: scope});
+			ajaxConfigurationCallNoMultipart(event, form, requestData);
+		}
+	}).fail(function() {
+		hourglass.remove();
+		window.alert(form.attr('data-file-action-count-error'));
+	});
+});
 

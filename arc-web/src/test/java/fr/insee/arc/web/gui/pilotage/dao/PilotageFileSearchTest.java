@@ -1,0 +1,420 @@
+package fr.insee.arc.web.gui.pilotage.dao;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.io.File;
+import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import fr.insee.arc.core.dataobjects.ArcPreparedStatementBuilder;
+import fr.insee.arc.core.dataobjects.DataObjectService;
+import fr.insee.arc.core.model.TraitementEtat;
+import fr.insee.arc.core.model.TraitementPhase;
+import fr.insee.arc.utils.dao.UtilitaireDao;
+import fr.insee.arc.utils.structure.GenericBean;
+import fr.insee.arc.web.gui.all.util.Session;
+import fr.insee.arc.web.gui.all.util.VObject;
+import fr.insee.arc.web.gui.all.util.VObjectService;
+import fr.insee.arc.web.gui.pilotage.model.PilotageFileSearch;
+import fr.insee.arc.web.gui.pilotage.model.ViewFichierBAS;
+import fr.insee.arc.web.gui.pilotage.model.ViewPilotageBAS;
+import fr.insee.arc.web.gui.pilotage.model.ViewRapportBAS;
+import io.zonky.test.db.postgres.embedded.EmbeddedPostgres;
+import org.postgresql.PGConnection;
+
+class PilotageFileSearchTest {
+
+	private static EmbeddedPostgres database;
+	private static Connection connection;
+	private PilotageDao dao;
+	private CapturingVObjectService service;
+	private VObject files;
+
+	@BeforeAll
+	static void createDatabase() throws Exception {
+		database = EmbeddedPostgres.start();
+		connection = database.getPostgresDatabase().getConnection();
+		connection.unwrap(PGConnection.class).setPrepareThreshold(0);
+		try (var statement = connection.createStatement()) {
+			statement.execute("CREATE SCHEMA file_search_test");
+			statement.execute("CREATE TABLE file_search_test.pilotage_fichier ("
+					+ "container text, o_container text, id_source text, id_norme text, validite text, "
+					+ "periodicite text, phase_traitement text, etat_traitement text[], "
+					+ "date_traitement timestamp, date_entree text, rapport text, nb_enr integer, "
+					+ "to_delete text, client text[], date_client timestamp[], jointure text)");
+		}
+	}
+
+	@AfterAll
+	static void closeDatabase() throws Exception {
+		if (connection != null) {
+			connection.close();
+		}
+		if (database != null) {
+			database.close();
+		}
+	}
+
+	@BeforeEach
+	void prepareViews() throws Exception {
+		try (var statement = connection.createStatement()) {
+			statement.execute("TRUNCATE file_search_test.pilotage_fichier");
+		}
+		Session session = new Session();
+		session.setHttpSession(new HttpSessionTemplate());
+		service = new CapturingVObjectService(session);
+		service.setConnection(connection);
+		DataObjectService objects = new DataObjectService();
+		objects.setSandboxSchema("file_search_test");
+		dao = new PilotageDao();
+		dao.initialize(service, objects);
+		files = new ViewFichierBAS();
+	}
+
+	@Test
+	void searchesEveryPhaseAndStatusAcrossDatesAndOriginalArchives() throws Exception {
+		for (TraitementPhase phase : TraitementPhase.getListPhaseReportedInBas()) {
+			insert(phase, phase + "_FIP6_a.xml", "first", "original.zip", "2026-01-01", "{OK}");
+			insert(phase, phase + "_fip6_b.xml", "second", "FIP6.zip", "2026-10-27", "{OK}");
+			insert(phase, phase + "_other.xml", "renamed", "FIP6-original.zip", "2026-10-27", "{OK}");
+			insert(phase, phase + "_error.xml", "ko", "FIP6.zip", "2026-10-27", "{KO}");
+			insert(phase, phase + "_FIP6_mixed.xml", "mixed", "original.zip", "2026-10-27", "{OK,KO}");
+		}
+		for (TraitementPhase phase : TraitementPhase.getListPhaseReportedInBas()) {
+			search(phase.toString(), "OK", "%FIP6%");
+			List<String> expectedOk = List.of(phase + "_FIP6_a.xml", phase + "_FIP6_mixed.xml",
+					phase + "_fip6_b.xml", phase + "_other.xml");
+			assertEquals(expectedOk, files.mapContent().get("id_source").stream().sorted().toList());
+			assertEquals(expectedOk, rows(files.getMainQuery()).get("id_source").stream().sorted().toList());
+			assertEquals(4, dao.countFilesForAction(files));
+
+			search(phase.toString(), "KO", "%FIP6%");
+			assertEquals(List.of(phase + "_FIP6_mixed.xml", phase + "_error.xml"),
+					files.mapContent().get("id_source").stream().sorted().toList());
+			assertEquals(2, dao.countFilesForAction(files));
+		}
+	}
+
+	@Test
+	void sourceSearchLimitDoesNotRestrictActions() throws Exception {
+		for (int i = 0; i < 120; i++) {
+			insert(TraitementPhase.MAPPING, "LIMIT_" + i + ".xml", "archive",
+					"original.zip", "2026-01-01", "{OK}");
+		}
+		search("MAPPING", "LIMIT_%");
+		assertEquals(100, rows(files.getMainQuery()).get("id_source").size());
+		assertEquals(120, dao.countFilesForAction(files));
+		assertEquals(0, markedCount("R"));
+		for (String code : List.of("R", "1", "RA")) {
+			UtilitaireDao.get(0).executeRequest(connection, dao.queryUpdateToDelete(files, code));
+			assertEquals(120, markedCount(code));
+		}
+		UtilitaireDao.get(0).executeRequest(connection, dao.queryUpdateToDelete(files, null));
+		assertEquals(0, markedCount("RA"));
+		assertEquals(120, rows(new ArcPreparedStatementBuilder(
+				"SELECT id_source FROM file_search_test.pilotage_fichier WHERE to_delete IS NULL")).get("id_source").size());
+		List<String> sampled = rows(files.getMainQuery()).get("id_source");
+		String hidden = null;
+		for (int i = 0; i < 120; i++) {
+			if (!sampled.contains("LIMIT_" + i + ".xml")) {
+				hidden = "LIMIT_" + i + ".xml";
+				break;
+			}
+		}
+		assertNotNull(hidden);
+		files.setFilterFields(new ArrayList<>(List.of("", "%" + hidden)));
+		refresh();
+		assertEquals(1, dao.countFilesForAction(files));
+		UtilitaireDao.get(0).executeRequest(connection, dao.queryUpdateToDelete(files, "R"));
+		assertEquals(1, markedCount("R"));
+		assertEquals(hidden, rows(new ArcPreparedStatementBuilder(
+				"SELECT id_source FROM file_search_test.pilotage_fichier WHERE to_delete='R'")).get("id_source").get(0));
+	}
+
+	@Test
+	void archiveSearchDownloadsAllMatchesAndRestrictsCheckedFiles() throws Exception {
+		for (int i = 0; i < 120; i++) {
+			insert(TraitementPhase.MAPPING, "item_" + i + ".xml", "container_" + i,
+					"SEARCH_" + i + ".zip", "2026-01-01", "{OK}");
+		}
+		insert(TraitementPhase.MAPPING, "outside.xml", "outside", "unrelated.zip", "2026-01-01", "{OK}");
+		search("MAPPING", "SEARCH_%");
+		assertEquals(100, rows(files.getMainQuery()).get("id_source").size());
+		try (var statement = connection.createStatement()) {
+			statement.execute("CREATE TEMP TABLE mapping_complete_ok AS SELECT id_source FROM file_search_test.pilotage_fichier");
+		}
+		dao.downloadBdBAS(files, "unused", List.of("mapping_complete_ok"), TraitementPhase.MAPPING);
+		assertEquals(120, rows(service.downloadQueries.get(0)).get("id_source").size());
+		dao.downloadFichierBAS(files, "unused", "unused", "unused");
+		assertEquals(120, rows(service.downloadQueries.get(0)).get("id_source").size());
+		dao.downloadEnvelopeBAS(files, "unused", "unused", List.of());
+		assertEquals(120, rows(service.downloadQueries.get(0)).get("nom_fichier").size());
+		files.setSelectedLines(new ArrayList<>(List.of(true)));
+		dao.downloadBdBAS(files, "unused", List.of("mapping_complete_ok"), TraitementPhase.MAPPING);
+		assertEquals(1, rows(service.downloadQueries.get(0)).get("id_source").size());
+		dao.downloadFichierBAS(files, "unused", "unused", "unused");
+		assertEquals(1, rows(service.downloadQueries.get(0)).get("id_source").size());
+		dao.downloadEnvelopeBAS(files, "unused", "unused", List.of());
+		assertEquals(1, rows(service.downloadQueries.get(0)).get("nom_fichier").size());
+		UtilitaireDao.get(0).executeRequest(connection, dao.queryUpdateToDelete(files, "R"));
+		assertEquals(1, markedCount("R"));
+		assertEquals("outside.xml", rows(new ArcPreparedStatementBuilder(
+				"SELECT id_source FROM file_search_test.pilotage_fichier WHERE container='outside' AND to_delete IS NULL"))
+				.get("id_source").get(0));
+	}
+
+	@Test
+	void filteredActionMarksAllPhasesOfTheMatchingFile() throws Exception {
+		insert(TraitementPhase.MAPPING, "MATCH_a.xml", "first", "first.zip", "2026-01-01", "{OK}");
+		insert(TraitementPhase.MAPPING, "MATCH_a.xml", "first", "first.zip", "2026-01-01", "{OK,KO}");
+		insert(TraitementPhase.CHARGEMENT, "MATCH_a.xml", "first", "first.zip", "2026-01-01", "{OK}");
+		insert(TraitementPhase.MAPPING, "other.xml", "first", "first.zip", "2026-01-01", "{KO}");
+		insert(TraitementPhase.MAPPING, "MATCH_b.xml", "second", "second.zip", "2026-01-02", "{OK}");
+		search("MAPPING", "MATCH_%");
+		files.setFilterFields(new ArrayList<>(List.of("", "%_a.xml")));
+		refresh();
+		assertEquals(1, dao.countFilesForAction(files)); // One file, several pilotage rows.
+		UtilitaireDao.get(0).executeRequest(connection, dao.queryUpdateToDelete(files, "R"));
+		assertEquals(3, markedCount("R"));
+		PilotageFileSearch.clear(files);
+	}
+
+	@Test
+	void matchesFullNamesWithCaseAndAcceptsExplicitWildcardsAndApostrophes() throws Exception {
+		insert(TraitementPhase.MAPPING, "FIP6_a.xml", "a", "archive.zip", "2026-01-01", "{OK}");
+		insert(TraitementPhase.MAPPING, "l'archive_FIP7.xml", "b", "archive.zip", "2026-02-01", "{OK}");
+		search("MAPPING", "fip6%.xml");
+		assertEquals(0, files.getContent().size());
+		search("MAPPING", "FIP6");
+		assertEquals(0, files.getContent().size());
+		assertEquals(0, dao.countFilesForAction(files));
+		search("MAPPING", "FIP6_a.xml");
+		assertEquals(List.of("FIP6_a.xml"), files.mapContent().get("id_source"));
+		search("MAPPING", "archive.zip");
+		assertEquals(2, files.getContent().size());
+		search("MAPPING", "%FIP_%.xml");
+		assertEquals(2, files.getContent().size());
+		search("MAPPING", "l'archive%");
+		assertEquals(List.of("l'archive_FIP7.xml"), files.mapContent().get("id_source"));
+		search("MAPPING", "' OR true --");
+		assertEquals(0, files.getContent().size());
+		assertTrue(files.getIsInitialized());
+	}
+
+	@Test
+	void paginationFiltersAndActionsKeepTheFullSearchScope() throws Exception {
+		for (int i = 0; i < 12; i++) {
+			insert(TraitementPhase.MAPPING, String.format("PAGINATE_%02d.xml", i),
+					"archive", "original.zip", "2026-01-" + (i + 1), "{OK}");
+		}
+		insert(TraitementPhase.MAPPING, "unrelated.xml", "archive", "original.zip", "2026-01-01", "{OK}");
+		search("MAPPING", "PAGINATE%");
+		assertEquals(10, files.getContent().size());
+		assertEquals(2, files.getNbPages());
+		files.setIdPage("2");
+		refresh();
+		assertEquals(2, files.getContent().size());
+		assertEquals(12, dao.countFilesForAction(files));
+		UtilitaireDao.get(0).executeRequest(connection, dao.queryUpdateToDelete(files, "R"));
+		assertEquals(12, markedCount("R"));
+
+		files.setFilterFields(new ArrayList<>(List.of("", "%_11.xml")));
+		files.setIdPage("1");
+		refresh();
+		assertEquals(List.of("PAGINATE_11.xml"), files.mapContent().get("id_source"));
+		files.setSelectedLines(new ArrayList<>(List.of(true)));
+		assertEquals(1, dao.countFilesForAction(files));
+		UtilitaireDao.get(0).executeRequest(connection, dao.queryUpdateToDelete(files, "1"));
+		assertEquals(1, markedCount("1"));
+		assertEquals(11, markedCount("R"));
+	}
+
+	@Test
+	void checkedFilesRestrictActionsWithoutSecondaryFilters() throws Exception {
+		insert(TraitementPhase.MAPPING, "FIP6_a.xml", "a", "archive.zip", "2026-01-01", "{OK}");
+		insert(TraitementPhase.MAPPING, "FIP6_b.xml", "b", "archive.zip", "2026-02-01", "{OK}");
+		search("MAPPING", "FIP6%");
+		files.setSelectedLines(new ArrayList<>(List.of(true, false)));
+		assertEquals(1, dao.countFilesForAction(files));
+		UtilitaireDao.get(0).executeRequest(connection, dao.queryUpdateToDelete(files, "RA"));
+		assertEquals(1, markedCount("RA"));
+	}
+
+	@Test
+	void countsFilesForPilotageCellAndReportSelections() throws Exception {
+		insert(TraitementPhase.MAPPING, "first.xml", "archive", "original.zip", "2026-01-01", "{OK}");
+		insert(TraitementPhase.MAPPING, "second.xml", "archive", "original.zip", "2026-01-01", "{OK}");
+		insert(TraitementPhase.MAPPING, "another-date.xml", "archive", "original.zip", "2026-01-02", "{OK}");
+		try (var statement = connection.createStatement()) {
+			statement.execute("UPDATE file_search_test.pilotage_fichier SET rapport = 'report A' WHERE id_source = 'first.xml'");
+		}
+
+		ViewPilotageBAS pilotage = new ViewPilotageBAS();
+		ViewRapportBAS report = new ViewRapportBAS();
+		service.initialize(pilotage, new ArcPreparedStatementBuilder(
+				"SELECT '2026-01-01'::text AS date_entree, 2 AS mapping_ok"), null, Map.of());
+		pilotage.setSelectedLines(new ArrayList<>(List.of(true)));
+		pilotage.setSelectedColumns(new ArrayList<>(List.of(false, true)));
+		dao.initializeFichierBAS(files, pilotage, report);
+		assertEquals(2, dao.countFilesForAction(files));
+
+		pilotage.setSelectedLines(new ArrayList<>());
+		service.initialize(report, new ArcPreparedStatementBuilder(
+				"SELECT '2026-01-01'::text AS date_entree, 'MAPPING'::text AS phase_traitement,"
+						+ " 'OK'::text AS etat_traitement, 'report A'::text AS rapport"), null, Map.of());
+		report.setSelectedLines(new ArrayList<>(List.of(true)));
+		dao.initializeFichierBAS(files, pilotage, report);
+		assertEquals(1, dao.countFilesForAction(files));
+		assertEquals(0, markedCount("R"));
+	}
+
+	@Test
+	void countsArchivesForArchiveActionAndFilesForFileActions() throws Exception {
+		// 3 fichiers dans une archive, 2 fichiers dans une autre archive
+		insert(TraitementPhase.MAPPING, "file1.xml", "container1", "archiveA.zip", "2026-01-01", "{OK}");
+		insert(TraitementPhase.MAPPING, "file2.xml", "container1", "archiveA.zip", "2026-01-01", "{OK}");
+		insert(TraitementPhase.MAPPING, "file3.xml", "container1", "archiveA.zip", "2026-01-01", "{OK}");
+		insert(TraitementPhase.MAPPING, "file4.xml", "container2", "archiveB.zip", "2026-01-01", "{OK}");
+		insert(TraitementPhase.MAPPING, "file5.xml", "container2", "archiveB.zip", "2026-01-01", "{OK}");
+		search("MAPPING", "%");
+		// Pour une action fichier (rejouer/supprimer), on compte les fichiers (couples container+id_source)
+		assertEquals(5, dao.countFilesForAction(files, "toRestoreBAS"));
+		assertEquals(5, dao.countFilesForAction(files, "toDeleteBAS"));
+		assertEquals(5, dao.countFilesForAction(files, "undoActionBAS"));
+		// Pour l'action archive (rejouer archives), on compte les archives (containers distincts)
+		assertEquals(2, dao.countFilesForAction(files, "toRestoreArchiveBAS"));
+		// La surcharge sans action compte par défaut les fichiers
+		assertEquals(5, dao.countFilesForAction(files));
+	}
+
+	@Test
+	void databaseDownloadUsesSearchAndDetailFiltersWithoutADateSelection() throws Exception {
+		insert(TraitementPhase.MAPPING, "FIP6_a.xml", "a", "archive.zip", "2026-01-01", "{OK}");
+		insert(TraitementPhase.MAPPING, "FIP6_b.xml", "b", "archive.zip", "2026-02-01", "{OK}");
+		insert(TraitementPhase.MAPPING, "unrelated.xml", "c", "archive.zip", "2026-03-01", "{OK}");
+		try (var statement = connection.createStatement()) {
+			statement.execute("CREATE TEMP TABLE mapping_search_ok AS "
+					+ "SELECT id_source FROM file_search_test.pilotage_fichier");
+		}
+		search("MAPPING", "FIP6%");
+		dao.downloadBdBAS(files, "unused", List.of("mapping_search_ok"), TraitementPhase.MAPPING);
+		assertEquals(2, rows(service.downloadQueries.get(0)).get("id_source").size());
+		files.setFilterFields(new ArrayList<>(List.of("", "%_b.xml")));
+		refresh();
+		dao.downloadBdBAS(files, "unused", List.of("mapping_search_ok"), TraitementPhase.MAPPING);
+		assertEquals(List.of("FIP6_b.xml"), rows(service.downloadQueries.get(0)).get("id_source"));
+		search("MAPPING", "missing");
+		dao.downloadBdBAS(files, "unused", List.of("mapping_search_ok"), TraitementPhase.MAPPING);
+		assertTrue(rows(service.downloadQueries.get(0)).isEmpty());
+	}
+
+	@Test
+	void newSearchResetsSelectionFiltersAndPageAndSurvivesSessionCopy() throws Exception {
+		insert(TraitementPhase.MAPPING, "FIP6_a.xml", "a", "archive.zip", "2026-01-01", "{OK}");
+		search("MAPPING", "FIP6%");
+		files.setSelectedLines(new ArrayList<>(List.of(true)));
+		files.setFilterFields(new ArrayList<>(List.of("unwanted")));
+		files.setIdPage("8");
+		assertTrue(PilotageFileSearch.start(files, "MAPPING", "KO", "FIP6%", "file_search_test"));
+		assertTrue(files.mapContentSelected().isEmpty());
+		assertTrue(files.getFilterFields().isEmpty());
+		assertEquals("1", files.getIdPage());
+		refresh();
+		VObject restored = service.preInitialize(new ViewFichierBAS());
+		assertTrue(PilotageFileSearch.isActive(restored));
+		assertEquals("FIP6%", PilotageFileSearch.getPattern(restored));
+		assertEquals(TraitementEtat.KO, PilotageFileSearch.getEtat(restored));
+		assertFalse(PilotageFileSearch.clearIfEnvironmentChanged(restored, "file_search_test"));
+		assertTrue(PilotageFileSearch.clearIfEnvironmentChanged(restored, "another_environment"));
+		assertFalse(PilotageFileSearch.isActive(restored));
+		Session otherSession = new Session();
+		otherSession.setHttpSession(new HttpSessionTemplate());
+		assertFalse(PilotageFileSearch.isActive(new VObjectService(otherSession).preInitialize(new ViewFichierBAS())));
+	}
+
+	@Test
+	void blankAndInvalidSearchesNeverOpenAllFiles() {
+		assertFalse(PilotageFileSearch.start(files, "MAPPING", "OK", " ", "file_search_test"));
+		refresh();
+		assertFalse(files.getIsInitialized());
+		assertFalse(PilotageFileSearch.start(files, "EXPORT", "OK", "%", "file_search_test"));
+		assertFalse(PilotageFileSearch.start(files, "unknown", "OK", "FIP6", "file_search_test"));
+		assertFalse(PilotageFileSearch.start(files, "MAPPING", "INVALID", "FIP6", "file_search_test"));
+		assertFalse(PilotageFileSearch.isActive(files));
+	}
+
+	private void search(String phase, String pattern) {
+		search(phase, "OK", pattern);
+	}
+
+	private void search(String phase, String etat, String pattern) {
+		assertTrue(PilotageFileSearch.start(files, phase, etat, pattern, "file_search_test"));
+		refresh();
+		assertNotNull(files.getMainQuery());
+	}
+
+	private void refresh() {
+		dao.initializeFichierBAS(files, new ViewPilotageBAS(), new ViewRapportBAS());
+	}
+
+	private Map<String, List<String>> rows(ArcPreparedStatementBuilder query) throws Exception {
+		return new GenericBean(UtilitaireDao.get(0).executeRequest(connection, query)).mapContent();
+	}
+
+	private int markedCount(String code) throws Exception {
+		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder(
+				"SELECT count(*) AS n FROM file_search_test.pilotage_fichier WHERE to_delete = ");
+		query.appendText(code);
+		return Integer.parseInt(rows(query).get("n").get(0));
+	}
+
+	private void insert(TraitementPhase phase, String source, String container, String original,
+			String date, String state) throws Exception {
+		ArcPreparedStatementBuilder query = new ArcPreparedStatementBuilder(
+				"INSERT INTO file_search_test.pilotage_fichier "
+				+ "(phase_traitement, id_source, container, o_container, date_entree, etat_traitement) VALUES (");
+		query.appendText(phase.toString()).append(",").appendText(source).append(",").appendText(container)
+				.append(",").appendText(original).append(",").appendText(date).append(",")
+				.appendText(state).append("::text[])");
+		UtilitaireDao.get(0).executeRequest(connection, query);
+	}
+
+	private static class CapturingVObjectService extends VObjectService {
+		private List<ArcPreparedStatementBuilder> downloadQueries;
+
+		CapturingVObjectService(Session session) {
+			super(session);
+		}
+
+		@Override
+		public File downloadXML(VObject view, String directory, ArcPreparedStatementBuilder query,
+				String input, String environment, String phase) {
+			downloadQueries = List.of(query);
+			return new File("unused.zip");
+		}
+
+		@Override
+		public File downloadEnveloppe(VObject view, String directory, ArcPreparedStatementBuilder query,
+				String input, List<String> directories) {
+			downloadQueries = List.of(query);
+			return new File("unused.tar");
+		}
+
+		@Override
+		public File download(VObject view, String directory, List<String> names,
+				List<ArcPreparedStatementBuilder> queries) {
+			downloadQueries = queries;
+			return new File("unused.zip");
+		}
+	}
+}
